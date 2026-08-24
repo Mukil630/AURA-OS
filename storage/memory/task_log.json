@@ -1,0 +1,320 @@
+[
+  {
+    "timestamp": "2026-08-22T14:43:00+05:30",
+    "event": "INIT_MEMORY_VAULT",
+    "description": "Created permanent AGENTS.md, context.json, and linked 5TB Google Drive folder"
+  },
+  {
+    "timestamp": "2026-08-22T14:58:01.677779",
+    "event": "BOT_LAUNCHED",
+    "description": "Telegram bridge daemon started successfully in background",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:14:37.565629",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Hi maapla, how are you?... | Reply: Hey Mukil! Naan super aa irukkin, thanks for asking. Nee epp...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:14:53.360158",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Hi maapla, how are you?... | Reply: Hey Mukil, I'm doing great, thanks for asking! \ud83d\ude4c How can I h...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:14:54.148772",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'"
+      },
+      "output_preview": "2026-08-22 15.14.54"
+    }
+  },
+  {
+    "timestamp": "2026-08-22T15:15:27.138202",
+    "event": "AI_ROUTER_ACTIVATED",
+    "description": "Groq ReAct Brain with Tool Calling is fully operational on Telegram",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:27:31.685138",
+    "event": "TELEGRAM_START",
+    "description": "User \u041d\u0438\u043d\u0430 started Telegram conversation",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:28:01.240641",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "Get-WmiObject -Class Win32_Battery | Select-Object -Property Name, BatteryStatus, EstimatedChargeRemaining | ConvertTo-Json"
+      },
+      "output_preview": "{\n    \"Name\":  \"ASUS Battery\",\n    \"BatteryStatus\":  2,\n    \"EstimatedChargeRemaining\":  86\n}"
+    }
+  },
+  {
+    "timestamp": "2026-08-22T15:28:38.103208",
+    "event": "CHAT_RESPONSE",
+    "description": "User: So ur working good... | Reply: Hey Mukil! \ud83d\ude4c All set and ready to roll. Anything specific yo...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:28:43.749584",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Can I control pc... | Reply: Sure thing, Mukil! \ud83d\ude4c  \nNaan (JARVIS) ninge Windows PC\u2011yalli ...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:29:44.299192",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "Start-Process \"https://mail.google.com\""
+      },
+      "output_preview": "Command executed successfully with no output."
+    }
+  },
+  {
+    "timestamp": "2026-08-22T15:49:42.842395",
+    "event": "VOICE_ENGINE_ACTIVATED",
+    "description": "Whisper Large V3 Turbo voice note transcription is live on Telegram",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T15:53:33.358126",
+    "event": "2WAY_VOICE_ACTIVE",
+    "description": "Jarvis now transcribes incoming voice notes and replies with spoken audio voice notes",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T18:32:33.530355",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "(Get-WmiObject -Class Win32_Battery).EstimatedChargeRemaining"
+      },
+      "output_preview": "69"
+    }
+  },
+  {
+    "timestamp": "2026-08-22T18:32:45.291739",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "(Get-WmiObject -Class Win32_Battery).EstimatedChargeRemaining"
+      },
+      "output_preview": "68"
+    }
+  },
+  {
+    "timestamp": "2026-08-22T18:35:51.682375",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Hey... | Reply: Hey maapla! Enna pannanum? \ud83d\ude0a Sollu, enna help venum? Mass a ...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T18:40:53.721237",
+    "event": "CHAT_RESPONSE",
+    "description": "User: So don't make like this if u speak tamil make tamil text... | Reply: Sure maapla! Naan Tamil\u2011Tanglish mix\u2011la pesuven, aana unaku ...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T18:41:07.668636",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Ok system yappadi working... | Reply: Hey Mukil! System smooth-a irukku, ellam set\u2011up aachu. Yetha...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T18:41:22.472863",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Ok no audio wanted... | Reply: Sure maapla, audio illaama pochu! \ud83c\udfa7  \nAny other thing you ne...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T18:46:09.457059",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Enna maapla, unaku enna ellam panna theriyum?... | Reply: Kandippa maapla! Naan\u202fJARVIS\u202f\u2013\u202fMukil\u2011oda personal AI partner...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T18:46:11.706639",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Explain the difference between SQL and NoSQL databases in tw... | Reply: SQL databases are relational systems that store data in stru...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-22T19:35:16.507380",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Hey bro... | Reply: Hey! How can I assist you today?...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-23T14:46:31.625102",
+    "event": "CHAT_RESPONSE",
+    "description": "User: hey jarvis... | Reply: Hey Mukil! How can I assist you today?...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-23T14:46:38.269691",
+    "event": "DAEMON_STARTED",
+    "description": "JARVIS Telegram 2-Way Voice Gateway daemon started by Antigravity",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-23T14:47:08.647368",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "(Get-CimInstance -ClassName Win32_Battery).EstimatedChargeRemaining"
+      },
+      "output_preview": "71"
+    }
+  },
+  {
+    "timestamp": "2026-08-23T14:47:51.876686",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: browser_open_and_screenshot",
+    "metadata": {
+      "args": {
+        "url": "https://mail.google.com"
+      },
+      "output_preview": "Browser screenshot error: It looks like you are using Playwright Sync API inside the asyncio loop.\nP"
+    }
+  },
+  {
+    "timestamp": "2026-08-23T16:34:54.635132",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: open_browser_url",
+    "metadata": {
+      "args": {
+        "url": "https://mail.google.com"
+      },
+      "output_preview": "Successfully opened https://mail.google.com in your PC browser!"
+    }
+  },
+  {
+    "timestamp": "2026-08-23T16:34:56.575640",
+    "event": "CHAT_RESPONSE",
+    "description": "User: can u open gmail... | Reply: Sure thing! Gmail is now open in your browser. Let me know i...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-23T16:58:00.000000",
+    "event": "SGC_BILLING_INSPECTION",
+    "description": "Analyzed SGC Billing shortcut & source code (C:\\Users\\mukil\\sgc-billing), installed npm packages, verified Electron environment and ready for new updates",
+    "metadata": {
+      "shortcut": "C:\\Users\\Public\\Desktop\\SGC Billing.lnk",
+      "target": "C:\\Program Files\\SGC Billing\\SGC Billing.exe",
+      "repo": "C:\\Users\\mukil\\sgc-billing",
+      "git_remote": "https://github.com/Mukil630/sgc-billing"
+    }
+  },
+  {
+    "timestamp": "2026-08-23T16:59:04.817434",
+    "event": "DRIVE_BILLING_FOLDERS_CONFIGURED",
+    "description": "Configured dual Google Drive folders for bills in sgc-billing and jarvis-core",
+    "metadata": {
+      "folder_1": "155EqYOwPJ2Fc9QfqVSrZu5VnYzZgRcyZ",
+      "folder_2": "1a9VJAP_Nypn_mjUEYCNvMpkGN5H9Kwf4"
+    }
+  },
+  {
+    "timestamp": "2026-08-24T18:09:21.165956",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: What is HashSet in Java?... | Reply: **HashSet\u202fin\u202fJava**\n\nA **`HashSet`** is a concrete implement...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-24T18:09:40.365950",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: What is HashSet in Java?... | Reply: **HashSet in Java \u2013 Overview**\n\nA **`HashSet<E>`** is a conc...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-24T18:09:43.419524",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: get_screen_brightness",
+    "metadata": {
+      "args": {
+        "": {}
+      },
+      "output_preview": "Current screen brightness is [0]%."
+    }
+  },
+  {
+    "timestamp": "2026-08-24T18:09:44.085752",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Check my screen brightness... | Reply: Your current screen brightness is **0\u202f%**. Let me know if yo...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-24T18:37:00.388715",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: get_screen_brightness",
+    "metadata": {
+      "args": {
+        "": {}
+      },
+      "output_preview": "Current screen brightness is [0]%."
+    }
+  },
+  {
+    "timestamp": "2026-08-24T18:37:01.388809",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Check my screen brightness... | Reply: The current screen brightness on your PC is **0\u202f%**. Let me ...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-24T18:37:01.418798",
+    "event": "VOICE_GATEWAY_COMMAND",
+    "description": "Source: google_assistant_gemini | Query: Check my screen brightness",
+    "metadata": {
+      "reply": "The current screen brightness on your PC is **0\u202f%**. Let me know if you\u2019d like to adjust it."
+    }
+  },
+  {
+    "timestamp": "2026-08-24T19:02:55.460540",
+    "event": "SECURITY_ALERT",
+    "description": "Unauthorized voice access attempt blocked",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-24T19:02:58.431472",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "Get-CimInstance -ClassName Win32_Battery | Select-Object EstimatedChargeRemaining, BatteryStatus"
+      },
+      "output_preview": "EstimatedChargeRemaining BatteryStatus\n------------------------ -------------\n                      "
+    }
+  },
+  {
+    "timestamp": "2026-08-24T19:02:59.186406",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Check my battery... | Reply: Your battery is currently at **65\u202f%** charge. The status cod...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-24T19:02:59.198196",
+    "event": "SECURE_VOICE_COMMAND",
+    "description": "Source: google_assistant_gemini | Query: Check my battery",
+    "metadata": {
+      "reply": "Your battery is currently at **65\u202f%** charge. The status code **2** indicates it\u2019s discharging (i.e."
+    }
+  },
+  {
+    "timestamp": "2026-08-24T19:02:59.229051",
+    "event": "SECURITY_VIOLATION",
+    "description": "Blocked destructive command: format c: and delete all files",
+    "metadata": {}
+  }
+]

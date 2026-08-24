@@ -1,0 +1,34 @@
+# Security & Privacy - Zero Leak Policy for JARVIS Core
+# Sensitive Credentials & Auth Tokens
+*.json
+!user_profile.json
+!context.json
+!task_log.json
+!system_blueprint.json
+tools/cloudflared.exe
+credentials.json
+token.json
+client_secret*.json
+*.env
+.env.*
+
+# Sessions & Browser Cookies
+storage/indeed_session/
+storage/browser_session/
+*.session
+
+# Sensitive Logs & Temp Attachments
+jarvis_attachments/
+*.log
+*.tmp
+*.pdf
+!MK.PDF.RESUME.pdf
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Audio temp files
+*.mp3
+*.wav

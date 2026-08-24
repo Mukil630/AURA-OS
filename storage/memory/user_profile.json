@@ -1,0 +1,75 @@
+{
+  "personal_details": {
+    "name": "MUKILARASU S",
+    "email": "mukilarasu55@gmail.com",
+    "phone": "9080030538",
+    "location": "Karur, Tamil Nadu",
+    "college": "VSB Engineering College, Karur",
+    "degree": "B.Tech – Information Technology",
+    "batch": "2023 – 2027",
+    "cgpa": "7.9 / 10",
+    "hsc_percentage": "69.33%",
+    "github": "https://github.com/Mukil630",
+    "leetcode": "https://leetcode.com/u/Mukil55",
+    "linkedin": "https://www.linkedin.com/in/mukilarasu-s-333771302"
+  },
+  "master_resume_paths": {
+    "local_path": "C:\\Users\\mukil\\OneDrive\\placement questions\\MK.PDF.RESUME.pdf",
+    "drive_link": "https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link",
+    "drive_file_id": "1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ"
+  },
+  "technical_skills": {
+    "languages": ["Java", "Python", "JavaScript", "SQL"],
+    "frameworks_and_tools": ["Flask", "Node.js", "React", "Electron", "PostgreSQL", "MySQL", "Git", "GitHub", "Railway", "Postman", "Playwright", "Groq API"]
+  },
+  "projects": [
+    "Botify – AI-Powered WhatsApp Bot SaaS",
+    "SGC Billing – Desktop Invoice Application (Electron + React + Google Drive Sync)",
+    "AI Billing Automation Bot (Groq API + Telegram Bot)",
+    "Agentic AI Workflow Automation Platform"
+  ],
+  "internships": [
+    "Hero MotoCorp Ltd. — Research & Development Intern (1 Month)",
+    "IBM — AI & Automation Weekend Internship (2026)"
+  ],
+  "certifications": [
+    "Infosys Certified Java Programmer – Infosys (2024)",
+    "AI Agents for Beginners – Simplilearn SkillUp (2026)",
+    "AI & ML Made Easy: From Basic to Advanced (2025) – Udemy",
+    "Demystifying Networking – NPTEL (2025)"
+  ],
+  "career_blueprint": {
+    "timeline": "Final Year Sprint -> 1-2 Years IT Corporate Exposure -> Family Business Modernization Takeover",
+    "backup_plan": "Direct Family Business scaling with AI/Software if placement isn't chosen",
+    "mindset": "100% Effort without fear of outcome; Master Java, Python, and Real-World Agentic AI Projects"
+  },
+  "jarvis_charter": {
+    "role": "24/7 Personal AI Executive Partner, Placement Hunter & Full-Stack Automation Companion",
+    "responsibilities": [
+      "Daily Fresher Job Scraper & Auto-Application Manager (Indeed, LinkedIn, Naukri)",
+      "Continuous Gmail Priority Monitoring (Interviews, Test Links, Assessment Shortlists)",
+      "Java Core & Placement Coding Mentor (Daily 30-min Pattern Drills)",
+      "Family Business Tech Automation (SGC Billing, Lead Generation, CRM)"
+    ],
+    "security_protocols": {
+      "zero_data_leak": true,
+      "local_first_storage": true,
+      "credential_protection": "All tokens, credentials, sessions, and private resumes locked locally via .gitignore",
+      "oauth_direct": "Google Drive and Gmail direct authenticated OAuth only — zero third party transmission",
+      "autonomous_execution_mode": "FULL_OPEN_PERMISSION",
+      "voice_passcode_protocol": {
+        "enabled": true,
+        "default_passphrase": "AURA Protocol Stark 55",
+        "role": "High-privilege biometric voice and passcode unlock"
+      }
+    },
+    "personal_milestone": {
+      "birthday_date": "2026-09-03",
+      "target_launch_deadline": "2026-09-01",
+      "countdown_days": 8,
+      "dream_goal": "Complete and gift JARVIS Autonomous AI Operating System to Mukil for his Birthday on Sep 3rd",
+      "status": "In Active 8-Day Sprint with Pair-Programming Partner Antigravity",
+      "vision": "24/7 Cloud Brain + Phone App + Local PC Worker + 5TB Drive Vault + Placement & Business Automation"
+    }
+  }
+}

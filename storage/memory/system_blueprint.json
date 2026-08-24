@@ -1,0 +1,34 @@
+{
+  "system_name": "JARVIS Personal AI Operating System (Autonomous PA Core)",
+  "user": "Mukil",
+  "version": "3.0.0",
+  "architecture": {
+    "orchestration_layer": "LangGraph (Stateful Graph, Checkpoints, Approval Gates)",
+    "ai_components": "LangChain + Gemini / Groq / OpenAI",
+    "tool_standard": "MCP (Model Context Protocol) Servers",
+    "execution_workers": ["Antigravity CLI", "Playwright Automation", "PC Tools", "PowerShell"],
+    "interfaces": ["Telegram Bot (Voice & Text Control)", "Web Dashboard", "Mobile Gateway"],
+    "database_and_memory": ["PostgreSQL / Local JSON State", "pgvector Semantic Memory", "Persistent File Vault"]
+  },
+  "specialized_agents": {
+    "orchestrator_agent": "Main router, intent classification, multi-step planning, state preservation",
+    "task_and_scheduler_agent": "Priority engine (Importance + Urgency + Career Impact), adaptive dynamic replanning",
+    "learning_agent": "Tracks Java, Python, SQL, DSA, Apti; weak area detection, spaced repetition, quizzes",
+    "placement_and_career_agent": "Company drive tracking, skill gap analysis, job scraping (2026/2027), ATS resume auto-tailoring, auto-apply",
+    "monitoring_and_event_agent": "24/7 Gmail radar (interviews/test links), GitHub CI/commit watcher, LinkedIn radar, dead-line alerts",
+    "automation_agent": "Browser automation (Playwright), PC commands, Git workflows, file management",
+    "memory_agent": "Working, Episodic, Semantic (Preferences), Procedural memory layers",
+    "review_agent": "Daily 8 AM morning briefing, 9:30 PM daily review, placement readiness scoring"
+  },
+  "security_and_permissions": {
+    "green_auto": ["Read data", "Search jobs", "Create tasks", "Save memory", "Generate briefs"],
+    "yellow_ask_first": ["Draft commit", "Modify files", "Draft email reply", "Prepare job application"],
+    "red_always_confirm": ["Delete files", "Push production", "Final submit job application", "Critical financial/email sends"]
+  },
+  "today_study_sprint": {
+    "java": ["Set concepts (HashSet, LinkedHashSet, TreeSet)", "Subarrays (Contiguous vs Subsequence, Prefix Sum, Sliding Window)"],
+    "python": ["Conditions, Loops, Nested Loops, List/Array operations"],
+    "aptitude": ["Time & Work (Formula, Efficiency, Combined Work, Men/Women problems)"],
+    "milestone_completion": "LinkedIn learning & builder post"
+  }
+}
