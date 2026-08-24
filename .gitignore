@@ -11,6 +11,8 @@ token.json
 client_secret*.json
 *.env
 .env.*
+storage/vault/
+.vault/
 
 # Sessions & Browser Cookies
 storage/indeed_session/
