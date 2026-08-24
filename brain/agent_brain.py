@@ -10,10 +10,43 @@ from memory.memory_manager import MemoryManager
 from tools import pc_tools
 from groq import Groq
 from brain.intent_router import IntentRouter
+from brain.adaptive_scheduler import AdaptiveScheduler
 
 logger = logging.getLogger(__name__)
 
 TOOLS_DEFINITION = [
+    {
+        "type": "function",
+        "function": {
+            "name": "create_placement_sprint",
+            "description": "Create a temporary high-intensity placement drive sprint (e.g. Capgemini, TCS, Zoho drive prep) that overrides the daily schedule for a specific number of days and auto-reverts back to baseline routine on deadline completion.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "company_name": {
+                        "type": "string",
+                        "description": "Name of the company or placement drive event (e.g. 'Capgemini Placement Sprint', 'TCS NQT Prep')."
+                    },
+                    "duration_days": {
+                        "type": "integer",
+                        "description": "Duration of the sprint in days (default 7)."
+                    }
+                },
+                "required": ["company_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_daily_schedule",
+            "description": "Get today's active schedule (shows active sprint override if in progress, or baseline Java/Python/Aptitude routine).",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
     {
         "type": "function",
         "function": {
@@ -339,7 +372,18 @@ class AgentBrain:
         self.router = IntentRouter()
 
     def _execute_tool_sync(self, name: str, args: dict) -> str:
-        if name == "open_browser_url":
+        if name == "create_placement_sprint":
+            sched = AdaptiveScheduler()
+            res = sched.create_sprint_override(
+                event_name=args.get("company_name", "Placement Drive Sprint"),
+                duration_days=args.get("duration_days", 7)
+            )
+            return f"✅ 7-Day Sprint '{res['sprint_name']}' created successfully! Expiry Date: {res['expiry_date']}. Daily schedule has been prioritized for this drive and will auto-revert upon completion."
+        elif name == "get_daily_schedule":
+            sched = AdaptiveScheduler()
+            res = sched.get_today_active_schedule()
+            return f"📅 Today's Active Schedule (Mode: {res['mode']}):\n" + json.dumps(res['schedule'], indent=2)
+        elif name == "open_browser_url":
             return pc_tools.open_browser_url(args.get("url", "https://google.com"))
         elif name == "run_powershell":
             return pc_tools.run_powershell(args.get("command", ""))
@@ -397,10 +441,11 @@ class AgentBrain:
     def process_message(self, user_message: str, user_name: str = "Mukil") -> str:
         sys_context = self.mem.get_system_prompt_context()
         system_prompt = (
-            f"You are JARVIS, {user_name}'s autonomous personal AI agent, executive partner, and co-developer.\n\n"
+            f"You are AURA (Autonomous Unified Response Assistant), {user_name}'s autonomous personal AI agent, executive partner, and co-developer.\n\n"
             "🧠 AGENTIC THINKING & INTELLIGENCE:\n"
             "- Always analyze the user's intent deeply before acting or answering.\n"
-            "- If the user requests an action on their PC (e.g. open gmail, websites, apps, battery, WhatsApp, files, commands) -> CALL THE APPROPRIATE TOOL immediately.\n"
+            "- If the user requests an action on their PC (e.g. schedule, sprints, open websites/apps, battery, WhatsApp, files, commands) -> CALL THE APPROPRIATE TOOL immediately.\n"
+            "- For placement sprints or scheduling, use 'create_placement_sprint' or 'get_daily_schedule'.\n"
             "- For opening websites/apps (like Gmail, YouTube, Google), use 'open_browser_url' or 'run_powershell'.\n"
             "- If the user asks a question, technical explanation, or general chat -> give a smart, structured, insightful answer.\n\n"
             "🌐 STRICT LANGUAGE & TONE DIRECTIVE:\n"
