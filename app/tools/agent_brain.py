@@ -311,7 +311,12 @@ class AutonomousAgentBrain:
                 return "❌ Empty command received.", None
             try:
                 import subprocess
-                out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT, timeout=20, text=True)
+                out = subprocess.check_output(
+                    ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", cmd],
+                    stderr=subprocess.STDOUT,
+                    timeout=30,
+                    text=True
+                )
                 res = f"💻 *Terminal Command Executed*:\n`{cmd}`\n\n```\n{out.strip()[:1000]}\n```"
                 return res, None
             except subprocess.CalledProcessError as cpe:
