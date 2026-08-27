@@ -48,7 +48,7 @@ from app.core.contracts.credential import RawSecretPayloadError
 from app.core.governance.admission_controller import AdmissionController
 from app.policy.approval_engine import ApprovalEngine, default_approval_engine
 from app.tools.reminder_scheduler import ReminderScheduler
-from app.tools.tts_engine import JARVISVoiceEngine
+from app.tools.tts_engine import JARVISVoiceEngine, VoiceMode
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -141,6 +141,8 @@ class TelegramBotDaemon:
         app.add_handler(CommandHandler("remind", self._handle_remind))
         app.add_handler(CommandHandler("reminders", self._handle_list_reminders))
         app.add_handler(CommandHandler("cancelremind", self._handle_cancel_reminder))
+        app.add_handler(CommandHandler("voice", self._handle_voice_command))
+        app.add_handler(CommandHandler("voices", self._handle_voice_command))
 
         # Inline Button Callback Handler
         app.add_handler(CallbackQueryHandler(self._handle_callback_query))
@@ -241,11 +243,54 @@ class TelegramBotDaemon:
             await update.message.reply_text("Usage: `/cancelremind <reminder_id>`", parse_mode="Markdown")
             return
 
-        success = self.reminder_scheduler.cancel_reminder(args.strip())
-        if success:
-            await update.message.reply_text(f"✅ Reminder `{args.strip()}` has been cancelled.", parse_mode="Markdown")
-        else:
-            await update.message.reply_text(f"❌ Reminder `{args.strip()}` not found or already completed.", parse_mode="Markdown")
+    async def _handle_voice_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Process /voice command to switch between 3 persona voices."""
+        if not update.message:
+            return
+
+        cmd_text = update.message.text.strip()
+        args = cmd_text.split(maxsplit=1)[1] if len(cmd_text.split(maxsplit=1)) > 1 else ""
+
+        if not args:
+            cur = self.voice_engine.get_current_mode_info()
+            keyboard = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton("👨 Male Voice", callback_data="VOICE:male"),
+                    InlineKeyboardButton("👩 Female Voice", callback_data="VOICE:female"),
+                ],
+                [
+                    InlineKeyboardButton("🤖 Robotic JARVIS", callback_data="VOICE:jarvis"),
+                ]
+            ])
+            await update.message.reply_text(
+                f"🎙️ *JARVIS Voice Persona Settings*\n\n"
+                f"• Active Voice: *{cur['name']}*\n\n"
+                f"Choose your preferred AI Voice persona:\n"
+                f"1. `/voice male` - 👨 Tamil/Indian Male (Valluvar)\n"
+                f"2. `/voice female` - 👩 Tamil/Indian Female (Pallavi)\n"
+                f"3. `/voice jarvis` - 🤖 Robotic British JARVIS (Stark AI)",
+                parse_mode="Markdown",
+                reply_markup=keyboard,
+                reply_to_message_id=update.message.message_id,
+            )
+            return
+
+        success, msg = self.voice_engine.set_voice_mode(args)
+        await update.message.reply_text(msg, parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+
+        # Generate sample audio greeting in new voice!
+        sample_text = "Hello Mukil, I am your JARVIS AI assistant." if self.voice_engine.current_mode == VoiceMode.JARVIS else "வணக்கம் மாப்ள! நான் உங்கள் ஜார்விஸ் ஏஐ உதவியாளர்."
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+            tmp_path = tmp.name
+        try:
+            await self.voice_engine.save_voice_file(sample_text, tmp_path)
+            with open(tmp_path, "rb") as vf:
+                await update.message.reply_voice(voice=vf, caption=f"🎙️ *Sample Voice Note*: {sample_text}", parse_mode="Markdown")
+        except Exception as e:
+            logger.warning(f"Voice sample generation failed: {e}")
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
     # ─────────────────────────────────────────────────────────────────────────
     # ADAPTER TRANSLATION: TELEGRAM -> CONTRACT -> RESPONSE
@@ -382,7 +427,27 @@ class TelegramBotDaemon:
         username = query.from_user.username
         data = query.data.strip()
 
-        # Format as approval command
+        # 1. Voice switching callback
+        if data.startswith("VOICE:"):
+            mode = data.split(":", 1)[1]
+            success, msg = self.voice_engine.set_voice_mode(mode)
+            if query.message:
+                await query.message.reply_text(msg, parse_mode="Markdown")
+                sample_text = "Hello Mukil, I am your JARVIS AI assistant." if self.voice_engine.current_mode == VoiceMode.JARVIS else "வணக்கம் மாப்ள! நான் உங்கள் ஜார்விஸ் ஏஐ உதவியாளர்."
+                with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+                    tmp_path = tmp.name
+                try:
+                    await self.voice_engine.save_voice_file(sample_text, tmp_path)
+                    with open(tmp_path, "rb") as vf:
+                        await query.message.reply_voice(voice=vf, caption=f"🎙️ *Sample Voice Note*: {sample_text}", parse_mode="Markdown")
+                except Exception as e:
+                    logger.warning(f"Callback voice sample failed: {e}")
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
+            return
+
+        # 2. Approval decision callback
         cmd_text = None
         if data.startswith("APPROVE:"):
             approval_id = data.split(":", 1)[1]

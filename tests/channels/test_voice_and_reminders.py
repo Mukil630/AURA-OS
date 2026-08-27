@@ -1,4 +1,4 @@
-"""Unit and Integration Tests for JARVIS Neural Voice Engine and Reminder Scheduler."""
+"""Unit and Integration Tests for JARVIS Neural Voice Engine, Multi-Voice Modes, and Reminder Scheduler."""
 import asyncio
 from datetime import datetime, timedelta, timezone
 import os
@@ -6,16 +6,32 @@ import tempfile
 import pytest
 
 from app.tools.reminder_scheduler import ReminderScheduler
-from app.tools.tts_engine import JARVISVoiceEngine, TAMIL_VOICE, ENGLISH_VOICE
+from app.tools.tts_engine import JARVISVoiceEngine, VoiceMode, VOICE_CONFIGS
 
 
-def test_vr_01_tts_script_detection():
-    """VR-01: Voice engine automatically detects Tamil script vs English."""
+def test_vr_01_tts_voice_resolution():
+    """VR-01: Voice engine correctly resolves voices based on mode and language."""
     engine = JARVISVoiceEngine()
-    assert engine._detect_script("வணக்கம் மாப்ள!") == TAMIL_VOICE
-    assert engine._detect_script("Hello Maapla, how are you?") == ENGLISH_VOICE
-    assert engine._detect_script("Java study session 10 PM") == ENGLISH_VOICE
-    assert engine._detect_script("நினைவூட்டல் பதிவு செய்யப்பட்டது") == TAMIL_VOICE
+    
+    # Default is Male
+    v, r, p = engine._resolve_voice("வணக்கம் மாப்ள!")
+    assert v == "ta-IN-ValluvarNeural"
+    v, r, p = engine._resolve_voice("Hello Mukil")
+    assert v == "en-IN-PrabhatNeural"
+
+    # Switch to Female
+    engine.set_voice_mode("female")
+    v, r, p = engine._resolve_voice("வணக்கம் மாப்ள!")
+    assert v == "ta-IN-PallaviNeural"
+    v, r, p = engine._resolve_voice("Hello Mukil")
+    assert v == "en-IN-NeerjaNeural"
+
+    # Switch to Robotic JARVIS
+    engine.set_voice_mode("jarvis")
+    v, r, p = engine._resolve_voice("Hello Mukil")
+    assert v == "en-GB-RyanNeural"
+    assert r == "+5%"
+    assert p == "-2Hz"
 
 
 def test_vr_02_tts_empty_input_validation():
@@ -131,3 +147,22 @@ def test_vr_06_reminder_poll_loop_trigger():
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+
+def test_vr_07_voice_mode_switching():
+    """VR-07: Voice mode switching handles aliases and invalid modes gracefully."""
+    engine = JARVISVoiceEngine()
+    success, msg = engine.set_voice_mode("1")
+    assert success is True
+    assert engine.current_mode == VoiceMode.MALE
+
+    success, msg = engine.set_voice_mode("friday")
+    assert success is True
+    assert engine.current_mode == VoiceMode.FEMALE
+
+    success, msg = engine.set_voice_mode("robot")
+    assert success is True
+    assert engine.current_mode == VoiceMode.JARVIS
+
+    success, msg = engine.set_voice_mode("alien_voice")
+    assert success is False
