@@ -1,112 +1,89 @@
-# 🌌 AURA — Autonomous Unified Response Assistant
-> **A 24/7 Persistent, Multi-Device Autonomous AI Operating System & Executive Partner**  
-> *Engineered by Mukil | Official Birthday Launch: September 3, 2026*
+# 🌌 AURA-OS — Autonomous Unified Response Assistant & Master Agent
+
+> **Enterprise-Grade Distributed Agentic Operating System & 24/7 Executive Partner**  
+> *Engineered by Mukil | 892 / 892 Automated Tests Passing (100% Green)*
 
 ---
 
-## 🏛️ System Overview
+## 🏛️ Master Architecture & Operating Plane Overview
 
-**AURA** (*Autonomous Unified Response Assistant*) is a next-generation personal AI operating system designed to automate software engineering, campus placement preparation, family business modernization, and cross-device hardware control (Phone ↔ Cloud ↔ PC).
-
-Unlike static rule-based chatbots, **AURA** employs a **Dynamic CodeAct & State Engine** that dynamically plans, generates on-demand scripts, self-heals errors, and adapts schedules contextually without hardcoded limitations.
-
-```
-                  ┌─────────────────────────────────────┐
-                  │          🗣️ MUKIL (Master)          │
-                  └──────────────────┬──────────────────┘
-                                     │
-           ┌─────────────────────────┴─────────────────────────┐
-           │                                                   │
-  📲 Phone PWA / Voice                               💻 PC Desktop Dashboard
-           │                                                   │
-           └─────────────────────────┬─────────────────────────┘
-                                     ▼
-                   ┌───────────────────────────────────┐
-                   │     🚪 AURA 24/7 CLOUD GATEWAY    │
-                   │     FastAPI + Secret Auth Token   │
-                   └─────────────────┬─────────────────┘
-                                     ▼
-                   ┌───────────────────────────────────┐
-                   │    🧠 LANGGRAPH CENTRAL BRAIN     │
-                   │    Intent Router & Dynamic CodeAct│
-                   └─────────────────┬─────────────────┘
-                                     ▼
-     ┌───────────────────────┬───────┴───────┬───────────────────────┐
-     ▼                       ▼               ▼                       ▼
-☕ Study & Sprints     🤖 Placement Hunter  📧 24/7 Gmail Radar    💼 Business Engine
- (Adaptive Revert)     (Indeed / ATS Match)  (Interview Alerts)     (SGC Billing Sync)
-     │                       │               │                       │
-     └───────────────────────┼───────────────┼───────────────────────┘
-                             ▼               ▼
-                 🗄️ PostgreSQL / Supabase   🌐 5TB Google Drive Vault
+```text
+                  📱 TELEGRAM / VOICE (Mukil's Phone)
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │  JARVIS MASTER CORE │
+                    └──────────┬──────────┘
+                               │
+            ┌──────────────────┴──────────────────┐
+            ▼                                     ▼
+    PHASE 12 OPERATING PLANE              EDGE ADAPTERS & BRIDGES
+    ├── Multi-Tenant Boundaries           ├── Telegram Bot Daemon (Groq Whisper Turbo)
+    ├── Zero-Leak Credential Vault        ├── Safe Diagnostics Engine (/exec)
+    ├── Distributed Lease Task Queue      ├── Live Hardware Telemetry (/status)
+    ├── Distributed Multi-Resource Locks  └── Human Approval Gateway (/approve, /reject)
+    └── Quota & Rate Limit Coordination           │
+                                                  ▼
+                                      5TB GOOGLE DRIVE VAULTS
+                                      ├── Master Vault (1iaHzDzC7KiJk2FlMdS7eNW7vkYxDeaXZ)
+                                      ├── SGC Billing 1 (155EqYOwPJ2Fc9QfqVSrZu5VnYzZgRcyZ)
+                                      ├── SGC Billing 2 (1a9VJAP_Nypn_mjUEYCNvMpkGN5H9Kwf4)
+                                      └── Master ATS Resume (1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ)
 ```
 
 ---
 
-## ⚡ Core Architectural Superpowers
+## ⚡ Core Capabilities
 
-1. **🧠 Universal Dynamic CodeAct Engine**:
-   - Zero hardcoded tool limitations. When given arbitrary complex tasks, AURA writes, debugs, and executes Python/PowerShell scripts on the fly.
-2. **📅 Adaptive Sprints with Auto-Reversion**:
-   - Normal daily routines (Java, Python, Apti) dynamically switch into 7-day high-intensity placement drive sprints and automatically restore baseline habits upon deadline completion.
-3. **📱 24/7 Cloud Brain (Never Sleeps)**:
-   - Hosted in the cloud (Railway / Render). Operates autonomously even when the local laptop is shut down.
-4. **🔒 Military-Grade Security & Stark Passcode Protocol**:
-   - Secret key header pairing (`x-jarvis-token`), destructive command firewalls, and biometric voice passcode activation (`AURA Protocol Stark 55`).
-5. **🌐 5TB Google Drive Master Vault Sync**:
-   - Direct integration with Google Drive (`1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1`) & dual SGC billing vaults (`155Eq...` & `1a9VJ...`).
+1. **📱 2-Way Voice & Mobile Gateway (Telegram)**:
+   - Natural language voice notes transcribed in real-time via Groq Whisper Large V3 Turbo.
+   - Live hardware status telemetry (`CPU %`, `RAM %`, `Battery %`, and Task queue).
+2. **💻 Controlled Local PC Remote Diagnostics (`/exec`)**:
+   - Safe whitelisted diagnostics (`hostname`, `whoami`, `systeminfo`, `get-process`, `tasklist`, `ipconfig`).
+   - Deep regex defense blocking all arbitrary shell wrappers (`cmd /c`, `powershell -enc`, `iex`, `DownloadString`).
+3. **🔒 Phase 12 Enterprise Operating Plane**:
+   - Distributed multi-tenant isolation, zero-secret payload scanning, task queue leasing, heartbeat renewal, deadlock-free resource locking, rate limiting (HTTP 429), and token budget quotas.
+4. **☁️ 5TB Google Drive Vault Integration**:
+   - Master Vault, SGC Billing Dual Vaults, and Master ATS Resume links seamlessly bound and accessible.
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-aura-core/
-├── api/                   # 🚪 24/7 Authenticated Mobile Voice Gateway
-│   └── voice_webhook.py   # FastAPI server with Token pairing & guardrails
-├── brain/                 # 🧠 Core Reasoning & Intent Classification
-│   ├── agent_brain.py     # ReAct reasoning loop & tool executor
-│   └── intent_router.py   # Convo vs Action vs Process 3-way triage
-├── memory/                # 💾 Memory Management Layer
-│   └── memory_manager.py  # Persistent state reader & updater
-├── storage/               # 🗄️ Local state & Applied jobs database
-│   ├── memory/            # context.json, user_profile.json, system_blueprint.json
-│   └── applied_jobs.json  # Live log of automated job applications
-├── tools/                 # 🛠️ System Tools & Cloud Bridges
-│   ├── pc_tools.py        # Windows OS hardware execution
-│   ├── telegram_bridge.py # 2-Way Voice Telegram bot with Whisper & Neural TTS
-│   ├── drive_manager.py   # 5TB Google Drive sync engine
-│   └── cloudflared.exe    # Encrypted Cloudflare Tunnel bridge
-└── start_jarvis_tunnel.bat# 🚀 1-Click Server & Tunnel Launcher
+mukil-master-agent/
+│
+├── app/
+│   ├── api/                # FastAPI Gateway & REST Endpoints
+│   ├── connectors/
+│   │   └── telegram/       # Telegram Daemon, Gateway Service, Auth & Idempotency Guard
+│   ├── core/
+│   │   ├── contracts/      # Strongly-Typed Pydantic Data Contracts
+│   │   ├── governance/     # Quota Coordinator, Token Budget & Admission Controller
+│   │   ├── leasing/        # Distributed Task Queue, Lease Manager, Resource Locks
+│   │   └── models/         # Request & Response Domain Models
+│   ├── database/           # SQLite / SQLAlchemy Async Persistence Repositories
+│   ├── memory/             # Multi-Tier Working, Episodic, & Semantic Memory
+│   ├── policy/             # Approval Engine, Risk Classifier & Telegram Approval
+│   ├── security/           # Credential Vault, RedTeam Guard & Token Sanitizer
+│   └── tools/              # Tool Implementations & Schema Registry
+│
+├── docs/                   # Phase 12 Architectural Specifications
+├── tests/                  # 892 Unit, Integration, Adversarial & Live Channel Tests
+├── .env.example            # Environment template configuration
+├── pyproject.toml          # Project metadata & pytest configuration
+├── start_telegram_gateway.bat # 1-Click Telegram Gateway Daemon Launcher
+└── README.md
 ```
 
 ---
 
-## 🚀 Quick Start (Local & Remote Mobile Pairing)
+## 🚦 Roadmap & Verification Status
 
-### 1. Launch Server & Secure Tunnel
-```bash
-start_jarvis_tunnel.bat
-```
-
-### 2. Mobile Voice Webhook Trigger
-Send an authenticated `POST` request from Android HTTP Shortcuts or Google Assistant:
-```bash
-curl -X POST "https://your-tunnel.trycloudflare.com/api/voice" \
-     -H "x-jarvis-token: mukil-jarvis-vault-key-9080030538" \
-     -H "Content-Type: application/json" \
-     -d '{"query": "Check screen brightness and today study schedule"}'
-```
-
----
-
-## 👑 Roadmap & Milestones (8-Day Birthday Sprint)
-- [x] **Day 1 (Aug 25)**: Core Brain Refactor, Intent Router & Secure Cloud Tunnel.
-- [ ] **Day 2 (Aug 26)**: Google Calendar Native Sync & Adaptive 7-Day Sprint Overrides.
-- [ ] **Day 3 (Aug 27)**: 24/7 Gmail Interview Radar & Placement Fresher Job Hunter.
-- [ ] **Day 4 (Aug 28)**: Family Business (SGC Billing) Overdue Radar & 5TB Drive Indexer.
-- [ ] **Day 5 (Aug 29)**: Stark Voice Passcode Protocol & Encrypted Secret Vault.
-- [ ] **Day 6 (Aug 30)**: Mobile PWA App & Iron-Man UI Dashboard.
-- [ ] **Day 7 (Aug 31)**: 24/7 Cloud Deployment (Railway + Supabase).
-- [ ] **Day 8 (Sep 1-2)**: End-to-End Master Polish & Official Launch!
-- [ ] **🎂 Sep 3, 2026**: **Happy Birthday Mukil — AURA is Live!**
+- [x] **Phase 0–11**: Core Master Agent Substrate & Verification (415 Tests)
+- [x] **Phase 12**: Distributed Multi-Tenant Operating Plane (429 Tests)
+- [x] **Milestone 2 Step 1**: Telegram Gateway Contract-First Service (32 Tests)
+- [x] **Milestone 2 Step 2**: Live Daemon + Adversarial Security + Real Phone E2E (16 Tests)
+- [ ] **Milestone 3**: 5TB Google Drive Continuous Vault & Auto-Sync Engine
+- [ ] **Milestone 4**: Placement & ATS Resume Customizer Agent
+- [ ] **Milestone 5**: Business Lead Gen & SGC Dual Invoicing Agent

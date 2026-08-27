@@ -1,36 +1,89 @@
-# Security & Privacy - Zero Leak Policy for JARVIS Core
-# Sensitive Credentials & Auth Tokens
-*.json
-!user_profile.json
-!context.json
-!task_log.json
-!system_blueprint.json
-tools/cloudflared.exe
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Environments & Sensitive Credentials (Zero Leak Policy)
+.env
+.env.*
+*.env
 credentials.json
 token.json
 client_secret*.json
-*.env
-.env.*
 storage/vault/
 .vault/
-
-# Sessions & Browser Cookies
 storage/indeed_session/
 storage/browser_session/
 *.session
 
-# Sensitive Logs & Temp Attachments
-jarvis_attachments/
+# Database & Local Runtime Data
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite3
+
+# Logs & Temporary Artifacts
 *.log
-*.tmp
-*.pdf
-!MK.PDF.RESUME.pdf
+logs/
+tmp/
+temp/
+.system_generated/
+jarvis_attachments/
 
-# Python Cache
-__pycache__/
-*.pyc
-*.pyo
+# OS Specific
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Audio temp files
-*.mp3
-*.wav
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
