@@ -53,6 +53,7 @@ from app.connectors.telegram.idempotency import TelegramReplayGuard
 from app.core.contracts.credential import RawSecretPayloadError
 from app.core.governance.admission_controller import AdmissionController
 from app.policy.approval_engine import ApprovalEngine, default_approval_engine
+from app.tools.conversation_engine import ConversationEngine
 from app.tools.reminder_scheduler import ReminderScheduler
 from app.tools.tts_engine import JARVISVoiceEngine, VoiceMode
 
@@ -123,6 +124,7 @@ class TelegramBotDaemon:
         )
         self.voice_engine = JARVISVoiceEngine()
         self.reminder_scheduler = ReminderScheduler()
+        self.conversation_engine = ConversationEngine()
         self.app: Optional[Application] = None
         self._is_running = False
 
@@ -329,7 +331,7 @@ class TelegramBotDaemon:
         lower_t = raw_text.lower().strip()
         logger.info(f"Incoming text '{raw_text}' from {user.first_name} (ID: {user.id}, Username: @{user.username})")
 
-        # Check if text is asking to set a timer/reminder (e.g. '10.00 mani ku timer set pannu')
+        # 1. Check if text is asking to set a timer/reminder (e.g. '10.00 mani ku timer set pannu')
         if any(k in lower_t for k in ["remind", "reminder", "alarm", "timer", "மணி", "mani"]) and any(c.isdigit() for c in lower_t):
             try:
                 rem = self.reminder_scheduler.parse_and_create(
@@ -350,9 +352,20 @@ class TelegramBotDaemon:
             except Exception:
                 pass
 
-        contract_update = self._to_contract_update(update)
-        outbound = self.gateway.process_update(contract_update)
-        await self._dispatch_outbound(update, outbound)
+        # 2. Check if text is an explicit system task execution
+        if self.conversation_engine.is_task_intent(raw_text):
+            contract_update = self._to_contract_update(update)
+            outbound = self.gateway.process_update(contract_update)
+            await self._dispatch_outbound(update, outbound)
+            return
+
+        # 3. Natural Conversation / Question Answering (Instant LLM Response)
+        chat_response = await self.conversation_engine.generate_chat_response(raw_text, user_name=user.first_name)
+        await update.message.reply_text(
+            text=chat_response,
+            parse_mode="Markdown",
+            reply_to_message_id=update.message.message_id,
+        )
 
     async def _handle_voice(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Download and process voice note payloads with 2-Way Voice Output."""
@@ -417,14 +430,14 @@ class TelegramBotDaemon:
                     spoken_tamil = f"மன்னிக்கவும் Boss, reminder time-ஐ புரிந்து கொள்ள முடியவில்லை."
                     caption_text = f"❌ *Reminder Error*: {str(ex)}"
 
-            # 4. General Voice Note - Intelligent Spoken Acknowledgement
+            # 4. General Voice Note - Natural Conversational Answer
             else:
-                spoken_tamil = f"வணக்கம் Boss! உங்கள் voice request பெறப்பட்டது. {transcription}. இந்த task-ஐ JARVIS execute செய்து வருகிறது."
+                chat_response = await self.conversation_engine.generate_chat_response(transcription, user_name=update.effective_user.first_name)
+                spoken_tamil = chat_response
                 caption_text = (
-                    f"⚡ *Task Accepted by Jarvis Master Agent*\n\n"
-                    f"🎙️ *Voice Transcribed*: _{transcription}_\n"
-                    f"🚦 *Admission*: `ALLOWED`\n"
-                    f"⏳ *Status*: Running..."
+                    f"🎙️ *JARVIS Voice Response*\n\n"
+                    f"📝 *You said*: _{transcription}_\n\n"
+                    f"{chat_response}"
                 )
 
             # 5. Always Synthesize Audio & Reply with Fluent Tamil Voice Note!
