@@ -30,11 +30,11 @@ VOICE_CONFIGS: Dict[VoiceMode, Dict[str, str]] = {
         "pitch": "+0Hz",
     },
     VoiceMode.FEMALE: {
-        "name": "👩 Female Voice (Pallavi / Neerja)",
+        "name": "👩 FRIDAY AI (Sweet & Soft Female Tone)",
         "tamil": "ta-IN-PallaviNeural",
-        "english": "en-IN-NeerjaNeural",
-        "rate": "+0%",
-        "pitch": "+0Hz",
+        "english": "en-US-JennyNeural",
+        "rate": "+2%",
+        "pitch": "+3Hz",
     },
     VoiceMode.JARVIS: {
         "name": "🤖 Robotic JARVIS (Stark AI Edition)",

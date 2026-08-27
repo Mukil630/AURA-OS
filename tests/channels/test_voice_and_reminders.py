@@ -19,12 +19,14 @@ def test_vr_01_tts_voice_resolution():
     v, r, p = engine._resolve_voice("Hello Mukil")
     assert v == "en-IN-PrabhatNeural"
 
-    # Switch to Female
+    # Switch to Female FRIDAY
     engine.set_voice_mode("female")
     v, r, p = engine._resolve_voice("வணக்கம் மாப்ள!")
     assert v == "ta-IN-PallaviNeural"
+    assert r == "+2%"
+    assert p == "+3Hz"
     v, r, p = engine._resolve_voice("Hello Mukil")
-    assert v == "en-IN-NeerjaNeural"
+    assert v == "en-US-JennyNeural"
 
     # Switch to Robotic JARVIS
     engine.set_voice_mode("jarvis")
