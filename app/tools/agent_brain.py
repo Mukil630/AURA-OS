@@ -386,12 +386,29 @@ class AutonomousAgentBrain:
         if not clean_input:
             return "வணக்கம் Boss! All systems online. What is your command?", None
 
-        if not self._client:
-            # Fallback if no LLM key
-            handled, msg, photo = self.pc_pilot.try_execute_pc_intent(clean_input)
-            if handled:
-                return msg or "Action executed, Boss.", photo
-            return f"வணக்கம் Boss! Request '{clean_input}' received.", None
+        # Build Real-Time Live System Context (Date, Time IST, Battery, CPU, RAM)
+        from datetime import datetime, timedelta, timezone
+        import psutil
+
+        now_utc = datetime.now(timezone.utc)
+        now_ist = now_utc + timedelta(hours=5, minutes=30)
+        current_time_str = now_ist.strftime("%A, %d %B %Y, %I:%M:%S %p IST")
+
+        batt = psutil.sensors_battery()
+        batt_str = f"{batt.percent:.0f}%" if batt else "N/A"
+        batt_plug = "Plugged in (Charging)" if (batt and batt.power_plugged) else "On Battery"
+        cpu_pct = f"{psutil.cpu_percent(interval=None):.1f}%"
+        ram_pct = f"{psutil.virtual_memory().percent:.1f}%"
+
+        live_system_prompt = (
+            f"{SYSTEM_AGENT_PROMPT}\n\n"
+            f"[LIVE REAL-TIME SYSTEM CONTEXT]\n"
+            f"• Current Live Date & Time: {current_time_str}\n"
+            f"• PC Battery Level: {batt_str} ({batt_plug})\n"
+            f"• PC Hardware: CPU {cpu_pct} | RAM {ram_pct}\n"
+            f"• User: Mukil (Always address him as 'Boss')\n"
+            f"• OS: Windows 11\n"
+        )
 
         # Execute LLM reasoning with Tool Schemas
         for model in GROQ_MODELS:
@@ -399,7 +416,7 @@ class AutonomousAgentBrain:
                 response = self._client.chat.completions.create(
                     model=model,
                     messages=[
-                        {"role": "system", "content": SYSTEM_AGENT_PROMPT},
+                        {"role": "system", "content": live_system_prompt},
                         {"role": "user", "content": clean_input},
                     ],
                     tools=AGENT_TOOLS_SCHEMA,
