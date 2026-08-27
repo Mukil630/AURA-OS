@@ -1,0 +1,259 @@
+"""JARVIS PC Pilot & Browser Automation Engine.
+Executes hands-free PC actions, browser searches, app launches, media/volume controls,
+and screen captures from Telegram voice and text commands.
+"""
+import ctypes
+import logging
+import os
+import subprocess
+import tempfile
+import urllib.parse
+import webbrowser
+from typing import Optional, Tuple
+import psutil
+
+logger = logging.getLogger("PCPilot")
+
+KNOWN_SITES = {
+    "google": "https://www.google.com",
+    "youtube": "https://www.youtube.com",
+    "github": "https://github.com",
+    "linkedin": "https://www.linkedin.com",
+    "chatgpt": "https://chat.openai.com",
+    "leetcode": "https://leetcode.com",
+    "gmail": "https://mail.google.com",
+    "reddit": "https://www.reddit.com",
+    "twitter": "https://twitter.com",
+    "x": "https://x.com",
+    "drive": "https://drive.google.com",
+    "maps": "https://maps.google.com",
+    "netflix": "https://www.netflix.com",
+    "spotify": "https://open.spotify.com",
+    "whatsapp": "https://web.whatsapp.com",
+}
+
+
+class PCPilot:
+    """Controls local PC actions, browser workflows, and system commands."""
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 1. BROWSER AUTOMATION & WEB SEARCH
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def search_google(self, query: str) -> str:
+        """Opens Google search in default browser for given query."""
+        encoded = urllib.parse.quote_plus(query.strip())
+        url = f"https://www.google.com/search?q={encoded}"
+        webbrowser.open(url)
+        return f"🔎 Searched Google for: '{query}'"
+
+    def search_youtube(self, query: str) -> str:
+        """Opens YouTube search in default browser."""
+        encoded = urllib.parse.quote_plus(query.strip())
+        url = f"https://www.youtube.com/results?search_query={encoded}"
+        webbrowser.open(url)
+        return f"▶️ Opened YouTube search for: '{query}'"
+
+    def open_url(self, url: str) -> str:
+        """Opens any standard URL in browser."""
+        clean_url = url.strip()
+        if not clean_url.startswith("http://") and not clean_url.startswith("https://"):
+            clean_url = "https://" + clean_url
+        webbrowser.open(clean_url)
+        return f"🌐 Opened URL: {clean_url}"
+
+    def open_known_site(self, site_name: str) -> Optional[str]:
+        """Opens well-known site by alias."""
+        clean = site_name.lower().strip()
+        if clean in KNOWN_SITES:
+            url = KNOWN_SITES[clean]
+            webbrowser.open(url)
+            return f"🌐 Opened {clean.capitalize()} ({url})"
+        return None
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 2. LOCAL APP LAUNCHING
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def launch_app(self, app_name: str) -> str:
+        """Launches common desktop apps."""
+        clean = app_name.lower().strip()
+        try:
+            if "code" in clean or "vs" in clean or "vscode" in clean:
+                subprocess.Popen(["code", "."], shell=True)
+                return "💻 Launched Visual Studio Code in current workspace."
+            elif "chrome" in clean or "browser" in clean:
+                subprocess.Popen(["start", "chrome"], shell=True)
+                return "🌐 Launched Google Chrome."
+            elif "terminal" in clean or "cmd" in clean or "powershell" in clean:
+                subprocess.Popen(["start", "powershell"], shell=True)
+                return "⚡ Opened PowerShell Terminal."
+            elif "notepad" in clean:
+                subprocess.Popen(["notepad.exe"], shell=True)
+                return "📝 Opened Notepad."
+            elif "calc" in clean or "calculator" in clean:
+                subprocess.Popen(["calc.exe"], shell=True)
+                return "🔢 Opened Calculator."
+            elif "explorer" in clean or "files" in clean:
+                subprocess.Popen(["explorer.exe", "."], shell=True)
+                return "📁 Opened File Explorer."
+            else:
+                subprocess.Popen(["start", clean], shell=True)
+                return f"🚀 Attempted to launch '{clean}'."
+        except Exception as e:
+            return f"❌ Failed to launch '{app_name}': {str(e)}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 3. SCREENSHOT / VISION EYES
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def capture_screen(self) -> Tuple[bool, Optional[str], str]:
+        """
+        Captures high-res screenshot and saves to temp file.
+        Returns: (success, image_path, message)
+        """
+        try:
+            from PIL import ImageGrab
+            screenshot = ImageGrab.grab()
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+                tmp_path = f.name
+            screenshot.save(tmp_path, "PNG")
+            return True, tmp_path, "📸 PC Screen captured successfully!"
+        except Exception as ex:
+            try:
+                import pyautogui
+                screenshot = pyautogui.screenshot()
+                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+                    tmp_path = f.name
+                screenshot.save(tmp_path, "PNG")
+                return True, tmp_path, "📸 PC Screen captured successfully!"
+            except Exception as e:
+                logger.error(f"Screenshot capture failed: {e}")
+                return False, None, f"❌ Screenshot failed: {str(e)}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 4. SYSTEM CONTROLS & VOLUME
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def lock_pc(self) -> str:
+        """Locks the Windows workstation."""
+        try:
+            ctypes.windll.user32.LockWorkStation()
+            return "🔒 Windows Workstation Locked, Boss."
+        except Exception as e:
+            return f"❌ Failed to lock workstation: {str(e)}"
+
+    def adjust_volume(self, action: str) -> str:
+        """Adjusts volume (up, down, mute)."""
+        try:
+            import pyautogui
+            if action == "up":
+                for _ in range(5):
+                    pyautogui.press("volumeup")
+                return "🔊 Volume Increased."
+            elif action == "down":
+                for _ in range(5):
+                    pyautogui.press("volumedown")
+                return "🔉 Volume Decreased."
+            elif action == "mute":
+                pyautogui.press("volumemute")
+                return "🔇 Volume Toggled / Muted."
+            return "Volume command unrecognized."
+        except Exception as e:
+            return f"Volume control error: {str(e)}"
+
+    def copy_clipboard(self, text: str) -> str:
+        """Copies text to PC clipboard."""
+        try:
+            import pyperclip
+            pyperclip.copy(text)
+            return f"📋 Copied to PC Clipboard: '{text[:50]}...'"
+        except Exception as e:
+            return f"Clipboard error: {str(e)}"
+
+    def get_clipboard(self) -> str:
+        """Gets current PC clipboard text."""
+        try:
+            import pyperclip
+            content = pyperclip.paste()
+            if not content:
+                return "📋 PC Clipboard is empty."
+            return f"📋 *PC Clipboard Content*:\n```\n{content[:500]}\n```"
+        except Exception as e:
+            return f"Clipboard error: {str(e)}"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 5. INTENT CLASSIFIER & AUTOMATIC EXECUTION
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def try_execute_pc_intent(self, text: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Interprets natural command and executes PC action if matched.
+        Returns: (handled, text_response, optional_photo_path)
+        """
+        clean = text.lower().strip()
+
+        # 1. Screenshot / Show Screen
+        if any(k in clean for k in ["screenshot", "screen shot", "show my screen", "screen photo", "pc screen", "desktop screen"]):
+            success, path, msg = self.capture_screen()
+            return True, msg, path
+
+        # 2. Google Search
+        if clean.startswith("search ") or "search on google" in clean or "google for " in clean or "search google for " in clean:
+            query = clean
+            for prefix in ["search google for ", "search on google for ", "search for ", "search google ", "google for ", "search "]:
+                if query.startswith(prefix):
+                    query = query[len(prefix):].strip()
+                    break
+            query = query.replace("on google", "").replace("in google", "").strip()
+            msg = self.search_google(query if query else "AI engineering")
+            return True, msg, None
+
+        # 3. YouTube Search / Play
+        if "youtube" in clean and any(k in clean for k in ["search", "play", "open"]):
+            query = clean
+            for prefix in ["play on youtube ", "search on youtube for ", "search youtube for ", "open youtube and play ", "open youtube "]:
+                if query.startswith(prefix):
+                    query = query[len(prefix):].strip()
+                    break
+            query = query.replace("on youtube", "").replace("in youtube", "").strip()
+            msg = self.search_youtube(query if query else "JARVIS AI music")
+            return True, msg, None
+
+        # 4. Open Known Websites (e.g. "open github", "open linkedin", "open chatgpt")
+        if clean.startswith("open ") or clean.startswith("launch "):
+            target = clean.split(maxsplit=1)[1].strip() if len(clean.split(maxsplit=1)) > 1 else ""
+            # Check known sites
+            site_msg = self.open_known_site(target)
+            if site_msg:
+                return True, site_msg, None
+            # Check URLs
+            if "." in target and not " " in target:
+                url_msg = self.open_url(target)
+                return True, url_msg, None
+            # Check common apps
+            app_msg = self.launch_app(target)
+            return True, app_msg, None
+
+        # 5. Lock PC
+        if any(k in clean for k in ["lock pc", "lock my pc", "lock computer", "lock screen", "lock workstation"]):
+            msg = self.lock_pc()
+            return True, msg, None
+
+        # 6. Volume Control
+        if "volume" in clean or "sound" in clean or "mute" in clean:
+            if "up" in clean or "increase" in clean or "raise" in clean:
+                return True, self.adjust_volume("up"), None
+            elif "down" in clean or "decrease" in clean or "lower" in clean:
+                return True, self.adjust_volume("down"), None
+            elif "mute" in clean:
+                return True, self.adjust_volume("mute"), None
+
+        # 7. Clipboard Sync
+        if clean.startswith("copy to pc ") or clean.startswith("copy to clipboard "):
+            content = text.split(maxsplit=3)[-1]
+            return True, self.copy_clipboard(content), None
+        elif clean in ["get clipboard", "show clipboard", "read clipboard", "what is on my clipboard"]:
+            return True, self.get_clipboard(), None
+
+        return False, None, None

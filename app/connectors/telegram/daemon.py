@@ -54,6 +54,7 @@ from app.core.contracts.credential import RawSecretPayloadError
 from app.core.governance.admission_controller import AdmissionController
 from app.policy.approval_engine import ApprovalEngine, default_approval_engine
 from app.tools.conversation_engine import ConversationEngine
+from app.tools.pc_pilot import PCPilot
 from app.tools.reminder_scheduler import ReminderScheduler
 from app.tools.tts_engine import JARVISVoiceEngine, VoiceMode
 
@@ -125,6 +126,7 @@ class TelegramBotDaemon:
         self.voice_engine = JARVISVoiceEngine()
         self.reminder_scheduler = ReminderScheduler()
         self.conversation_engine = ConversationEngine()
+        self.pc_pilot = PCPilot()
         self.app: Optional[Application] = None
         self._is_running = False
 
@@ -331,7 +333,30 @@ class TelegramBotDaemon:
         lower_t = raw_text.lower().strip()
         logger.info(f"Incoming text '{raw_text}' from {user.first_name} (ID: {user.id}, Username: @{user.username})")
 
-        # 1. Check if text is asking to set a timer/reminder (e.g. '10.00 mani ku timer set pannu')
+        # 1. Check PC Pilot Action (Browser Search, App Launch, Screenshot, Volume, Lock)
+        handled, pc_msg, photo_path = self.pc_pilot.try_execute_pc_intent(raw_text)
+        if handled:
+            if photo_path and os.path.exists(photo_path):
+                try:
+                    with open(photo_path, "rb") as pf:
+                        await update.message.reply_photo(
+                            photo=pf,
+                            caption=pc_msg,
+                            parse_mode="Markdown",
+                            reply_to_message_id=update.message.message_id,
+                        )
+                finally:
+                    if os.path.exists(photo_path):
+                        os.remove(photo_path)
+            elif pc_msg:
+                await update.message.reply_text(
+                    text=pc_msg,
+                    parse_mode="Markdown",
+                    reply_to_message_id=update.message.message_id,
+                )
+            return
+
+        # 2. Check if text is asking to set a timer/reminder (e.g. '10.00 mani ku timer set pannu')
         if any(k in lower_t for k in ["remind", "reminder", "alarm", "timer", "மணி", "mani"]) and any(c.isdigit() for c in lower_t):
             try:
                 rem = self.reminder_scheduler.parse_and_create(
@@ -352,14 +377,14 @@ class TelegramBotDaemon:
             except Exception:
                 pass
 
-        # 2. Check if text is an explicit system task execution
+        # 3. Check if text is an explicit system task execution
         if self.conversation_engine.is_task_intent(raw_text):
             contract_update = self._to_contract_update(update)
             outbound = self.gateway.process_update(contract_update)
             await self._dispatch_outbound(update, outbound)
             return
 
-        # 3. Natural Conversation / Question Answering (Instant LLM Response)
+        # 4. Natural Conversation / Question Answering (Instant LLM Response)
         chat_response = await self.conversation_engine.generate_chat_response(raw_text, user_name=user.first_name)
         await update.message.reply_text(
             text=chat_response,
@@ -393,8 +418,27 @@ class TelegramBotDaemon:
             spoken_tamil = None
             caption_text = None
 
-            # 2. Check for PC status & Battery query
-            if any(k in lower_t for k in ["battery", "charge", "power", "cpu", "status", "how is my pc", "running"]):
+            # 2. Check PC Pilot Action (Browser Search, App Launch, Screenshot, Volume, Lock)
+            handled, pc_msg, photo_path = self.pc_pilot.try_execute_pc_intent(transcription)
+            if handled:
+                spoken_tamil = f"சரி Boss! {pc_msg}"
+                caption_text = f"🚀 *PC Action Executed!*\n\n📝 *Action*: _{pc_msg}_"
+                if photo_path and os.path.exists(photo_path):
+                    try:
+                        with open(photo_path, "rb") as pf:
+                            await update.message.reply_photo(
+                                photo=pf,
+                                caption=caption_text,
+                                parse_mode="Markdown",
+                                reply_to_message_id=update.message.message_id,
+                            )
+                    finally:
+                        if os.path.exists(photo_path):
+                            os.remove(photo_path)
+                    return
+
+            # 3. Check for PC status & Battery query
+            elif any(k in lower_t for k in ["battery", "charge", "power", "cpu", "status", "how is my pc", "running"]):
                 try:
                     import psutil
                     cpu = f"{psutil.cpu_percent(interval=0.05):.1f}"
@@ -416,7 +460,7 @@ class TelegramBotDaemon:
                 except Exception:
                     pass
 
-            # 3. Check for voice reminder, timer, or alarm
+            # 4. Check for voice reminder, timer, or alarm
             elif any(k in lower_t for k in ["remind", "remainder", "reminder", "alarm", "timer", "மணி", "mani"]):
                 try:
                     rem = self.reminder_scheduler.parse_and_create(
@@ -430,7 +474,7 @@ class TelegramBotDaemon:
                     spoken_tamil = f"மன்னிக்கவும் Boss, reminder time-ஐ புரிந்து கொள்ள முடியவில்லை."
                     caption_text = f"❌ *Reminder Error*: {str(ex)}"
 
-            # 4. General Voice Note - Natural Conversational Answer
+            # 5. General Voice Note - Natural Conversational Answer
             else:
                 chat_response = await self.conversation_engine.generate_chat_response(transcription, user_name=update.effective_user.first_name)
                 spoken_tamil = chat_response
