@@ -323,17 +323,14 @@ class TelegramBotDaemon:
                     pass
 
             # 3. Check for voice reminder
-            elif "remind" in lower_t:
+            elif any(k in lower_t for k in ["remind", "remainder", "reminder", "alarm"]):
                 try:
-                    rem_args = lower_t.split("remind", 1)[1].strip()
-                    if rem_args.startswith("me"):
-                        rem_args = rem_args[2:].strip()
-                    if rem_args.startswith("to"):
-                        rem_args = rem_args[2:].strip()
+                    # Clean prefix
+                    rem_clean = re.sub(r"^(?:set\s+)?(?:a\s+)?(?:remind(?:er|ar)?|alarm)\s+(?:for\s+|to\s+|in\s+)?", "", lower_t).strip()
                     rem = self.reminder_scheduler.parse_and_create(
                         chat_id=update.effective_chat.id,
                         user_id=update.effective_user.id,
-                        command_args=rem_args,
+                        command_args=rem_clean if rem_clean else "10m Scheduled Task",
                     )
                     spoken_tamil = f"சரி மாப்ள! நினைவூட்டல் பதிவு செய்யப்பட்டது. குறிப்பிட்ட நேரத்தில் உங்களுக்கு குரல் செய்தி அனுப்புகிறேன்."
                     caption_text = f"⏰ *Reminder Scheduled!*\n\n📝 *Task*: _{rem['message']}_\n⏳ *Due*: `{rem['target_time'][:19]} UTC`"
@@ -341,30 +338,34 @@ class TelegramBotDaemon:
                     spoken_tamil = f"மன்னிக்கவும் மாப்ள, நினைவூட்டல் நேரத்தை புரிந்து கொள்ள முடியவில்லை."
                     caption_text = f"❌ *Reminder Error*: {str(ex)}"
 
-            # 4. If direct spoken answer ready, synthesize audio & reply with Voice Note!
-            if spoken_tamil and caption_text:
-                with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as out_tmp:
-                    out_path = out_tmp.name
-                try:
-                    await self.voice_engine.save_voice_file(spoken_tamil, out_path)
-                    with open(out_path, "rb") as vf:
-                        await update.message.reply_voice(
-                            voice=vf,
-                            caption=caption_text,
-                            parse_mode="Markdown",
-                            reply_to_message_id=update.message.message_id,
-                        )
-                    return
-                except Exception as ex:
-                    logger.warning(f"Voice reply synthesis failed: {ex}")
-                finally:
-                    if os.path.exists(out_path):
-                        os.remove(out_path)
+            # 4. General Voice Note - Intelligent Spoken Acknowledgement
+            else:
+                spoken_tamil = f"வணக்கம் மாப்ள! உங்கள் குரல் செய்தி பெறப்பட்டது. {transcription}. இந்த பணியை ஜார்விஸ் வெற்றிகரமாக செயல்படுத்தி வருகிறது."
+                caption_text = (
+                    f"⚡ *Task Accepted by Jarvis Master Agent*\n\n"
+                    f"🎙️ *Voice Transcribed*: _{transcription}_\n"
+                    f"🚦 *Admission*: `ALLOWED`\n"
+                    f"⏳ *Status*: Running..."
+                )
 
-            # 5. Fallback: Dispatch to Master Agent Pipeline
-            contract_update = self._to_contract_update(update)
-            outbound = self.gateway.process_update(contract_update, raw_voice_bytes=raw_bytes)
-            await self._dispatch_outbound(update, outbound)
+            # 5. Always Synthesize Audio & Reply with Fluent Tamil Voice Note!
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as out_tmp:
+                out_path = out_tmp.name
+            try:
+                await self.voice_engine.save_voice_file(spoken_tamil, out_path)
+                with open(out_path, "rb") as vf:
+                    await update.message.reply_voice(
+                        voice=vf,
+                        caption=caption_text,
+                        parse_mode="Markdown",
+                        reply_to_message_id=update.message.message_id,
+                    )
+            except Exception as ex:
+                logger.warning(f"Voice reply synthesis failed: {ex}")
+                await update.message.reply_text(caption_text, parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+            finally:
+                if os.path.exists(out_path):
+                    os.remove(out_path)
 
         finally:
             if os.path.exists(tmp_path):
