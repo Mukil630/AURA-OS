@@ -72,7 +72,7 @@ class PCPilot:
         return None
 
     # ─────────────────────────────────────────────────────────────────────────
-    # 2. LOCAL APP LAUNCHING
+    # 2. LOCAL APP LAUNCHING & CLOSING
     # ─────────────────────────────────────────────────────────────────────────
 
     def launch_app(self, app_name: str) -> str:
@@ -102,6 +102,68 @@ class PCPilot:
                 return f"🚀 Attempted to launch '{clean}'."
         except Exception as e:
             return f"❌ Failed to launch '{app_name}': {str(e)}"
+
+    def close_app(self, app_name: str) -> str:
+        """Closes or terminates a running application or browser tab."""
+        clean = app_name.lower().strip()
+        
+        # 1. Close browser tab or active window
+        if clean in ["tab", "browser tab", "chrome tab", "youtube", "web tab"]:
+            try:
+                import pyautogui
+                pyautogui.hotkey("ctrl", "w")
+                return f"🛑 Closed active browser tab ({app_name}), Boss."
+            except Exception:
+                pass
+
+        if clean in ["window", "active window", "current window", "app"]:
+            try:
+                import pyautogui
+                pyautogui.hotkey("alt", "f4")
+                return "🛑 Closed active window, Boss."
+            except Exception:
+                pass
+
+        # 2. Process killer map
+        proc_map = {
+            "notepad": "notepad.exe",
+            "chrome": "chrome.exe",
+            "browser": "chrome.exe",
+            "code": "Code.exe",
+            "vscode": "Code.exe",
+            "calc": "CalculatorApp.exe",
+            "calculator": "CalculatorApp.exe",
+            "terminal": "WindowsTerminal.exe",
+            "powershell": "powershell.exe",
+            "cmd": "cmd.exe",
+            "edge": "msedge.exe",
+            "explorer": "explorer.exe",
+            "spotify": "Spotify.exe",
+        }
+
+        target_exe = proc_map.get(clean, f"{clean}.exe")
+        killed_count = 0
+        try:
+            for p in psutil.process_iter(["pid", "name"]):
+                try:
+                    if p.info["name"] and p.info["name"].lower() == target_exe.lower():
+                        p.kill()
+                        killed_count += 1
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+        except Exception as ex:
+            logger.error(f"Error killing process {target_exe}: {ex}")
+
+        if killed_count > 0:
+            return f"🛑 Closed '{clean}' (Terminated {killed_count} process instances), Boss."
+        
+        # Fallback to Alt+F4 hotkey
+        try:
+            import pyautogui
+            pyautogui.hotkey("alt", "f4")
+            return f"🛑 Closed '{clean}' window, Boss."
+        except Exception as e:
+            return f"❌ Could not close '{clean}': {str(e)}"
 
     # ─────────────────────────────────────────────────────────────────────────
     # 3. SCREENSHOT / VISION EYES
@@ -198,7 +260,29 @@ class PCPilot:
             success, path, msg = self.capture_screen()
             return True, msg, path
 
-        # 2. Google Search
+        # 2. Close / Terminate App or Tab (e.g. "close notepad", "kill chrome", "close youtube")
+        if clean.startswith("close ") or clean.startswith("kill ") or clean.startswith("quit ") or clean.startswith("exit "):
+            target = clean.split(maxsplit=1)[1].strip()
+            msg = self.close_app(target)
+            return True, msg, None
+
+        # 3. Direct YouTube Open (e.g. "open youtube", "youtube")
+        if clean in ["open youtube", "launch youtube", "youtube"]:
+            msg = self.open_known_site("youtube")
+            return True, msg, None
+
+        # 4. YouTube Search / Play
+        if "youtube" in clean and any(k in clean for k in ["search", "play"]):
+            query = clean
+            for prefix in ["play on youtube ", "search on youtube for ", "search youtube for ", "open youtube and play ", "play "]:
+                if query.startswith(prefix):
+                    query = query[len(prefix):].strip()
+                    break
+            query = query.replace("on youtube", "").replace("in youtube", "").strip()
+            msg = self.search_youtube(query if query else "JARVIS AI music")
+            return True, msg, None
+
+        # 5. Google Search
         if clean.startswith("search ") or "search on google" in clean or "google for " in clean or "search google for " in clean:
             query = clean
             for prefix in ["search google for ", "search on google for ", "search for ", "search google ", "google for ", "search "]:
@@ -209,18 +293,7 @@ class PCPilot:
             msg = self.search_google(query if query else "AI engineering")
             return True, msg, None
 
-        # 3. YouTube Search / Play
-        if "youtube" in clean and any(k in clean for k in ["search", "play", "open"]):
-            query = clean
-            for prefix in ["play on youtube ", "search on youtube for ", "search youtube for ", "open youtube and play ", "open youtube "]:
-                if query.startswith(prefix):
-                    query = query[len(prefix):].strip()
-                    break
-            query = query.replace("on youtube", "").replace("in youtube", "").strip()
-            msg = self.search_youtube(query if query else "JARVIS AI music")
-            return True, msg, None
-
-        # 4. Open Known Websites (e.g. "open github", "open linkedin", "open chatgpt")
+        # 6. Open Known Websites (e.g. "open github", "open linkedin", "open chatgpt")
         if clean.startswith("open ") or clean.startswith("launch "):
             target = clean.split(maxsplit=1)[1].strip() if len(clean.split(maxsplit=1)) > 1 else ""
             # Check known sites
@@ -235,12 +308,12 @@ class PCPilot:
             app_msg = self.launch_app(target)
             return True, app_msg, None
 
-        # 5. Lock PC
+        # 7. Lock PC
         if any(k in clean for k in ["lock pc", "lock my pc", "lock computer", "lock screen", "lock workstation"]):
             msg = self.lock_pc()
             return True, msg, None
 
-        # 6. Volume Control
+        # 8. Volume Control
         if "volume" in clean or "sound" in clean or "mute" in clean:
             if "up" in clean or "increase" in clean or "raise" in clean:
                 return True, self.adjust_volume("up"), None
@@ -249,7 +322,7 @@ class PCPilot:
             elif "mute" in clean:
                 return True, self.adjust_volume("mute"), None
 
-        # 7. Clipboard Sync
+        # 9. Clipboard Sync
         if clean.startswith("copy to pc ") or clean.startswith("copy to clipboard "):
             content = text.split(maxsplit=3)[-1]
             return True, self.copy_clipboard(content), None

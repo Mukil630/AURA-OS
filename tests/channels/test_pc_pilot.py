@@ -65,3 +65,19 @@ def test_pc_04_intent_routing():
     # Unhandled natural conversational text
     handled, msg, _ = pilot.try_execute_pc_intent("What is recursion?")
     assert handled is False
+
+
+def test_pc_05_close_app_and_tabs():
+    """PC-05: Tests closing apps and browser tabs."""
+    pilot = PCPilot()
+    
+    with patch("pyautogui.hotkey") as mock_hotkey:
+        handled, msg, _ = pilot.try_execute_pc_intent("close youtube")
+        assert handled is True
+        assert "Closed active browser tab" in msg
+        mock_hotkey.assert_called_with("ctrl", "w")
+
+        handled, msg, _ = pilot.try_execute_pc_intent("close notepad")
+        assert handled is True
+        assert "Closed" in msg
+
