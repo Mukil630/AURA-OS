@@ -47,6 +47,8 @@ from app.connectors.telegram.idempotency import TelegramReplayGuard
 from app.core.contracts.credential import RawSecretPayloadError
 from app.core.governance.admission_controller import AdmissionController
 from app.policy.approval_engine import ApprovalEngine, default_approval_engine
+from app.tools.reminder_scheduler import ReminderScheduler
+from app.tools.tts_engine import JARVISVoiceEngine
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -98,7 +100,8 @@ class GroqWhisperVoiceTranscriber(IVoiceTranscriber):
 class TelegramBotDaemon:
     """
     Live background daemon polling the Telegram Bot API and routing updates
-    through the validated TelegramGatewayService and Phase 12 Operating Plane.
+    through the validated TelegramGatewayService, Phase 12 Operating Plane,
+    JARVIS Neural Voice Engine, and Reminder Scheduler.
     """
 
     def __init__(
@@ -112,6 +115,8 @@ class TelegramBotDaemon:
             allowed_user_ids=allowed_user_ids,
             voice_transcriber=GroqWhisperVoiceTranscriber(),
         )
+        self.voice_engine = JARVISVoiceEngine()
+        self.reminder_scheduler = ReminderScheduler()
         self.app: Optional[Application] = None
         self._is_running = False
 
@@ -121,6 +126,7 @@ class TelegramBotDaemon:
             raise ValueError("TELEGRAM_BOT_TOKEN is required to start the Telegram Daemon.")
 
         builder = ApplicationBuilder().token(self.bot_token)
+        builder.post_init(self._on_app_post_init)
         app = builder.build()
 
         # Command Handlers
@@ -132,6 +138,9 @@ class TelegramBotDaemon:
         app.add_handler(CommandHandler("approve", self._handle_command))
         app.add_handler(CommandHandler("reject", self._handle_command))
         app.add_handler(CommandHandler("exec", self._handle_command))
+        app.add_handler(CommandHandler("remind", self._handle_remind))
+        app.add_handler(CommandHandler("reminders", self._handle_list_reminders))
+        app.add_handler(CommandHandler("cancelremind", self._handle_cancel_reminder))
 
         # Inline Button Callback Handler
         app.add_handler(CallbackQueryHandler(self._handle_callback_query))
@@ -143,7 +152,100 @@ class TelegramBotDaemon:
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text))
 
         self.app = app
+        self.reminder_scheduler.set_callback(self._on_reminder_triggered)
         return app
+
+    async def _on_app_post_init(self, application: Application) -> None:
+        """Starts background reminder scheduler when Telegram application starts."""
+        await self.reminder_scheduler.start()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # REMINDER CALLBACK & HANDLERS
+    # ─────────────────────────────────────────────────────────────────────────
+
+    async def _on_reminder_triggered(self, reminder: Dict[str, Any]) -> None:
+        """Sends reminder notification to Telegram with both text and fluent spoken voice note."""
+        chat_id = reminder.get("chat_id")
+        msg = reminder.get("message", "Timed Reminder")
+        if not self.app or not chat_id:
+            return
+
+        spoken_tamil = f"வணக்கம் மாப்ள! இது உங்களுக்கான நினைவூட்டல் செய்தி: {msg}. நேரத்தை சரியாக பயன்படுத்தவும்."
+        alert_text = f"⏰ *JARVIS REMINDER ALERT!*\n\n📝 *Task*: _{msg}_\n⏳ *Time*: `{datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}`"
+
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
+                tmp_audio = tmp.name
+            await self.voice_engine.save_voice_file(spoken_tamil, tmp_audio)
+            with open(tmp_audio, "rb") as f:
+                await self.app.bot.send_voice(chat_id=chat_id, voice=f, caption=alert_text, parse_mode="Markdown")
+            if os.path.exists(tmp_audio):
+                os.remove(tmp_audio)
+        except Exception as e:
+            logger.warning(f"Voice reminder send failed, falling back to text: {e}")
+            await self.app.bot.send_message(chat_id=chat_id, text=alert_text, parse_mode="Markdown")
+
+    async def _handle_remind(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Process /remind command (e.g. /remind 10m Study Java)."""
+        if not update.message or not update.effective_user:
+            return
+
+        cmd_text = update.message.text.strip()
+        args = cmd_text.split(maxsplit=1)[1] if len(cmd_text.split(maxsplit=1)) > 1 else ""
+        if not args:
+            await update.message.reply_text(
+                "⏰ *Usage*: `/remind <time> <task>`\n\n*Examples*:\n• `/remind 10m Study Java`\n• `/remind 1h Placement Test`\n• `/remind 30m SGC Invoice Check`",
+                parse_mode="Markdown",
+            )
+            return
+
+        try:
+            rem = self.reminder_scheduler.parse_and_create(
+                chat_id=update.effective_chat.id,
+                user_id=update.effective_user.id,
+                command_args=args,
+            )
+            await update.message.reply_text(
+                f"⏰ *Reminder Set Successfully!*\n\n"
+                f"📋 *ID*: `{rem['reminder_id']}`\n"
+                f"📝 *Task*: _{rem['message']}_\n"
+                f"⏳ *Target Time*: `{rem['target_time'][:19]} UTC`\n\n"
+                f"JARVIS will send a voice alert when due.",
+                parse_mode="Markdown",
+                reply_to_message_id=update.message.message_id,
+            )
+        except Exception as e:
+            await update.message.reply_text(f"❌ *Error setting reminder*: {str(e)}", parse_mode="Markdown")
+
+    async def _handle_list_reminders(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """List active pending reminders."""
+        if not update.message:
+            return
+        active = self.reminder_scheduler.list_reminders(user_id=update.effective_user.id if update.effective_user else None)
+        if not active:
+            await update.message.reply_text("📋 *No active reminders scheduled.* Use `/remind 10m <task>` to set one.", parse_mode="Markdown")
+            return
+
+        lines = ["⏰ *Active Scheduled Reminders:*\n"]
+        for r in active:
+            lines.append(f"• `{r['reminder_id']}`: _{r['message']}_ (Due: `{r['target_time'][:19]} UTC`)")
+        await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+
+    async def _handle_cancel_reminder(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Cancel a reminder by ID."""
+        if not update.message:
+            return
+        cmd_text = update.message.text.strip()
+        args = cmd_text.split(maxsplit=1)[1] if len(cmd_text.split(maxsplit=1)) > 1 else ""
+        if not args:
+            await update.message.reply_text("Usage: `/cancelremind <reminder_id>`", parse_mode="Markdown")
+            return
+
+        success = self.reminder_scheduler.cancel_reminder(args.strip())
+        if success:
+            await update.message.reply_text(f"✅ Reminder `{args.strip()}` has been cancelled.", parse_mode="Markdown")
+        else:
+            await update.message.reply_text(f"❌ Reminder `{args.strip()}` not found or already completed.", parse_mode="Markdown")
 
     # ─────────────────────────────────────────────────────────────────────────
     # ADAPTER TRANSLATION: TELEGRAM -> CONTRACT -> RESPONSE
@@ -172,7 +274,7 @@ class TelegramBotDaemon:
         await self._dispatch_outbound(update, outbound)
 
     async def _handle_voice(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        """Download and process voice note payloads."""
+        """Download and process voice note payloads with 2-Way Voice Output."""
         if not update.message or not update.effective_user:
             return
 
@@ -180,7 +282,6 @@ class TelegramBotDaemon:
         if not voice:
             return
 
-        # Download raw audio bytes
         voice_file = await context.bot.get_file(voice.file_id)
         with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
             tmp_path = tmp.name
@@ -190,9 +291,81 @@ class TelegramBotDaemon:
             with open(tmp_path, "rb") as f:
                 raw_bytes = f.read()
 
+            # 1. Transcribe incoming audio
+            transcription = self.gateway.voice_transcriber.transcribe(raw_bytes)
+            logger.info(f"Voice Transcribed: '{transcription}'")
+
+            lower_t = transcription.lower()
+            spoken_tamil = None
+            caption_text = None
+
+            # 2. Check for PC status & Battery query
+            if any(k in lower_t for k in ["battery", "charge", "power", "cpu", "status", "how is my pc", "running"]):
+                try:
+                    import psutil
+                    cpu = f"{psutil.cpu_percent(interval=0.05):.1f}"
+                    vmem = psutil.virtual_memory()
+                    ram_pct = f"{vmem.percent:.1f}"
+                    batt = psutil.sensors_battery()
+                    batt_str = f"{batt.percent:.0f}%" if batt else "N/A"
+                    plug = "சார்ஜர் இணைக்கப்பட்டுள்ளது" if (batt and batt.power_plugged) else "பேட்டரியில் இயங்குகிறது"
+
+                    spoken_tamil = f"வணக்கம் மாப்ள! உங்கள் கணினி பேட்டரி {batt_str} உள்ளது. {plug}. சிபியு பயன்பாடு {cpu} சதவீதம். கணினி மிக சிறப்பாக இயங்குகிறது!"
+                    caption_text = (
+                        f"🎙️ *JARVIS Voice Response*\n\n"
+                        f"📝 *Query*: _{transcription}_\n"
+                        f"🔋 *Battery*: `{batt_str}`\n"
+                        f"⚡ *CPU Usage*: `{cpu}%`\n"
+                        f"🧠 *RAM*: `{ram_pct}%`\n"
+                        f"🟢 *Status*: Autonomous & Online"
+                    )
+                except Exception:
+                    pass
+
+            # 3. Check for voice reminder
+            elif "remind" in lower_t:
+                try:
+                    rem_args = lower_t.split("remind", 1)[1].strip()
+                    if rem_args.startswith("me"):
+                        rem_args = rem_args[2:].strip()
+                    if rem_args.startswith("to"):
+                        rem_args = rem_args[2:].strip()
+                    rem = self.reminder_scheduler.parse_and_create(
+                        chat_id=update.effective_chat.id,
+                        user_id=update.effective_user.id,
+                        command_args=rem_args,
+                    )
+                    spoken_tamil = f"சரி மாப்ள! நினைவூட்டல் பதிவு செய்யப்பட்டது. குறிப்பிட்ட நேரத்தில் உங்களுக்கு குரல் செய்தி அனுப்புகிறேன்."
+                    caption_text = f"⏰ *Reminder Scheduled!*\n\n📝 *Task*: _{rem['message']}_\n⏳ *Due*: `{rem['target_time'][:19]} UTC`"
+                except Exception as ex:
+                    spoken_tamil = f"மன்னிக்கவும் மாப்ள, நினைவூட்டல் நேரத்தை புரிந்து கொள்ள முடியவில்லை."
+                    caption_text = f"❌ *Reminder Error*: {str(ex)}"
+
+            # 4. If direct spoken answer ready, synthesize audio & reply with Voice Note!
+            if spoken_tamil and caption_text:
+                with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as out_tmp:
+                    out_path = out_tmp.name
+                try:
+                    await self.voice_engine.save_voice_file(spoken_tamil, out_path)
+                    with open(out_path, "rb") as vf:
+                        await update.message.reply_voice(
+                            voice=vf,
+                            caption=caption_text,
+                            parse_mode="Markdown",
+                            reply_to_message_id=update.message.message_id,
+                        )
+                    return
+                except Exception as ex:
+                    logger.warning(f"Voice reply synthesis failed: {ex}")
+                finally:
+                    if os.path.exists(out_path):
+                        os.remove(out_path)
+
+            # 5. Fallback: Dispatch to Master Agent Pipeline
             contract_update = self._to_contract_update(update)
             outbound = self.gateway.process_update(contract_update, raw_voice_bytes=raw_bytes)
             await self._dispatch_outbound(update, outbound)
+
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
