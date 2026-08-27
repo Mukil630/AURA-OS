@@ -1,5 +1,6 @@
 """Unit and Integration Tests for AutonomousAgentBrain."""
 import asyncio
+import os
 from unittest.mock import MagicMock, patch
 import pytest
 
@@ -83,3 +84,35 @@ def test_ab_03_mock_llm_conversational_response():
     res, photo = asyncio.run(brain.process_user_intent("Explain TCP vs UDP"))
     assert "TCP is connection-oriented" in res
     assert photo is None
+
+
+def test_ab_04_universal_tools_execution():
+    """AB-04: Universal tools (terminal, file manager, python runner) execute properly."""
+    brain = AutonomousAgentBrain(api_key="mock_key")
+
+    # 1. Run Python Code
+    py_code = "print(2 + 3)"
+    res, _ = brain.execute_tool("run_python_code", {"code": py_code})
+    assert "5" in res
+
+    # 2. Manage Files (write & read)
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
+        tpath = tmp.name
+
+    try:
+        w_res, _ = brain.execute_tool("manage_files", {"action": "write", "file_path": tpath, "content": "Hello Jarvis"})
+        assert "created / updated successfully" in w_res
+
+        r_res, _ = brain.execute_tool("manage_files", {"action": "read", "file_path": tpath})
+        assert "Hello Jarvis" in r_res
+    finally:
+        if os.path.exists(tpath):
+            os.remove(tpath)
+
+    # 3. Execute Terminal Command
+    with patch("subprocess.check_output", return_value="v1.0.0\n"):
+        c_res, _ = brain.execute_tool("execute_terminal_command", {"command": "git --version"})
+        assert "git --version" in c_res
+        assert "v1.0.0" in c_res
+

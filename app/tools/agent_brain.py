@@ -142,6 +142,66 @@ AGENT_TOOLS_SCHEMA = [
                 "required": ["action"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_terminal_command",
+            "description": "Executes a safe shell/PowerShell command on the user's PC (e.g. git status, git push, ipconfig, python script, dir, pip install) and returns the output.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The exact shell command to execute"
+                    }
+                },
+                "required": ["command"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "manage_files",
+            "description": "Reads, writes, creates, lists, or inspects files and directories on the user's PC.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["read", "write", "list", "exists"],
+                        "description": "File action to perform"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "description": "Target file or directory path"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "File content when action is write"
+                    }
+                },
+                "required": ["action", "file_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_python_code",
+            "description": "Executes an ad-hoc Python code snippet dynamically in a sandboxed runner and returns printed output or calculations.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Python code snippet to execute"
+                    }
+                },
+                "required": ["code"]
+            }
+        }
     }
 ]
 
@@ -244,6 +304,65 @@ class AutonomousAgentBrain:
                 return self.pc_pilot.copy_clipboard(txt), None
             else:
                 return self.pc_pilot.get_clipboard(), None
+
+        elif tool_name == "execute_terminal_command":
+            cmd = args.get("command", "").strip()
+            if not cmd:
+                return "❌ Empty command received.", None
+            try:
+                import subprocess
+                out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT, timeout=20, text=True)
+                res = f"💻 *Terminal Command Executed*:\n`{cmd}`\n\n```\n{out.strip()[:1000]}\n```"
+                return res, None
+            except subprocess.CalledProcessError as cpe:
+                return f"⚠️ *Command Failed (Exit Code {cpe.returncode})*:\n```\n{cpe.output.strip()[:500]}\n```", None
+            except Exception as e:
+                return f"❌ Command execution error: {str(e)}", None
+
+        elif tool_name == "manage_files":
+            act = args.get("action", "")
+            fpath = args.get("file_path", "").strip()
+            content = args.get("content", "")
+            try:
+                if act == "write":
+                    os.makedirs(os.path.dirname(os.path.abspath(fpath)), exist_ok=True)
+                    with open(fpath, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    return f"📁 File `{fpath}` created / updated successfully, Boss.", None
+                elif act == "read":
+                    if not os.path.exists(fpath):
+                        return f"❌ File `{fpath}` does not exist.", None
+                    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                        data = f.read()
+                    return f"📄 *Content of `{fpath}`*:\n```\n{data[:1000]}\n```", None
+                elif act == "list":
+                    target_dir = fpath if os.path.isdir(fpath) else "."
+                    entries = os.listdir(target_dir)[:30]
+                    return f"📁 *Files in `{target_dir}`*:\n" + "\n".join(f"• {e}" for e in entries), None
+                elif act == "exists":
+                    exists = os.path.exists(fpath)
+                    return f"File `{fpath}` exists: {'Yes ✅' if exists else 'No ❌'}", None
+            except Exception as e:
+                return f"❌ File management error: {str(e)}", None
+
+        elif tool_name == "run_python_code":
+            code_snippet = args.get("code", "").strip()
+            if not code_snippet:
+                return "❌ Empty code snippet.", None
+            try:
+                import io
+                import sys
+                old_stdout = sys.stdout
+                redirected = io.StringIO()
+                sys.stdout = redirected
+                loc = {}
+                exec(code_snippet, {"__builtins__": __builtins__}, loc)
+                sys.stdout = old_stdout
+                output = redirected.getvalue()
+                return f"🐍 *Python Execution Output*:\n```\n{output.strip() if output.strip() else 'Executed successfully with no stdout.'}\n```", None
+            except Exception as e:
+                sys.stdout = old_stdout
+                return f"❌ Python Execution Error: {str(e)}", None
 
         return f"Tool '{tool_name}' executed successfully.", None
 
