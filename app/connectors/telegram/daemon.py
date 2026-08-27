@@ -178,7 +178,7 @@ class TelegramBotDaemon:
         if not self.app or not chat_id:
             return
 
-        spoken_tamil = f"வணக்கம் மாப்ள! இது உங்களுக்கான நினைவூட்டல் செய்தி: {msg}. நேரத்தை சரியாக பயன்படுத்தவும்."
+        spoken_tamil = f"வணக்கம் பாஸ்! இது உங்களுக்கான நினைவூட்டல் செய்தி: {msg}. நேரத்தை சரியாக பயன்படுத்தவும்."
         alert_text = f"⏰ *JARVIS REMINDER ALERT!*\n\n📝 *Task*: _{msg}_\n⏳ *Time*: `{datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}`"
 
         try:
@@ -285,7 +285,7 @@ class TelegramBotDaemon:
         await update.message.reply_text(msg, parse_mode="Markdown", reply_to_message_id=update.message.message_id)
 
         # Generate sample audio greeting in new voice!
-        sample_text = "Hello Mukil, I am your JARVIS AI assistant." if self.voice_engine.current_mode == VoiceMode.JARVIS else "வணக்கம் மாப்ள! நான் உங்கள் ஜார்விஸ் ஏஐ உதவியாளர்."
+        sample_text = "Hello Boss, I am your AI assistant." if self.voice_engine.current_mode == VoiceMode.JARVIS else "வணக்கம் பாஸ்! நான் உங்கள் ஏஐ உதவியாளர்."
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             tmp_path = tmp.name
         try:
@@ -361,7 +361,7 @@ class TelegramBotDaemon:
                     batt_str = f"{batt.percent:.0f}%" if batt else "N/A"
                     plug = "சார்ஜர் இணைக்கப்பட்டுள்ளது" if (batt and batt.power_plugged) else "பேட்டரியில் இயங்குகிறது"
 
-                    spoken_tamil = f"வணக்கம் மாப்ள! உங்கள் கணினி பேட்டரி {batt_str} உள்ளது. {plug}. சிபியு பயன்பாடு {cpu} சதவீதம். கணினி மிக சிறப்பாக இயங்குகிறது!"
+                    spoken_tamil = f"வணக்கம் பாஸ்! உங்கள் கணினி பேட்டரி {batt_str} உள்ளது. {plug}. சிபியு பயன்பாடு {cpu} சதவீதம். கணினி மிக சிறப்பாக இயங்குகிறது!"
                     caption_text = (
                         f"🎙️ *JARVIS Voice Response*\n\n"
                         f"📝 *Query*: _{transcription}_\n"
@@ -383,15 +383,15 @@ class TelegramBotDaemon:
                         user_id=update.effective_user.id,
                         command_args=rem_clean if rem_clean else "10m Scheduled Task",
                     )
-                    spoken_tamil = f"சரி மாப்ள! நினைவூட்டல் பதிவு செய்யப்பட்டது. குறிப்பிட்ட நேரத்தில் உங்களுக்கு குரல் செய்தி அனுப்புகிறேன்."
+                    spoken_tamil = f"சரி பாஸ்! நினைவூட்டல் பதிவு செய்யப்பட்டது. குறிப்பிட்ட நேரத்தில் உங்களுக்கு குரல் செய்தி அனுப்புகிறேன்."
                     caption_text = f"⏰ *Reminder Scheduled!*\n\n📝 *Task*: _{rem['message']}_\n⏳ *Due*: `{rem['target_time'][:19]} UTC`"
                 except Exception as ex:
-                    spoken_tamil = f"மன்னிக்கவும் மாப்ள, நினைவூட்டல் நேரத்தை புரிந்து கொள்ள முடியவில்லை."
+                    spoken_tamil = f"மன்னிக்கவும் பாஸ், நினைவூட்டல் நேரத்தை புரிந்து கொள்ள முடியவில்லை."
                     caption_text = f"❌ *Reminder Error*: {str(ex)}"
 
             # 4. General Voice Note - Intelligent Spoken Acknowledgement
             else:
-                spoken_tamil = f"வணக்கம் மாப்ள! உங்கள் குரல் செய்தி பெறப்பட்டது. {transcription}. இந்த பணியை ஜார்விஸ் வெற்றிகரமாக செயல்படுத்தி வருகிறது."
+                spoken_tamil = f"வணக்கம் பாஸ்! உங்கள் குரல் செய்தி பெறப்பட்டது. {transcription}. இந்த பணியை ஜார்விஸ் வெற்றிகரமாக செயல்படுத்தி வருகிறது."
                 caption_text = (
                     f"⚡ *Task Accepted by Jarvis Master Agent*\n\n"
                     f"🎙️ *Voice Transcribed*: _{transcription}_\n"
@@ -439,7 +439,7 @@ class TelegramBotDaemon:
             success, msg = self.voice_engine.set_voice_mode(mode)
             if query.message:
                 await query.message.reply_text(msg, parse_mode="Markdown")
-                sample_text = "Hello Mukil, I am your JARVIS AI assistant." if self.voice_engine.current_mode == VoiceMode.JARVIS else "வணக்கம் மாப்ள! நான் உங்கள் ஜார்விஸ் ஏஐ உதவியாளர்."
+                sample_text = "Hello Boss, I am your AI assistant." if self.voice_engine.current_mode == VoiceMode.JARVIS else "வணக்கம் பாஸ்! நான் உங்கள் ஏஐ உதவியாளர்."
                 with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
                     tmp_path = tmp.name
                 try:
