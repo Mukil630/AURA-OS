@@ -53,46 +53,84 @@ class ReminderScheduler:
 
     def parse_and_create(self, chat_id: int, user_id: int, command_args: str) -> Dict[str, Any]:
         """
-        Parses commands like:
-        - "in 10m study java"
-        - "in 2h 30m placement aptitude test"
+        Parses complex natural, relative, absolute (IST), and Tanglish commands like:
+        - "10.00 mani ku timer set pannu"
+        - "10:00 pm study java"
         - "10m study python"
+        - "in 1h 30m placement aptitude test"
+        - "5 mins"
         - "22:30 meeting"
         """
         args = command_args.strip()
         if not args:
-            raise ValueError("Usage: `/remind <time> <message>` (e.g. `/remind 10m Study Java`)")
+            raise ValueError("Usage: `/remind <time> <message>` (e.g. `/remind 10m Study Java` or `/remind 10.00`)")
 
-        now = datetime.now(timezone.utc)
+        now_utc = datetime.now(timezone.utc)
+        ist_offset = timedelta(hours=5, minutes=30)
+        now_ist = now_utc + ist_offset
         target_time: Optional[datetime] = None
         message = ""
 
-        # Check relative time (e.g. 10m, 2h, 1h 30m, in 15m)
-        rel_match = re.match(r"^(?:in\s+)?(?:(\d+)\s*h(?:ours?)?)?\s*(?:(\d+)\s*m(?:in(?:utes?)?)?)?\s*(?:(\d+)\s*s(?:ec(?:onds?)?)?)?\s+(.+)$", args, re.IGNORECASE)
-        if rel_match and any([rel_match.group(1), rel_match.group(2), rel_match.group(3)]):
-            hours = int(rel_match.group(1) or 0)
-            minutes = int(rel_match.group(2) or 0)
-            seconds = int(rel_match.group(3) or 0)
-            message = rel_match.group(4).strip()
-            total_seconds = hours * 3600 + minutes * 60 + seconds
-            if total_seconds <= 0:
-                raise ValueError("Reminder duration must be greater than 0.")
-            target_time = now + timedelta(seconds=total_seconds)
-        else:
-            # Fallback simple split: first token as duration
-            parts = args.split(maxsplit=1)
-            if len(parts) >= 2:
-                time_str = parts[0].lower()
-                message = parts[1].strip()
-                if time_str.endswith("m") and time_str[:-1].isdigit():
-                    target_time = now + timedelta(minutes=int(time_str[:-1]))
-                elif time_str.endswith("h") and time_str[:-1].isdigit():
-                    target_time = now + timedelta(hours=int(time_str[:-1]))
-                elif time_str.endswith("s") and time_str[:-1].isdigit():
-                    target_time = now + timedelta(seconds=int(time_str[:-1]))
+        # Normalize text
+        clean = args.lower().strip()
+        clean = re.sub(r"^(?:set\s+)?(?:a\s+)?(?:remind(?:er|ar)?|alarm|timer)\s+(?:for\s+|to\s+|in\s+|at\s+)?", "", clean)
+        clean = re.sub(r"\s*(?:mani\s*ku|manikku|mani|ku|set\s*pannu)\s*", " ", clean).strip()
+
+        # 1. First priority: Relative Duration (e.g. 10m, 5 mins, 1 hour 30 mins, 30s)
+        rel_pattern = re.compile(r"(?:in\s+)?(\d+)\s*(hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)\b", re.IGNORECASE)
+        rel_matches = rel_pattern.findall(args)
+
+        if rel_matches:
+            total_seconds = 0
+            for val_str, unit in rel_matches:
+                val = int(val_str)
+                u = unit.lower()
+                if u.startswith("h"):
+                    total_seconds += val * 3600
+                elif u.startswith("m") and not u.startswith("man"):
+                    total_seconds += val * 60
+                elif u.startswith("s"):
+                    total_seconds += val
+
+            if total_seconds > 0:
+                target_time = now_utc + timedelta(seconds=total_seconds)
+                cleaned_msg = rel_pattern.sub("", args).strip()
+                cleaned_msg = re.sub(r"^(?:in|set|a|remind|reminder|timer|alarm|to|for)\b\s*", "", cleaned_msg, flags=re.IGNORECASE).strip()
+                cleaned_msg = re.sub(r"\s*(?:mani\s*ku|manikku|mani|ku|set\s*pannu)\s*$", "", cleaned_msg, flags=re.IGNORECASE).strip()
+                message = cleaned_msg
+
+        # 2. Second priority: Absolute Clock Time (e.g. 10.00, 10:00, 10:00 PM, 10 pm, 22:00)
+        if not target_time:
+            clock_pattern = re.compile(r"\b(\d{1,2})(?:[:\.](\d{2}))?\s*(am|pm)?\b", re.IGNORECASE)
+            clock_match = clock_pattern.search(args)
+            if clock_match:
+                hour = int(clock_match.group(1))
+                minute = int(clock_match.group(2) or 0)
+                ampm = (clock_match.group(3) or "").lower()
+
+                if 0 <= hour <= 23 and 0 <= minute <= 59:
+                    if ampm == "pm" and hour < 12:
+                        hour += 12
+                    elif ampm == "am" and hour == 12:
+                        hour = 0
+                    elif not ampm and hour < 12 and now_ist.hour >= 12 and (hour + 12) > now_ist.hour:
+                        hour += 12
+
+                    target_ist = now_ist.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                    if target_ist <= now_ist:
+                        target_ist += timedelta(days=1)
+
+                    target_time = target_ist - ist_offset
+                    cleaned_msg = clock_pattern.sub("", args).strip()
+                    cleaned_msg = re.sub(r"^(?:at|set|a|remind|reminder|timer|alarm|to|for)\b\s*", "", cleaned_msg, flags=re.IGNORECASE).strip()
+                    cleaned_msg = re.sub(r"\s*(?:mani\s*ku|manikku|mani|ku|timer|alarm|set\s*pannu)\s*", " ", cleaned_msg, flags=re.IGNORECASE).strip()
+                    message = cleaned_msg
 
         if not target_time:
-            raise ValueError("Could not parse reminder time. Examples: `10m Study Java`, `1h Placement Test`.")
+            raise ValueError("Could not parse time. Examples: `10.00`, `10:00 PM`, `10m Study Java`, `1h Test`.")
+
+        if not message:
+            message = "Timer Alert"
 
         reminder_id = f"rem_{uuid4().hex[:8]}"
         reminder = {
@@ -100,7 +138,7 @@ class ReminderScheduler:
             "chat_id": chat_id,
             "user_id": user_id,
             "message": message,
-            "created_at": now.isoformat(),
+            "created_at": now_utc.isoformat(),
             "target_time": target_time.isoformat(),
             "status": "pending",
         }

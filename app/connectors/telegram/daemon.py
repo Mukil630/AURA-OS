@@ -325,7 +325,31 @@ class TelegramBotDaemon:
             return
 
         user = update.effective_user
-        logger.info(f"Incoming text '{update.message.text}' from {user.first_name} (ID: {user.id}, Username: @{user.username})")
+        raw_text = update.message.text or ""
+        lower_t = raw_text.lower().strip()
+        logger.info(f"Incoming text '{raw_text}' from {user.first_name} (ID: {user.id}, Username: @{user.username})")
+
+        # Check if text is asking to set a timer/reminder (e.g. '10.00 mani ku timer set pannu')
+        if any(k in lower_t for k in ["remind", "reminder", "alarm", "timer", "மணி", "mani"]) and any(c.isdigit() for c in lower_t):
+            try:
+                rem = self.reminder_scheduler.parse_and_create(
+                    chat_id=update.effective_chat.id,
+                    user_id=user.id,
+                    command_args=lower_t,
+                )
+                await update.message.reply_text(
+                    f"⏰ *Timer / Reminder Scheduled!*\n\n"
+                    f"📋 *ID*: `{rem['reminder_id']}`\n"
+                    f"📝 *Task*: _{rem['message']}_\n"
+                    f"⏳ *Target Time*: `{rem['target_time'][:19]} UTC`\n\n"
+                    f"JARVIS will send a voice alert when due, Boss.",
+                    parse_mode="Markdown",
+                    reply_to_message_id=update.message.message_id,
+                )
+                return
+            except Exception:
+                pass
+
         contract_update = self._to_contract_update(update)
         outbound = self.gateway.process_update(contract_update)
         await self._dispatch_outbound(update, outbound)
@@ -379,15 +403,13 @@ class TelegramBotDaemon:
                 except Exception:
                     pass
 
-            # 3. Check for voice reminder
-            elif any(k in lower_t for k in ["remind", "remainder", "reminder", "alarm"]):
+            # 3. Check for voice reminder, timer, or alarm
+            elif any(k in lower_t for k in ["remind", "remainder", "reminder", "alarm", "timer", "மணி", "mani"]):
                 try:
-                    # Clean prefix
-                    rem_clean = re.sub(r"^(?:set\s+)?(?:a\s+)?(?:remind(?:er|ar)?|alarm)\s+(?:for\s+|to\s+|in\s+)?", "", lower_t).strip()
                     rem = self.reminder_scheduler.parse_and_create(
                         chat_id=update.effective_chat.id,
                         user_id=update.effective_user.id,
-                        command_args=rem_clean if rem_clean else "10m Scheduled Task",
+                        command_args=lower_t,
                     )
                     spoken_tamil = f"சரி Boss! Reminder schedule பண்ணியாச்சு. Exact time-ல உங்களுக்கு voice alert அனுப்புறேன்."
                     caption_text = f"⏰ *Reminder Scheduled!*\n\n📝 *Task*: _{rem['message']}_\n⏳ *Due*: `{rem['target_time'][:19]} UTC`"

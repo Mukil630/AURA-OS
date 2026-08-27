@@ -168,3 +168,31 @@ def test_vr_07_voice_mode_switching():
 
     success, msg = engine.set_voice_mode("alien_voice")
     assert success is False
+
+
+def test_vr_08_tanglish_and_clock_time_parsing():
+    """VR-08: Tests parsing of Tanglish, clock times (e.g. 10.00 mani ku timer), and abbreviations."""
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        tmp_path = tmp.name
+
+    try:
+        scheduler = ReminderScheduler(storage_path=tmp_path)
+        
+        # Tanglish: "10.00 mani ku timer set pannu"
+        rem1 = scheduler.parse_and_create(chat_id=1, user_id=1, command_args="10.00 mani ku timer set pannu")
+        assert rem1["status"] == "pending"
+        assert rem1["message"] == "Timer Alert"
+
+        # "5 mins study"
+        rem2 = scheduler.parse_and_create(chat_id=1, user_id=1, command_args="5 mins study")
+        assert rem2["status"] == "pending"
+        assert rem2["message"] == "study"
+
+        # "10:00 pm placement review"
+        rem3 = scheduler.parse_and_create(chat_id=1, user_id=1, command_args="10:00 pm placement review")
+        assert rem3["status"] == "pending"
+        assert rem3["message"] == "placement review"
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
