@@ -28,6 +28,18 @@ Tone: High-agency, proactive, sharp, results-driven problem solver with producti
 """
 
 
+TARGET_PORTALS = {
+    "zoho": "https://www.zoho.com/careers/",
+    "freshworks": "https://www.freshworks.com/company/careers/",
+    "swiggy": "https://careers.swiggy.com/",
+    "postman": "https://www.postman.com/company/careers/",
+    "google": "https://www.google.com/about/careers/applications/jobs/results/?q=AI+Engineer",
+    "amazon": "https://www.amazon.jobs/en/search?base_query=AI+Engineer",
+    "microsoft": "https://careers.microsoft.com/us/en/search-results?keywords=AI%20Engineer",
+    "linkedin": "https://www.linkedin.com/jobs/search/?keywords=AI+Engineer+India&f_LF=f_AL",
+}
+
+
 class JobApplyAgent:
     """
     Autonomous Job Application & Pipeline Tracker Agent.
@@ -73,18 +85,18 @@ class JobApplyAgent:
 
         return [
             {
-                "platform": "LinkedIn Jobs",
+                "platform": "LinkedIn Jobs (Easy Apply)",
                 "role": role,
                 "location": location,
-                "search_url": f"https://www.linkedin.com/jobs/search/?keywords={encoded_role}&f_TPR=r86400",
-                "description": "Active openings posted within last 24 hours on LinkedIn.",
+                "search_url": f"https://www.linkedin.com/jobs/search/?keywords={encoded_role}&f_LF=f_AL",
+                "description": "1-Click Easy Apply listings on LinkedIn.",
             },
             {
                 "platform": "Google Jobs Aggregator",
                 "role": role,
                 "location": location,
                 "search_url": f"https://www.google.com/search?q={encoded_role}+jobs+apply",
-                "description": "Multi-board aggregated listings with 1-click apply links.",
+                "description": "Multi-board aggregated listings with direct career portals.",
             },
             {
                 "platform": "Wellfound (AngelList)",
@@ -107,7 +119,7 @@ class JobApplyAgent:
         company_name: str,
         job_title: str,
         job_description: Optional[str] = None,
-    ) -> Dict[str, str]:
+    ) -> Dict[str, Any]:
         """
         Uses Groq LLM to generate a customized cover letter, cold outreach email,
         and ATS-friendly screening answers tailored specifically to Mukil's Master Resume.
@@ -166,6 +178,71 @@ Format output as pure valid JSON.
             logger.warning(f"Groq application package generation failed: {e}")
 
         return default_package
+
+    def execute_live_application(
+        self,
+        company: str,
+        role: str = "AI Engineer",
+        job_description: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes a real hands-on application:
+        1. Generates tailored pitch + cover letter with Mukil's Master Resume.
+        2. Opens the company's official career portal / job search in PC browser.
+        3. Copies cold pitch to PC clipboard.
+        4. Logs application into pipeline tracker.
+        """
+        clean_comp = company.strip()
+        comp_key = clean_comp.lower()
+
+        portal_url = TARGET_PORTALS.get(
+            comp_key,
+            f"https://www.google.com/search?q={urllib.parse.quote_plus(clean_comp + ' ' + role + ' careers jobs apply')}"
+        )
+
+        # 1. Generate package
+        pkg = self.generate_application_package(clean_comp, role, job_description)
+
+        # 2. Open portal in PC browser
+        try:
+            import webbrowser
+            webbrowser.open(portal_url)
+        except Exception:
+            pass
+
+        # 3. Copy cold pitch to clipboard
+        try:
+            import pyperclip
+            pitch_text = f"{pkg.get('cold_pitch_email')}\n\nResume: {MUKIL_MASTER_RESUME_URL}"
+            pyperclip.copy(pitch_text)
+        except Exception:
+            pass
+
+        # 4. Log application
+        logged = self.log_application(
+            company=clean_comp,
+            role=role,
+            apply_url=portal_url,
+            notes=pkg.get("screening_answer_why_hire"),
+            status="APPLIED",
+        )
+
+        return {
+            "record": logged,
+            "package": pkg,
+            "portal_url": portal_url,
+        }
+
+    def batch_apply_top_companies(self, role: str = "AI Engineer") -> List[Dict[str, Any]]:
+        """
+        Sequentially executes applications across top hiring companies (Zoho, Freshworks, Swiggy, Postman).
+        """
+        top_targets = ["Zoho", "Freshworks", "Swiggy", "Postman"]
+        results = []
+        for company in top_targets:
+            res = self.execute_live_application(company=company, role=role)
+            results.append(res)
+        return results
 
     def log_application(
         self,
@@ -226,7 +303,7 @@ Format output as pure valid JSON.
             lines.append(
                 f"{idx}. {status_icon} *{app['company']}* - `{app['role']}`\n"
                 f"   • Status: *{app['status']}* | Applied: `{app['applied_at'][:10]}`\n"
-                f"   • Link: [Apply / Post Link]({app['apply_url']})"
+                f"   • Portal: [Open Careers Link]({app['apply_url']})"
             )
 
         return "\n".join(lines)

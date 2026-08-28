@@ -15,9 +15,9 @@ def test_job_01_search_jobs():
     listings = agent.search_jobs(role="AI Engineer", location="Bangalore")
     assert len(listings) >= 4
     platforms = [item["platform"] for item in listings]
-    assert "LinkedIn Jobs" in platforms
-    assert "Google Jobs Aggregator" in platforms
-    assert "Wellfound (AngelList)" in platforms
+    assert any("LinkedIn" in p for p in platforms)
+    assert any("Google" in p for p in platforms)
+    assert any("Wellfound" in p for p in platforms)
 
 
 def test_job_02_application_package_generation():
@@ -59,9 +59,15 @@ def test_job_04_agent_brain_job_tools():
 
     # Test create_job_application
     res_app, _ = brain.execute_tool("create_job_application", {"company": "Zoho", "role": "AI Developer"})
-    assert "Job Application Package Prepared for Zoho" in res_app
-    assert "Logged in Pipeline Tracker" in res_app
+    assert "AUTONOMOUS JOB APPLICATION EXECUTED FOR ZOHO" in res_app
+    assert "Application logged in pipeline tracker" in res_app
+
+    # Test batch_apply_jobs
+    res_batch, _ = brain.execute_tool("batch_apply_jobs", {"role": "AI Engineer"})
+    assert "BATCH APPLICATION EXECUTED ACROSS TOP COMPANIES" in res_batch
+    assert "Zoho" in res_batch
 
     # Test view_job_pipeline
     res_pipe, _ = brain.execute_tool("view_job_pipeline", {})
     assert "JOB APPLICATION PIPELINE" in res_pipe
+

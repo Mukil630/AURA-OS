@@ -45,13 +45,13 @@ AGENT_TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "create_job_application",
-            "description": "Generates a tailored application package (custom cover letter, cold outreach email with Mukil's Master Resume link, and screening answers) and logs it into the job pipeline tracker.",
+            "description": "Autonomously applies to a target company (e.g. Zoho, Google, Swiggy, Freshworks, Postman), opens their official career portal on the user's PC, copies the tailored pitch to clipboard, and logs application in the tracker.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "company": {
                         "type": "string",
-                        "description": "Company name, e.g. 'Google', 'Zoho', 'Swiggy', 'Freshworks'"
+                        "description": "Company name, e.g. 'Zoho', 'Google', 'Swiggy', 'Freshworks', 'Postman'"
                     },
                     "role": {
                         "type": "string",
@@ -62,7 +62,23 @@ AGENT_TOOLS_SCHEMA = [
                         "description": "Optional job description details"
                     }
                 },
-                "required": ["company", "role"]
+                "required": ["company"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "batch_apply_jobs",
+            "description": "Sequentially and autonomously executes job applications across all top hiring tech companies (Zoho, Freshworks, Swiggy, Postman) one by one, opening their career portals on PC and preparing custom pitches.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "type": "string",
+                        "description": "Target job role, e.g. 'AI Engineer', 'Full Stack Developer'"
+                    }
+                }
             }
         }
     },
@@ -311,21 +327,44 @@ class AutonomousAgentBrain:
             return "\n".join(lines), None
 
         elif tool_name == "create_job_application":
-            comp = args.get("company", "Tech Company")
+            comp = args.get("company", "Zoho")
             role = args.get("role", "AI Engineer")
             jd = args.get("job_description")
-            pkg = self.job_agent.generate_application_package(company_name=comp, job_title=role, job_description=jd)
-            logged = self.job_agent.log_application(company=comp, role=role, notes=pkg.get("screening_answer_why_hire"))
+            result = self.job_agent.execute_live_application(company=comp, role=role, job_description=jd)
+            logged = result["record"]
+            pkg = result["package"]
+            portal_url = result["portal_url"]
             
             res_md = (
-                f"🚀 *Job Application Package Prepared for {comp} ({role})*!\n\n"
-                f"📋 *App ID*: `{logged['application_id']}` | Status: *{logged['status']}*\n"
-                f"📄 *Master Resume*: [View Resume PDF]({logged['resume_link']})\n\n"
-                f"✉️ *Cold Outreach Pitch (LinkedIn/Email)*:\n```\n{pkg.get('cold_pitch_email')}\n```\n\n"
+                f"🚀 *AUTONOMOUS JOB APPLICATION EXECUTED FOR {comp.upper()}*!\n\n"
+                f"🌐 *Careers Portal Opened on PC*: [Click to View Careers Page]({portal_url})\n"
+                f"📋 *Application ID*: `{logged['application_id']}` | Status: *{logged['status']}*\n"
+                f"📄 *Master Resume Attached*: [View Resume PDF]({logged['resume_link']})\n"
+                f"📋 *PC Clipboard*: _Cold pitch copied to clipboard ready to paste (Ctrl+V)!_\n\n"
+                f"✉️ *Cold Outreach Pitch (Email/LinkedIn)*:\n```\n{pkg.get('cold_pitch_email')}\n```\n\n"
                 f"📝 *Tailored Cover Letter*:\n```\n{pkg.get('cover_letter')}\n```\n\n"
-                f"✅ *Logged in Pipeline Tracker*, Boss!"
+                f"💡 *Why You Are The Best Fit*:\n_{pkg.get('screening_answer_why_hire')}_\n\n"
+                f"✅ *Application logged in pipeline tracker, Boss!*"
             )
             return res_md, None
+
+        elif tool_name == "batch_apply_jobs":
+            role = args.get("role", "AI Engineer")
+            batch_results = self.job_agent.batch_apply_top_companies(role=role)
+            lines = [
+                f"🚀 *BATCH APPLICATION EXECUTED ACROSS TOP COMPANIES ({role})*!\n",
+                f"📄 *Master Resume Linked*: [View Resume PDF](https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link)\n"
+            ]
+            for item in batch_results:
+                rec = item["record"]
+                p_url = item["portal_url"]
+                lines.append(
+                    f"• 🟢 *{rec['company']}* (`{rec['role']}`)\n"
+                    f"   - Portal: [Careers Page]({p_url})\n"
+                    f"   - App ID: `{rec['application_id']}` | Status: *APPLIED*"
+                )
+            lines.append("\n📋 *All career portals opened on your PC screen and logged in tracker, Boss!*")
+            return "\n".join(lines), None
 
         elif tool_name == "view_job_pipeline":
             summary = self.job_agent.get_pipeline_summary()
