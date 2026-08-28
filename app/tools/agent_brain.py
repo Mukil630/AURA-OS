@@ -314,13 +314,14 @@ AGENT_TOOLS_SCHEMA = [
     }
 ]
 
-SYSTEM_AGENT_PROMPT = """You are JARVIS / FRIDAY, the executive autonomous AI partner and PC commander for Mukil (always address him as 'Boss').
-You possess REAL full autonomous control over his PC and applications.
+SYSTEM_AGENT_PROMPT = """You are JARVIS / AURA, the executive autonomous AI partner and PC commander for Mukil (always address him as 'Boss' or 'Mapla').
+You possess FULL autonomous capability to understand, plan, research, write code, execute tools, and solve ANY task Mukil assigns.
 
-Decision Rules:
-1. When Mukil asks to perform an action on his PC (e.g. open/close apps, kill tabs, browse/search web, screenshots, volume, lock workstation, timers/reminders, clipboard), ALWAYS invoke the appropriate tool from your toolset.
-2. When Mukil asks a technical question, coding problem, placement query, or engages in casual conversation, do NOT call PC tools. Instead, answer directly in confident, sharp, friendly Tanglish + English (Latin script only) addressing him as 'Boss'.
-3. Never say "I cannot control your device" or suggest manual keyboard shortcuts when asked to perform a task. You are an autonomous agent capable of executing actions directly.
+Operational Directives:
+1. True Autonomous Problem Solver: When Mukil gives you an open-ended goal or complex instruction (e.g. research, file creation, job application, code generation, system check), break it down, use your tools (Python runner, PowerShell terminal, web search, file manager, job hunter) iteratively in a multi-step loop until the task is 100% completed.
+2. Dynamic Execution over Limitations: Never say "I can't do that" or "You must do this manually". If you lack a pre-built tool, write and run custom Python code or PowerShell commands on the spot to accomplish the goal.
+3. Proof of Action: Whenever you complete desktop/system tasks, capture screenshots and verify the output.
+4. Executive Tone: Speak in sharp, authentic, brotherly Tanglish + English ('Boss' / 'Mapla' dynamic) with confident engineering precision.
 """
 
 
@@ -618,49 +619,69 @@ class AutonomousAgentBrain:
             f"• OS: Windows 11 / Cloud Linux\n"
         )
 
-        # 3. Execute LLM reasoning with Tool Schemas
+        # 3. Multi-Step Autonomous Agentic Problem Solving Loop (CodeAct ReAct Engine)
         for model in GROQ_MODELS:
             try:
-                response = self._client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": live_system_prompt},
-                        {"role": "user", "content": clean_input},
-                    ],
-                    tools=AGENT_TOOLS_SCHEMA,
-                    tool_choice="auto",
-                    temperature=0.2,
-                )
+                convo_history = [
+                    {"role": "system", "content": live_system_prompt},
+                    {"role": "user", "content": clean_input},
+                ]
+                photo_to_send = None
+                executed_steps = []
 
-                msg = response.choices[0].message
+                # Allow up to 4 autonomous agentic iterations per task
+                for _ in range(4):
+                    response = self._client.chat.completions.create(
+                        model=model,
+                        messages=convo_history,
+                        tools=AGENT_TOOLS_SCHEMA,
+                        tool_choice="auto",
+                        temperature=0.2,
+                    )
 
-                # A. LLM decided to invoke one or more tools
-                if msg.tool_calls:
-                    results = []
-                    photo_to_send = None
-                    for tc in msg.tool_calls:
-                        fn_name = tc.function.name
-                        try:
-                            fn_args = json.loads(tc.function.arguments) if tc.function.arguments else {}
-                        except Exception:
-                            fn_args = {}
-                        res_text, photo_path = self.execute_tool(fn_name, fn_args, chat_id=chat_id, user_id=user_id)
-                        results.append(res_text)
-                        if photo_path:
-                            photo_to_send = photo_path
+                    msg = response.choices[0].message
 
-                    final_text = "\n\n".join(results)
-                    self.memory_vault.record_conversation_turn(sender="JARVIS", text=final_text)
-                    return final_text, photo_to_send
+                    # A. LLM decided to invoke tool(s)
+                    if msg.tool_calls:
+                        convo_history.append(msg)
+                        for tc in msg.tool_calls:
+                            fn_name = tc.function.name
+                            try:
+                                fn_args = json.loads(tc.function.arguments) if tc.function.arguments else {}
+                            except Exception:
+                                fn_args = {}
 
-                # B. LLM decided to answer conversationally
-                elif msg.content and msg.content.strip():
-                    ans = msg.content.strip()
-                    self.memory_vault.record_conversation_turn(sender="JARVIS", text=ans)
-                    return ans, None
+                            res_text, photo_path = self.execute_tool(fn_name, fn_args, chat_id=chat_id, user_id=user_id)
+                            executed_steps.append(res_text)
+                            if photo_path:
+                                photo_to_send = photo_path
+
+                            convo_history.append({
+                                "role": "tool",
+                                "tool_call_id": tc.id,
+                                "name": fn_name,
+                                "content": res_text[:2000],
+                            })
+                        continue
+
+                    # B. LLM decided to answer conversationally or produce final synthesis
+                    elif msg.content and msg.content.strip():
+                        final_ans = msg.content.strip()
+                        if executed_steps:
+                            combined = "\n\n".join(executed_steps) + f"\n\n{final_ans}"
+                        else:
+                            combined = final_ans
+
+                        self.memory_vault.record_conversation_turn(sender="JARVIS", text=combined)
+                        return combined, photo_to_send
+
+                if executed_steps:
+                    combined = "\n\n".join(executed_steps)
+                    self.memory_vault.record_conversation_turn(sender="JARVIS", text=combined)
+                    return combined, photo_to_send
 
             except Exception as ex:
-                logger.warning(f"Model {model} failed: {ex}. Retrying next model...")
+                logger.warning(f"Model {model} agentic loop failed: {ex}. Retrying next model...")
 
         # Ultimate fallback
         handled, msg, photo = self.pc_pilot.try_execute_pc_intent(clean_input)
