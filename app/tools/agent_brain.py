@@ -8,6 +8,11 @@ import os
 from typing import Any, Dict, Optional, Tuple
 from groq import Groq
 
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
 from app.agents.placement.job_apply_agent import JobApplyAgent
 from app.connectors.drive.drive_vault import DriveVaultManager
 from app.tools.memory_vault import MemoryVault
@@ -20,6 +25,12 @@ GROQ_MODELS = [
     "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
+]
+
+GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-1.5-flash",
 ]
 
 AGENT_TOOLS_SCHEMA = [
@@ -341,6 +352,7 @@ class AutonomousAgentBrain:
         drive_manager: Optional[DriveVaultManager] = None,
     ):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         self.pc_pilot = pc_pilot or PCPilot()
         self.reminder_scheduler = reminder_scheduler or ReminderScheduler()
         self.job_agent = job_agent or JobApplyAgent(api_key=self.api_key)
@@ -352,6 +364,13 @@ class AutonomousAgentBrain:
                 self._client = Groq(api_key=self.api_key)
             except Exception as e:
                 logger.warning(f"Could not initialize Groq client in AgentBrain: {e}")
+
+        if self.gemini_api_key and genai:
+            try:
+                genai.configure(api_key=self.gemini_api_key)
+                logger.info("Google Gemini 2.5 Brain successfully initialized.")
+            except Exception as ge:
+                logger.warning(f"Could not initialize Gemini in AgentBrain: {ge}")
 
     def execute_tool(self, tool_name: str, args: Dict[str, Any], chat_id: int = 0, user_id: int = 0) -> Tuple[str, Optional[str]]:
         """
