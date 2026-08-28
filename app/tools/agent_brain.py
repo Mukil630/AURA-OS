@@ -8,6 +8,7 @@ import os
 from typing import Any, Dict, Optional, Tuple
 from groq import Groq
 
+from app.agents.placement.job_apply_agent import JobApplyAgent
 from app.tools.pc_pilot import PCPilot
 from app.tools.reminder_scheduler import ReminderScheduler
 
@@ -20,6 +21,59 @@ GROQ_MODELS = [
 ]
 
 AGENT_TOOLS_SCHEMA = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_and_hunt_jobs",
+            "description": "Searches for active tech job openings (AI Engineer, Full-Stack Developer, Python, Backend) across LinkedIn, Google Jobs, Wellfound, and Naukri with direct application links.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "type": "string",
+                        "description": "Target job title, e.g. 'AI Engineer', 'Full-Stack Developer', 'Python Developer'"
+                    },
+                    "location": {
+                        "type": "string",
+                        "description": "Job location, e.g. 'Remote', 'India', 'Bangalore', 'Chennai'"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_job_application",
+            "description": "Generates a tailored application package (custom cover letter, cold outreach email with Mukil's Master Resume link, and screening answers) and logs it into the job pipeline tracker.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "company": {
+                        "type": "string",
+                        "description": "Company name, e.g. 'Google', 'Zoho', 'Swiggy', 'Freshworks'"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Job role/title, e.g. 'AI Engineer', 'Full Stack Developer'"
+                    },
+                    "job_description": {
+                        "type": "string",
+                        "description": "Optional job description details"
+                    }
+                },
+                "required": ["company", "role"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "view_job_pipeline",
+            "description": "Views all tracked job applications, their current statuses, applied dates, and direct links.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
     {
         "type": "function",
         "function": {
@@ -226,10 +280,12 @@ class AutonomousAgentBrain:
         api_key: Optional[str] = None,
         pc_pilot: Optional[PCPilot] = None,
         reminder_scheduler: Optional[ReminderScheduler] = None,
+        job_agent: Optional[JobApplyAgent] = None,
     ):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         self.pc_pilot = pc_pilot or PCPilot()
         self.reminder_scheduler = reminder_scheduler or ReminderScheduler()
+        self.job_agent = job_agent or JobApplyAgent(api_key=self.api_key)
         self._client: Optional[Groq] = None
         if self.api_key:
             try:
@@ -243,7 +299,39 @@ class AutonomousAgentBrain:
         """
         logger.info(f"Agent executing tool '{tool_name}' with args: {args}")
 
-        if tool_name == "open_application":
+        if tool_name == "search_and_hunt_jobs":
+            r = args.get("role", "AI Engineer")
+            loc = args.get("location", "Remote / India")
+            listings = self.job_agent.search_jobs(role=r, location=loc)
+            lines = [f"🎯 *Active Job Opportunities Found ({r} - {loc})*:\n"]
+            for idx, item in enumerate(listings, 1):
+                lines.append(f"{idx}. *{item['platform']}*: [{item['role']}]({item['search_url']})\n   _{item['description']}_")
+            lines.append(f"\n📄 *Master Resume Linked*: [View Resume PDF](https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link)")
+            lines.append("\n💡 Say _'Apply to <Company>'_ to generate a tailored pitch!")
+            return "\n".join(lines), None
+
+        elif tool_name == "create_job_application":
+            comp = args.get("company", "Tech Company")
+            role = args.get("role", "AI Engineer")
+            jd = args.get("job_description")
+            pkg = self.job_agent.generate_application_package(company_name=comp, job_title=role, job_description=jd)
+            logged = self.job_agent.log_application(company=comp, role=role, notes=pkg.get("screening_answer_why_hire"))
+            
+            res_md = (
+                f"🚀 *Job Application Package Prepared for {comp} ({role})*!\n\n"
+                f"📋 *App ID*: `{logged['application_id']}` | Status: *{logged['status']}*\n"
+                f"📄 *Master Resume*: [View Resume PDF]({logged['resume_link']})\n\n"
+                f"✉️ *Cold Outreach Pitch (LinkedIn/Email)*:\n```\n{pkg.get('cold_pitch_email')}\n```\n\n"
+                f"📝 *Tailored Cover Letter*:\n```\n{pkg.get('cover_letter')}\n```\n\n"
+                f"✅ *Logged in Pipeline Tracker*, Boss!"
+            )
+            return res_md, None
+
+        elif tool_name == "view_job_pipeline":
+            summary = self.job_agent.get_pipeline_summary()
+            return summary, None
+
+        elif tool_name == "open_application":
             app = args.get("app_name", "")
             return self.pc_pilot.launch_app(app), None
 

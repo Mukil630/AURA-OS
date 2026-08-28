@@ -157,6 +157,8 @@ class TelegramBotDaemon:
         app.add_handler(CommandHandler("cancelremind", self._handle_cancel_reminder))
         app.add_handler(CommandHandler("voice", self._handle_voice_command))
         app.add_handler(CommandHandler("voices", self._handle_voice_command))
+        app.add_handler(CommandHandler("jobs", self._handle_jobs_command))
+        app.add_handler(CommandHandler("apply", self._handle_jobs_command))
 
         # Inline Button Callback Handler
         app.add_handler(CallbackQueryHandler(self._handle_callback_query))
@@ -311,6 +313,47 @@ class TelegramBotDaemon:
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+
+    async def _handle_jobs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Process /jobs and /apply commands for autonomous placement hunting."""
+        if not update.message or not update.effective_user:
+            return
+
+        cmd_text = update.message.text.strip()
+        args = cmd_text.split(maxsplit=1)[1] if len(cmd_text.split(maxsplit=1)) > 1 else ""
+
+        if not args or args.lower() in ["list", "status", "tracker", "pipeline"]:
+            summary = self.agent_brain.job_agent.get_pipeline_summary()
+            await update.message.reply_text(summary, parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+            return
+
+        # If user provides company and role (e.g. /jobs apply Google AI Engineer)
+        parts = args.split()
+        if parts[0].lower() in ["apply", "target", "new"] and len(parts) > 1:
+            company = parts[1]
+            role = " ".join(parts[2:]) if len(parts) > 2 else "AI Engineer"
+            pkg = self.agent_brain.job_agent.generate_application_package(company_name=company, job_title=role)
+            logged = self.agent_brain.job_agent.log_application(company=company, role=role, notes=pkg.get("screening_answer_why_hire"))
+            res_md = (
+                f"🚀 *Job Application Package Prepared for {company} ({role})*!\n\n"
+                f"📋 *App ID*: `{logged['application_id']}` | Status: *{logged['status']}*\n"
+                f"📄 *Master Resume*: [View Resume PDF]({logged['resume_link']})\n\n"
+                f"✉️ *Cold Outreach Pitch (LinkedIn/Email)*:\n```\n{pkg.get('cold_pitch_email')}\n```\n\n"
+                f"📝 *Tailored Cover Letter*:\n```\n{pkg.get('cover_letter')}\n```\n\n"
+                f"✅ *Logged in Pipeline Tracker*, Boss!"
+            )
+            await update.message.reply_text(res_md, parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+            return
+
+        # Default: search jobs for role
+        role = args.strip()
+        listings = self.agent_brain.job_agent.search_jobs(role=role)
+        lines = [f"🎯 *Active Job Opportunities Found ({role})*:\n"]
+        for idx, item in enumerate(listings, 1):
+            lines.append(f"{idx}. *{item['platform']}*: [{item['role']}]({item['search_url']})\n   _{item['description']}_")
+        lines.append(f"\n📄 *Master Resume Linked*: [View Resume PDF](https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link)")
+        lines.append("\n💡 Use `/jobs apply <Company> <Role>` to generate a custom application package!")
+        await update.message.reply_text("\n".join(lines), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
 
     # ─────────────────────────────────────────────────────────────────────────
     # ADAPTER TRANSLATION: TELEGRAM -> CONTRACT -> RESPONSE
