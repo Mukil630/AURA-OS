@@ -396,6 +396,25 @@ class TelegramBotDaemon:
                         parse_mode="Markdown",
                         reply_to_message_id=update.message.message_id,
                     )
+
+                # Also send a spoken voice confirmation
+                voice_summary = "Boss, task execute panniyachu. Screen proof and details send pannirken, and nammoda 5TB Drive Vault-layum save aayiduchu!"
+                with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as out_tmp:
+                    out_path = out_tmp.name
+                try:
+                    await self.voice_engine.save_voice_file(voice_summary, out_path)
+                    with open(out_path, "rb") as vf:
+                        await update.message.reply_voice(
+                            voice=vf,
+                            caption="🎙️ *JARVIS Execution Confirmation*",
+                            parse_mode="Markdown",
+                        )
+                except Exception as ve:
+                    logger.warning(f"Spoken confirmation failed: {ve}")
+                finally:
+                    if os.path.exists(out_path):
+                        os.remove(out_path)
+
             finally:
                 if os.path.exists(photo_path):
                     os.remove(photo_path)

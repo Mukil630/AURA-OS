@@ -9,6 +9,8 @@ from typing import Any, Dict, Optional, Tuple
 from groq import Groq
 
 from app.agents.placement.job_apply_agent import JobApplyAgent
+from app.connectors.drive.drive_vault import DriveVaultManager
+from app.tools.memory_vault import MemoryVault
 from app.tools.pc_pilot import PCPilot
 from app.tools.reminder_scheduler import ReminderScheduler
 
@@ -88,6 +90,43 @@ AGENT_TOOLS_SCHEMA = [
             "name": "view_job_pipeline",
             "description": "Views all tracked job applications, their current statuses, applied dates, and direct links.",
             "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "view_drive_vaults",
+            "description": "Views the 5TB Google Drive Master Vault matrix, official Master Resume link, and SGC billing dual vaults.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_memory_or_document",
+            "description": "Saves an important document, project note, or user directive to the persistent memory vault and 5TB Google Drive knowledge index.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Title of document or memory note"
+                    },
+                    "doc_type": {
+                        "type": "string",
+                        "description": "Type of document (e.g. 'resume', 'project_code', 'invoice', 'learning')"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Key points or details to remember"
+                    },
+                    "drive_link": {
+                        "type": "string",
+                        "description": "Optional Google Drive link"
+                    }
+                },
+                "required": ["title", "doc_type"]
+            }
         }
     },
     {
@@ -297,11 +336,15 @@ class AutonomousAgentBrain:
         pc_pilot: Optional[PCPilot] = None,
         reminder_scheduler: Optional[ReminderScheduler] = None,
         job_agent: Optional[JobApplyAgent] = None,
+        memory_vault: Optional[MemoryVault] = None,
+        drive_manager: Optional[DriveVaultManager] = None,
     ):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         self.pc_pilot = pc_pilot or PCPilot()
         self.reminder_scheduler = reminder_scheduler or ReminderScheduler()
         self.job_agent = job_agent or JobApplyAgent(api_key=self.api_key)
+        self.memory_vault = memory_vault or MemoryVault()
+        self.drive_manager = drive_manager or DriveVaultManager()
         self._client: Optional[Groq] = None
         if self.api_key:
             try:
@@ -322,7 +365,7 @@ class AutonomousAgentBrain:
             lines = [f"🎯 *Active Job Opportunities Found ({r} - {loc})*:\n"]
             for idx, item in enumerate(listings, 1):
                 lines.append(f"{idx}. *{item['platform']}*: [{item['role']}]({item['search_url']})\n   _{item['description']}_")
-            lines.append(f"\n📄 *Master Resume Linked*: [View Resume PDF](https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link)")
+            lines.append(f"\n📄 *Master Resume Linked*: [View Resume PDF]({self.drive_manager.get_master_resume_link()})")
             lines.append("\n💡 Say _'Apply to <Company>'_ to generate a tailored pitch!")
             return "\n".join(lines), None
 
@@ -335,25 +378,34 @@ class AutonomousAgentBrain:
             pkg = result["package"]
             portal_url = result["portal_url"]
             
+            # Capture visual screen proof
+            _, photo_path, _ = self.pc_pilot.capture_screen()
+
             res_md = (
                 f"🚀 *AUTONOMOUS JOB APPLICATION EXECUTED FOR {comp.upper()}*!\n\n"
                 f"🌐 *Careers Portal Opened on PC*: [Click to View Careers Page]({portal_url})\n"
                 f"📋 *Application ID*: `{logged['application_id']}` | Status: *{logged['status']}*\n"
                 f"📄 *Master Resume Attached*: [View Resume PDF]({logged['resume_link']})\n"
+                f"📸 *Visual Proof*: _Screenshot of opened application portal captured and sent below!_\n"
                 f"📋 *PC Clipboard*: _Cold pitch copied to clipboard ready to paste (Ctrl+V)!_\n\n"
                 f"✉️ *Cold Outreach Pitch (Email/LinkedIn)*:\n```\n{pkg.get('cold_pitch_email')}\n```\n\n"
                 f"📝 *Tailored Cover Letter*:\n```\n{pkg.get('cover_letter')}\n```\n\n"
                 f"💡 *Why You Are The Best Fit*:\n_{pkg.get('screening_answer_why_hire')}_\n\n"
-                f"✅ *Application logged in pipeline tracker, Boss!*"
+                f"✅ *Application logged in pipeline tracker & 5TB Drive Vault, Boss!*"
             )
-            return res_md, None
+            return res_md, photo_path
 
         elif tool_name == "batch_apply_jobs":
             role = args.get("role", "AI Engineer")
             batch_results = self.job_agent.batch_apply_top_companies(role=role)
+            
+            # Capture visual screen proof
+            _, photo_path, _ = self.pc_pilot.capture_screen()
+
             lines = [
                 f"🚀 *BATCH APPLICATION EXECUTED ACROSS TOP COMPANIES ({role})*!\n",
-                f"📄 *Master Resume Linked*: [View Resume PDF](https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link)\n"
+                f"📄 *Master Resume Linked*: [View Resume PDF]({self.drive_manager.get_master_resume_link()})\n",
+                f"📸 *Visual Proof*: _Screenshot of opened application portals captured and sent below!_\n"
             ]
             for item in batch_results:
                 rec = item["record"]
@@ -364,11 +416,34 @@ class AutonomousAgentBrain:
                     f"   - App ID: `{rec['application_id']}` | Status: *APPLIED*"
                 )
             lines.append("\n📋 *All career portals opened on your PC screen and logged in tracker, Boss!*")
-            return "\n".join(lines), None
+            return "\n".join(lines), photo_path
 
         elif tool_name == "view_job_pipeline":
             summary = self.job_agent.get_pipeline_summary()
             return summary, None
+
+        elif tool_name == "view_drive_vaults":
+            return self.drive_manager.get_vault_summary(), None
+
+        elif tool_name == "save_memory_or_document":
+            title = args.get("title", "Important Document")
+            doc_type = args.get("doc_type", "general")
+            notes = args.get("notes", "")
+            d_link = args.get("drive_link")
+            saved = self.memory_vault.save_important_document(
+                title=title,
+                doc_type=doc_type,
+                drive_link=d_link,
+                notes=notes,
+            )
+            return (
+                f"💾 *Document / Memory Saved to 5TB Drive Vault Index*!\n\n"
+                f"📋 *Title*: `{saved['title']}`\n"
+                f"📂 *Type*: `{saved['type']}`\n"
+                f"☁️ *Drive Vault*: [Open Vault]({saved['drive_link']})\n"
+                f"📝 *Notes*: _{saved['notes']}_\n\n"
+                f"JARVIS will remember this permanently across all devices, Boss."
+            ), None
 
         elif tool_name == "open_application":
             app = args.get("app_name", "")
@@ -513,7 +588,10 @@ class AutonomousAgentBrain:
         if not clean_input:
             return "வணக்கம் Boss! All systems online. What is your command?", None
 
-        # Build Real-Time Live System Context (Date, Time IST, Battery, CPU, RAM)
+        # 1. Save incoming turn to persistent multi-device memory
+        self.memory_vault.record_conversation_turn(sender=user_name, text=clean_input)
+
+        # 2. Build Real-Time Live System & Persistent Memory Context
         from datetime import datetime, timedelta, timezone
         import psutil
 
@@ -527,17 +605,20 @@ class AutonomousAgentBrain:
         cpu_pct = f"{psutil.cpu_percent(interval=None):.1f}%"
         ram_pct = f"{psutil.virtual_memory().percent:.1f}%"
 
+        memory_block = self.memory_vault.get_prompt_memory_context()
+
         live_system_prompt = (
             f"{SYSTEM_AGENT_PROMPT}\n\n"
+            f"{memory_block}\n\n"
             f"[LIVE REAL-TIME SYSTEM CONTEXT]\n"
             f"• Current Live Date & Time: {current_time_str}\n"
             f"• PC Battery Level: {batt_str} ({batt_plug})\n"
             f"• PC Hardware: CPU {cpu_pct} | RAM {ram_pct}\n"
-            f"• User: Mukil (Always address him as 'Boss')\n"
-            f"• OS: Windows 11\n"
+            f"• User: Mukil (Always address him as 'Boss' or 'Mapla')\n"
+            f"• OS: Windows 11 / Cloud Linux\n"
         )
 
-        # Execute LLM reasoning with Tool Schemas
+        # 3. Execute LLM reasoning with Tool Schemas
         for model in GROQ_MODELS:
             try:
                 response = self._client.chat.completions.create(
@@ -553,7 +634,7 @@ class AutonomousAgentBrain:
 
                 msg = response.choices[0].message
 
-                # 1. LLM decided to invoke one or more tools
+                # A. LLM decided to invoke one or more tools
                 if msg.tool_calls:
                     results = []
                     photo_to_send = None
@@ -569,11 +650,14 @@ class AutonomousAgentBrain:
                             photo_to_send = photo_path
 
                     final_text = "\n\n".join(results)
+                    self.memory_vault.record_conversation_turn(sender="JARVIS", text=final_text)
                     return final_text, photo_to_send
 
-                # 2. LLM decided to answer conversationally
+                # B. LLM decided to answer conversationally
                 elif msg.content and msg.content.strip():
-                    return msg.content.strip(), None
+                    ans = msg.content.strip()
+                    self.memory_vault.record_conversation_turn(sender="JARVIS", text=ans)
+                    return ans, None
 
             except Exception as ex:
                 logger.warning(f"Model {model} failed: {ex}. Retrying next model...")
@@ -581,5 +665,10 @@ class AutonomousAgentBrain:
         # Ultimate fallback
         handled, msg, photo = self.pc_pilot.try_execute_pc_intent(clean_input)
         if handled:
-            return msg or "Action executed, Boss.", photo
-        return f"வணக்கம் Boss! All systems ready for your command.", None
+            fb_text = msg or "Action executed, Boss."
+            self.memory_vault.record_conversation_turn(sender="JARVIS", text=fb_text)
+            return fb_text, photo
+        
+        fallback_ans = "வணக்கம் Boss! All systems ready for your command."
+        self.memory_vault.record_conversation_turn(sender="JARVIS", text=fallback_ans)
+        return fallback_ans, None
