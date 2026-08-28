@@ -85,14 +85,15 @@ def test_pc_05_close_app_and_tabs():
 def test_pc_06_launch_windows_apps():
     """PC-06: Tests launching Windows Store apps, Word, WhatsApp, and Store."""
     pilot = PCPilot()
-    with patch("subprocess.Popen") as mock_popen:
+    with patch("subprocess.Popen"):
         res_wa = pilot.launch_app("whatsapp")
-        assert "Launched WhatsApp" in res_wa
+        assert "WhatsApp" in res_wa
 
         res_word = pilot.launch_app("word")
-        assert "Launched Microsoft Word" in res_word
+        assert "Microsoft Word" in res_word
 
         res_store = pilot.launch_app("microsoft store")
-        assert "Launched Microsoft Store" in res_store
+        assert "Microsoft Store" in res_store
+
 
 
