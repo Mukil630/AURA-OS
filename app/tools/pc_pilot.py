@@ -76,30 +76,78 @@ class PCPilot:
     # ─────────────────────────────────────────────────────────────────────────
 
     def launch_app(self, app_name: str) -> str:
-        """Launches common desktop apps."""
-        clean = app_name.lower().strip()
+        """Launches Windows desktop apps, UWP Store apps, and Protocol URIs robustly."""
+        clean = app_name.lower().strip().replace(" app", "").replace(" application", "").strip()
+
+        # 1. Windows Protocol URI & Executable Routing Table
+        app_registry = {
+            "whatsapp": ("whatsapp:", "https://web.whatsapp.com", "WhatsApp"),
+            "word": ("winword", None, "Microsoft Word"),
+            "ms word": ("winword", None, "Microsoft Word"),
+            "winword": ("winword", None, "Microsoft Word"),
+            "excel": ("excel", None, "Microsoft Excel"),
+            "ms excel": ("excel", None, "Microsoft Excel"),
+            "powerpoint": ("powerpnt", None, "Microsoft PowerPoint"),
+            "ppt": ("powerpnt", None, "Microsoft PowerPoint"),
+            "microsoft store": ("ms-windows-store:", None, "Microsoft Store"),
+            "store": ("ms-windows-store:", None, "Microsoft Store"),
+            "windows store": ("ms-windows-store:", None, "Microsoft Store"),
+            "settings": ("ms-settings:", None, "Windows Settings"),
+            "camera": ("microsoft.windows.camera:", None, "Camera"),
+            "photos": ("ms-photos:", None, "Photos"),
+            "paint": ("mspaint", None, "Paint"),
+            "calculator": ("calc.exe", None, "Calculator"),
+            "calc": ("calc.exe", None, "Calculator"),
+            "notepad": ("notepad.exe", None, "Notepad"),
+            "task manager": ("taskmgr.exe", None, "Task Manager"),
+            "taskmgr": ("taskmgr.exe", None, "Task Manager"),
+            "explorer": ("explorer.exe", None, "File Explorer"),
+            "files": ("explorer.exe", None, "File Explorer"),
+            "spotify": ("spotify:", "https://open.spotify.com", "Spotify"),
+            "telegram": ("tg:", "https://web.telegram.org", "Telegram"),
+            "chrome": ("chrome", "https://www.google.com", "Google Chrome"),
+            "edge": ("msedge", None, "Microsoft Edge"),
+            "terminal": ("powershell", None, "PowerShell Terminal"),
+            "cmd": ("cmd.exe", None, "Command Prompt"),
+            "vscode": ("code .", None, "Visual Studio Code"),
+            "code": ("code .", None, "Visual Studio Code"),
+        }
+
+        # Check matched entry
+        matched = None
+        for key, entry in app_registry.items():
+            if key == clean or clean in key or key in clean:
+                matched = entry
+                break
+
+        if matched:
+            primary_cmd, web_fallback, display_name = matched
+            try:
+                # Launch via PowerShell Start-Process / Shell Execute
+                if ":" in primary_cmd:  # Windows Protocol URI (e.g. whatsapp:, ms-windows-store:)
+                    subprocess.Popen(
+                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", f"Start-Process '{primary_cmd}'"],
+                        shell=True,
+                    )
+                else:
+                    subprocess.Popen(
+                        ["powershell", "-NoProfile", "-NonInteractive", "-Command", f"Start-Process {primary_cmd}"],
+                        shell=True,
+                    )
+                return f"🚀 Launched {display_name} on your PC, Boss!"
+            except Exception as ex:
+                if web_fallback:
+                    webbrowser.open(web_fallback)
+                    return f"🌐 Opened {display_name} in your browser ({web_fallback}), Boss."
+                return f"❌ Could not launch {display_name}: {str(ex)}"
+
+        # General dynamic fallback
         try:
-            if "code" in clean or "vs" in clean or "vscode" in clean:
-                subprocess.Popen(["code", "."], shell=True)
-                return "💻 Launched Visual Studio Code in current workspace."
-            elif "chrome" in clean or "browser" in clean:
-                subprocess.Popen(["start", "chrome"], shell=True)
-                return "🌐 Launched Google Chrome."
-            elif "terminal" in clean or "cmd" in clean or "powershell" in clean:
-                subprocess.Popen(["start", "powershell"], shell=True)
-                return "⚡ Opened PowerShell Terminal."
-            elif "notepad" in clean:
-                subprocess.Popen(["notepad.exe"], shell=True)
-                return "📝 Opened Notepad."
-            elif "calc" in clean or "calculator" in clean:
-                subprocess.Popen(["calc.exe"], shell=True)
-                return "🔢 Opened Calculator."
-            elif "explorer" in clean or "files" in clean:
-                subprocess.Popen(["explorer.exe", "."], shell=True)
-                return "📁 Opened File Explorer."
-            else:
-                subprocess.Popen(["start", clean], shell=True)
-                return f"🚀 Attempted to launch '{clean}'."
+            subprocess.Popen(
+                ["powershell", "-NoProfile", "-NonInteractive", "-Command", f"Start-Process '{clean}'"],
+                shell=True,
+            )
+            return f"🚀 Launched '{app_name}' on your PC, Boss!"
         except Exception as e:
             return f"❌ Failed to launch '{app_name}': {str(e)}"
 
