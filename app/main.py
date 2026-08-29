@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 
 from app.api.v1.router import api_v1_router
 from app.api.v1.routes.health import health_check
@@ -60,6 +60,16 @@ def create_app() -> FastAPI:
             with open(hub_path, "r", encoding="utf-8") as f:
                 return HTMLResponse(content=f.read())
         return HTMLResponse("<h1>AURA-OS Mobile Hub is online.</h1>")
+
+    @app.get("/manifest.json", tags=["PWA"])
+    async def get_manifest():
+        m_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "manifest.json")
+        return FileResponse(m_path, media_type="application/json")
+
+    @app.get("/sw.js", tags=["PWA"])
+    async def get_service_worker():
+        sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sw.js")
+        return FileResponse(sw_path, media_type="application/javascript")
 
     # Mount API v1 Routes
     app.include_router(api_v1_router)

@@ -15,6 +15,8 @@ from app.api.v1.routes.dashboard import router as dashboard_router
 from app.api.v1.routes.approvals import router as approvals_router
 from app.api.v1.routes.bridge import router as bridge_router
 from app.api.v1.routes.chat_hub import router as chat_hub_router
+from app.api.v1.routes.pc_control import router as pc_control_router
+from app.api.v1.routes.ws_stream import router as ws_stream_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(health_router)
@@ -32,5 +34,8 @@ api_v1_router.include_router(dashboard_router)
 api_v1_router.include_router(approvals_router)
 api_v1_router.include_router(bridge_router)
 api_v1_router.include_router(chat_hub_router)
+api_v1_router.include_router(pc_control_router)
+api_v1_router.include_router(ws_stream_router)
+
 
 

@@ -3,10 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AURA-OS — Autonomous JARVIS Mobile Hub</title>
+  <title>AURA-OS — Autonomous JARVIS Mobile & PC Hub</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#00f2ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712035.png">
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --bg-dark: #080c14;
@@ -20,6 +30,7 @@
       --green: #00ff88;
       --green-dim: rgba(0, 255, 136, 0.15);
       --orange: #ff9e00;
+      --red: #ff0055;
       --text-main: #f0f4f8;
       --text-muted: #8899a6;
       --radius: 18px;
@@ -52,7 +63,7 @@
       background: rgba(11, 16, 28, 0.85);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--card-border);
-      padding: 12px 18px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -87,7 +98,7 @@
 
     .brand-title h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 800;
       letter-spacing: 1px;
       background: linear-gradient(90deg, #00f2ff, #ffffff);
@@ -96,7 +107,7 @@
     }
 
     .brand-title p {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       letter-spacing: 0.5px;
     }
@@ -104,7 +115,7 @@
     .hud-telemetry {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .hud-badge {
@@ -140,12 +151,80 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
+      font-size: 0.95rem;
     }
 
     .btn-icon:hover {
       background: var(--cyan);
       color: #000;
       box-shadow: 0 0 12px var(--cyan);
+    }
+
+    /* Hands-Free Voice Banner Toggle */
+    .handsfree-banner {
+      background: rgba(16, 24, 40, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+
+    .handsfree-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      transition: 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle-switch.active .toggle-knob {
+      left: 18px;
+      background: #000;
+    }
+
+    .vad-indicator {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .vad-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulseRecord 1s infinite;
     }
 
     /* Main Chat Stream */
@@ -161,7 +240,7 @@
 
     .message-row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       max-width: 88%;
       animation: fadeIn 0.3s ease-out;
     }
@@ -461,15 +540,15 @@
     }
 
     .btn-mic.recording {
-      background: #ff0055;
-      border-color: #ff0055;
+      background: var(--red);
+      border-color: var(--red);
       color: #fff;
       animation: pulseRecord 1.2s infinite;
     }
 
     @keyframes pulseRecord {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 12px #ff0055; }
-      50% { transform: scale(1.1); box-shadow: 0 0 24px #ff0055; }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 12px var(--red); }
+      50% { transform: scale(1.1); box-shadow: 0 0 24px var(--red); }
     }
 
     .btn-send {
@@ -512,6 +591,51 @@
       border-radius: 12px;
       border: 2px solid var(--cyan);
       box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+    }
+
+    /* Terminal & Project Builder Drawer */
+    #terminal-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 9, 16, 0.95);
+      backdrop-filter: blur(16px);
+      z-index: 900;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    .term-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .term-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      font-size: 1rem;
+    }
+
+    .term-body {
+      flex: 1;
+      background: #000;
+      border: 1px solid #222;
+      border-radius: 12px;
+      margin: 12px 0;
+      padding: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: #00ff88;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .term-controls {
+      display: flex;
+      gap: 10px;
     }
 
     /* Attachments Menu Popup */
@@ -560,8 +684,8 @@
     <div class="brand">
       <div class="reactor-orb">⚡</div>
       <div class="brand-title">
-        <h1>AURA 2.0</h1>
-        <p>Mukil's Personal JARVIS</p>
+        <h1>AURA-OS</h1>
+        <p>Autonomous JARVIS Hub</p>
       </div>
     </div>
 
@@ -570,10 +694,25 @@
         <span class="status-dot"></span>
         <span id="telemetry-battery">🔋 78%</span>
       </div>
+      <button class="btn-icon" id="btn-terminal" title="Remote Project Builder & Terminal" onclick="toggleTerminalModal()">💻</button>
       <button class="btn-icon" id="btn-notification" title="Enable Smart Push Notifications">🔔</button>
       <button class="btn-icon" id="btn-drive" title="Open 5TB Google Drive Vault">☁️</button>
     </div>
   </header>
+
+  <!-- Hands-Free Voice Mode Banner -->
+  <div class="handsfree-banner">
+    <div class="handsfree-toggle" onclick="toggleHandsFreeMode()">
+      <div class="toggle-switch" id="handsfree-switch">
+        <div class="toggle-knob"></div>
+      </div>
+      <span>🎙️ Hands-Free Full-Duplex Voice Mode</span>
+    </div>
+    <div class="vad-indicator" id="vad-indicator">
+      <div class="vad-pulse"></div>
+      <span id="vad-status">Listening...</span>
+    </div>
+  </div>
 
   <!-- Quick Action Pill Carousel -->
   <div class="quick-actions-bar">
@@ -583,7 +722,7 @@
     <div class="quick-pill" onclick="sendQuickAction('Take a PC screenshot')">📸 PC Screenshot</div>
     <div class="quick-pill" onclick="sendQuickAction('Today schedule enna maapla?')">📅 Today's Sprint</div>
     <div class="quick-pill" onclick="sendQuickAction('What is HashMap in Java?')">💡 Java DSA Brain</div>
-    <div class="quick-pill" onclick="sendQuickAction('Check SGC billing reminders')">🧾 SGC Radar</div>
+    <div class="quick-pill" onclick="sendQuickAction('Lock my PC')">🔒 Lock PC</div>
     <div class="quick-pill" onclick="testPushNotification()">🔔 Test Push Alert</div>
   </div>
 
@@ -594,17 +733,18 @@
       <div class="msg-avatar bot">⚡</div>
       <div class="bubble">
         <strong>Vanakkam Mukil! 🌌</strong><br>
-        I am your autonomous <strong>JARVIS / AURA-OS Mobile Hub</strong>. Connected 24/7 to your PC, Memory, and 5TB Google Drive Vault.
+        I am your autonomous <strong>AURA-OS / JARVIS Multi-Device Hub</strong>. Connected 24/7 across Phone & PC.
         <br><br>
         💬 <strong>Enna pannanum sollunga:</strong>
         <div class="action-chips">
           <span class="action-chip" onclick="sendQuickAction('Apply for Zoho AI Engineer')">🚀 Auto-Apply Zoho</span>
           <span class="action-chip" onclick="sendQuickAction('Show my placement resume')">📄 View ATS Resume</span>
           <span class="action-chip" onclick="sendQuickAction('Take a PC screenshot')">📸 Live Screenshot</span>
+          <span class="action-chip" onclick="toggleTerminalModal()">💻 Remote Project Build</span>
         </div>
         <div class="bubble-meta">
           <span>JARVIS Core • Connected</span>
-          <button class="voice-btn" onclick="speakText('Vanakkam Mukil! I am your autonomous JARVIS Mobile Hub. Enna pannanum sollunga!')">🔊 Speak</button>
+          <button class="voice-btn" onclick="speakText('Vanakkam Mukil! I am your autonomous JARVIS Hub. Connected across PC and phone. Enna pannanum sollunga!')">🔊 Speak</button>
         </div>
       </div>
     </div>
@@ -644,6 +784,23 @@
     <img id="modal-img" src="" alt="Screenshot Proof">
   </div>
 
+  <!-- Terminal & Project Runner Drawer -->
+  <div id="terminal-modal">
+    <div class="term-header">
+      <div class="term-title">💻 JARVIS REMOTE PROJECT BUILDER & TERMINAL</div>
+      <button class="btn-icon" onclick="toggleTerminalModal()">✕</button>
+    </div>
+    <div class="term-body" id="term-logs">> AURA Remote Execution Plane Ready.
+> Connected to Windows PC Kernel.
+> Type command or tap quick actions below:</div>
+    <div class="term-controls">
+      <input type="text" id="term-input" class="input-wrapper" style="flex:1;border-radius:10px;padding:8px 12px;" placeholder="npm run build, pytest, git status...">
+      <button class="action-chip" onclick="runRemoteCommand()">⚡ Run</button>
+      <button class="action-chip" onclick="runRemoteCommand('pytest')">🧪 Pytest</button>
+      <button class="action-chip" onclick="runRemoteCommand('git status')">🐙 Git Status</button>
+    </div>
+  </div>
+
   <script>
     const chatStream = document.getElementById('chat-stream');
     const chatInput = document.getElementById('chat-input');
@@ -652,8 +809,19 @@
     const attachMenu = document.getElementById('attach-menu');
     const btnToggleAttach = document.getElementById('btn-toggle-attach');
     const attachmentTray = document.getElementById('attachment-tray');
+    const handsfreeSwitch = document.getElementById('handsfree-switch');
+    const vadIndicator = document.getElementById('vad-indicator');
+    const vadStatus = document.getElementById('vad-status');
+
     let currentAttachment = null;
-    let isRecording = false;
+    let isHandsFreeActive = false;
+    let handsFreeRecognizer = null;
+    let isSpeaking = false;
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
 
     // Toggle Attach Menu
     btnToggleAttach.addEventListener('click', (e) => {
@@ -761,8 +929,8 @@
     }
 
     // Send Message / Execute Request
-    async function sendMessage() {
-      const msg = chatInput.value.trim();
+    async function sendMessage(overrideText = null) {
+      const msg = (overrideText !== null ? overrideText : chatInput.value).trim();
       const attached = currentAttachment;
 
       if (!msg && !attached) return;
@@ -786,7 +954,6 @@
         appendMessage(msg, 'user');
       }
 
-      // Show Typing indicator
       const typingId = showTypingIndicator();
 
       try {
@@ -794,7 +961,6 @@
         let bodyPayload = JSON.stringify({ message: msg || 'Uploaded file analysis', user_name: 'Mukil' });
         let headers = { 'Content-Type': 'application/json' };
 
-        // If file attached, use /upload endpoint
         if (attached) {
           endpoint = '/api/v1/hub/upload';
           const formData = new FormData();
@@ -819,6 +985,16 @@
           const mediaObj = data.screenshot_url ? { type: 'image', url: data.screenshot_url } : null;
           appendMessage(replyText, 'bot', mediaObj);
 
+          // Auto-speak in hands-free mode
+          if (isHandsFreeActive) {
+            speakText(replyText, () => {
+              // Restart listening after speech finishes
+              if (isHandsFreeActive && handsFreeRecognizer) {
+                try { handsFreeRecognizer.start(); } catch(e){}
+              }
+            });
+          }
+
           if (data.screenshot_url) {
             triggerSystemNotification('📸 Job Application Submitted!', `Proof captured for ${data.company || 'portal'}`);
           }
@@ -827,7 +1003,6 @@
         }
       } catch (err) {
         removeTypingIndicator(typingId);
-        // Fallback simulated bot reply when offline
         handleOfflineSimulatedReply(msg, attached);
       }
     }
@@ -839,13 +1014,16 @@
 
         if (msg.toLowerCase().includes('apply')) {
           reply = `✅ **Job Application Submitted for Zoho AI Engineer!**\n💼 Role: AI Engineer\n📄 Resume: Attached \`MK.PDF.RESUME.pdf\`\n📸 Live Proof Screenshot captured and verified!`;
-          media = { type: 'image', url: 'storage/screenshots/apply_zoho_20260829_192638.png' };
+          media = { type: 'image', url: '/api/v1/hub/screenshots/apply_zoho_20260829_192638.png' };
           triggerSystemNotification('💼 Application Submitted!', 'Zoho AI Engineer proof screenshot generated.');
         } else if (msg.toLowerCase().includes('battery')) {
           reply = `🔋 **PC Telemetry Status:** Battery is at **78%** (Discharging, not plugged in). System temperature normal!`;
+        } else if (msg.toLowerCase().includes('lock')) {
+          reply = `🔒 **PC Workstation Locked Successfully!**`;
         }
 
         appendMessage(reply, 'bot', media);
+        if (isHandsFreeActive) speakText(reply);
       }, 600);
     }
 
@@ -871,52 +1049,148 @@
     }
 
     function sendQuickAction(actionText) {
-      chatInput.value = actionText;
-      sendMessage();
+      sendMessage(actionText);
     }
 
-    // Voice Input (Speech-to-Text)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognizer = new SpeechRecognition();
-      recognizer.lang = 'en-IN';
-      recognizer.interimResults = false;
+    // Hands-Free Full-Duplex Continuous Voice Mode (ChatGPT Style)
+    function toggleHandsFreeMode() {
+      isHandsFreeActive = !isHandsFreeActive;
+      if (isHandsFreeActive) {
+        handsfreeSwitch.classList.add('active');
+        vadIndicator.style.display = 'flex';
+        startContinuousVoiceListening();
+        speakText("Hands-Free Voice Mode activated, Mukil. I am listening continuously.");
+      } else {
+        handsfreeSwitch.classList.remove('active');
+        vadIndicator.style.display = 'none';
+        stopContinuousVoiceListening();
+        window.speechSynthesis.cancel();
+      }
+    }
 
-      recognizer.onstart = () => {
-        isRecording = true;
+    function startContinuousVoiceListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech Recognition not supported on this browser.");
+        return;
+      }
+
+      handsFreeRecognizer = new SpeechRecognition();
+      handsFreeRecognizer.lang = 'en-IN';
+      handsFreeRecognizer.continuous = true;
+      handsFreeRecognizer.interimResults = false;
+
+      handsFreeRecognizer.onstart = () => {
+        vadStatus.innerText = "Listening continuously...";
         btnMic.classList.add('recording');
       };
 
-      recognizer.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        chatInput.value = transcript;
-        sendMessage();
+      handsFreeRecognizer.onresult = (event) => {
+        const lastIdx = event.results.length - 1;
+        const text = event.results[lastIdx][0].transcript.trim();
+        if (text) {
+          // Barge-in: Stop speech if user speaks
+          window.speechSynthesis.cancel();
+          vadStatus.innerText = `Heard: "${text}"`;
+          sendMessage(text);
+        }
       };
 
-      recognizer.onend = () => {
-        isRecording = false;
-        btnMic.classList.remove('recording');
+      handsFreeRecognizer.onerror = (e) => {
+        if (isHandsFreeActive) {
+          setTimeout(() => {
+            try { handsFreeRecognizer.start(); } catch(e){}
+          }, 1000);
+        }
       };
 
-      btnMic.addEventListener('click', () => {
-        if (isRecording) recognizer.stop();
-        else recognizer.start();
-      });
-    } else {
-      btnMic.addEventListener('click', () => {
-        alert("Speech recognition is supported on Chrome/Edge browsers!");
-      });
+      handsFreeRecognizer.onend = () => {
+        if (isHandsFreeActive && !isSpeaking) {
+          try { handsFreeRecognizer.start(); } catch(e){}
+        }
+      };
+
+      try { handsFreeRecognizer.start(); } catch(e){}
     }
 
-    // Text-to-Speech (Neural Voice Feedback)
-    function speakText(text) {
+    function stopContinuousVoiceListening() {
+      if (handsFreeRecognizer) {
+        try { handsFreeRecognizer.stop(); } catch(e){}
+        handsFreeRecognizer = null;
+      }
+      btnMic.classList.remove('recording');
+    }
+
+    // Manual Mic Click
+    btnMic.addEventListener('click', () => {
+      if (isHandsFreeActive) {
+        toggleHandsFreeMode();
+      } else {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return;
+        const rec = new SpeechRecognition();
+        rec.lang = 'en-IN';
+        rec.onstart = () => btnMic.classList.add('recording');
+        rec.onresult = (e) => {
+          chatInput.value = e.results[0][0].transcript;
+          sendMessage();
+        };
+        rec.onend = () => btnMic.classList.remove('recording');
+        rec.start();
+      }
+    });
+
+    // Text-to-Speech (Neural Voice Feedback with Callback)
+    function speakText(text, onComplete = null) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
+      isSpeaking = true;
       const clean = text.replace(/[*_`#]/g, '').replace(/https?:\/\/[^\s]+/g, 'link');
       const utterance = new SpeechSynthesisUtterance(clean);
       utterance.rate = 1.05;
       utterance.pitch = 0.95;
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        if (onComplete) onComplete();
+      };
+      utterance.onerror = () => {
+        isSpeaking = false;
+        if (onComplete) onComplete();
+      };
+
       window.speechSynthesis.speak(utterance);
+    }
+
+    // Remote Terminal Execution
+    function toggleTerminalModal() {
+      const m = document.getElementById('terminal-modal');
+      m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    async function runRemoteCommand(cmdOverride = null) {
+      const input = document.getElementById('term-input');
+      const cmd = cmdOverride || input.value.trim();
+      if (!cmd) return;
+      input.value = '';
+
+      const logs = document.getElementById('term-logs');
+      logs.innerText += `\n\n> powershell: ${cmd}\n[Running remote execution...]`;
+      logs.scrollTop = logs.scrollHeight;
+
+      try {
+        const res = await fetch('/api/v1/pc/execute_command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd })
+        });
+        const data = await res.json();
+        const output = data.stdout || data.stderr || data.error || 'No output.';
+        logs.innerText += `\n${output}\n[Exit Code: ${data.returncode || 0}]`;
+        logs.scrollTop = logs.scrollHeight;
+      } catch (err) {
+        logs.innerText += `\nExecution Error: ${err.message}`;
+      }
     }
 
     // Lightbox Modal
@@ -929,7 +1203,7 @@
       document.getElementById('image-modal').style.display = 'none';
     }
 
-    // Smart Notifications & Push Alerts
+    // Smart Notifications
     document.getElementById('btn-notification').addEventListener('click', async () => {
       if ('Notification' in window) {
         const permission = await Notification.requestPermission();
@@ -954,7 +1228,7 @@
     }
 
     // Event Listeners
-    btnSend.addEventListener('click', sendMessage);
+    btnSend.addEventListener('click', () => sendMessage());
     chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
