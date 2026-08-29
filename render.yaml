@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: aura-os-jarvis
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    region: singapore
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: ENVIRONMENT
+        value: production
+      - key: APP_NAME
+        value: AURA-OS | Autonomous JARVIS Hub
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_AUTHORIZED_USER_ID
+        value: "6133984381"
+      - key: CORS_ORIGINS
+        value: '["*"]'
+      - key: HOST
+        value: 0.0.0.0

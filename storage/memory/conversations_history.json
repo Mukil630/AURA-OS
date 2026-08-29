@@ -118,5 +118,15 @@
     "sender": "JARVIS",
     "text": "Semma idea, boss! We can jump into any of these:\n\n1. **Career Auto\u2011Apply Engine** \u2013 auto\u2011fills your profile on job portals, attaches your master PDF resume, snaps a live screenshot proof and logs the application.  \n2. **Live Screenshot Dispatcher** \u2013 captures page screenshots (or video) for any site you pick and pushes them to your Google Drive Vault.  \n3. **Multi\u2011Modal JARVIS Mobile Hub** \u2013 chat UI with video/doc upload, speech\u2011to\u2011text, smart alerts and push notifications.  \n\n**Quick clarifiers**  \n- Which job role or companies do you want the auto\u2011apply to target first?  \n- Do you need the screenshot proof saved automatically to your Drive Vault or just a local preview?  \n- For the Mobile Hub, any specific features you\u2019d love most \u2013 voice commands, real\u2011time video preview, or push alerts?  \n\nLet me know the exact combo, and I\u2019ll spin it up, host it on localhost, and drop you a clickable live preview link! \ud83d\ude80",
     "timestamp": "2026-08-29T20:40:12.055659"
+  },
+  {
+    "sender": "Mukil",
+    "text": "so jarvis",
+    "timestamp": "2026-08-29T20:46:22.960851"
+  },
+  {
+    "sender": "JARVIS",
+    "text": "Got it, boss! \ud83c\udfaf Let\u2019s lock in the exact thing you want to roll out.\n\n1. **Which engine should we fire up first?**  \n   - Career Auto\u2011Apply (jobs + screenshot proof)  \n   - Live Screenshot Dispatcher (any site \u2192 Drive/Local)  \n   - Multi\u2011Modal Mobile Hub (chat\u202f+\u202fvoice\u202f+\u202fuploads)\n\n2. **If it\u2019s the Auto\u2011Apply,** which job portal(s) or role keywords should we target (e.g., LinkedIn, Indeed, \u201cFull\u2011Stack Engineer\u201d)?\n\n3. **Where do you want the screenshot/video proof stored?**  \n   - Google Drive Vault (auto\u2011sync)  \n   - Local `screenshots/` folder with a preview link  \n   - Both?\n\nGive me the quick answers and I\u2019ll spin up the live localhost preview for you! \ud83d\ude80",
+    "timestamp": "2026-08-29T20:46:22.996573"
   }
 ]
