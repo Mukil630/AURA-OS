@@ -23,7 +23,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"Starting {settings.APP_NAME} in [{settings.ENVIRONMENT}] mode...")
     # Initialize database tables and schema
     await init_db()
+    
+    # Start 24/7 Render Keep-Alive Pinger (Prevents Cloud Sleep every 2 mins)
+    from app.core.keep_alive import keep_alive_engine
+    keep_alive_engine.start()
+    
     yield
+    keep_alive_engine.stop()
     logger.info(f"Shutting down {settings.APP_NAME}...")
 
 
