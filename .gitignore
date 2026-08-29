@@ -74,6 +74,7 @@ data/outbox_queue.json
 # Logs & Temporary Artifacts
 *.log
 *.mp3
+*.exe
 logs/
 tmp/
 temp/

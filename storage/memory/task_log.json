@@ -387,5 +387,17 @@
       "failed": 0,
       "status": "ALL_GREEN"
     }
+  },
+  {
+    "timestamp": "2026-08-29T15:06:08.219345",
+    "event": "SPRINT_OVERRIDE_CREATED",
+    "description": "Active Sprint: Capgemini Placement Drive Sprint for 7 days until 2026-09-05",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T15:06:08.316786",
+    "event": "AUTO_REVERT_TRIGGERED",
+    "description": "\ud83c\udf89 7-Day Sprint 'Capgemini Placement Drive Sprint' completed! Auto-Reverted back to baseline Java/Python routine.",
+    "metadata": {}
   }
 ]

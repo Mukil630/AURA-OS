@@ -574,5 +574,29 @@
     "sender": "JARVIS",
     "channel": "Telegram",
     "text": "Boss, recent chat la nalla **Notepad** open panna sonna. After that, \"atha close pannu\" nu sonna, naan close panni dhen.\n\nEnna venum?"
+  },
+  {
+    "timestamp": "2026-08-29T09:34:52.145962+00:00",
+    "sender": "Mukil",
+    "channel": "Telegram",
+    "text": "notepad-a close pannu"
+  },
+  {
+    "timestamp": "2026-08-29T09:34:52.219142+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "Closed notepad, Boss."
+  },
+  {
+    "timestamp": "2026-08-29T09:34:52.338641+00:00",
+    "sender": "Mukil",
+    "channel": "Telegram",
+    "text": "Explain TCP vs UDP"
+  },
+  {
+    "timestamp": "2026-08-29T09:34:52.385546+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "TCP is connection-oriented while UDP is connectionless, Boss!"
   }
 ]
