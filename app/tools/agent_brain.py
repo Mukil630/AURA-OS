@@ -13,6 +13,7 @@ try:
 except ImportError:
     genai = None
 
+from app.agents.business.sgc_reminder_agent import SGCReminderAgent
 from app.agents.placement.job_apply_agent import JobApplyAgent
 from app.connectors.drive.drive_vault import DriveVaultManager
 from app.tools.memory_vault import MemoryVault
@@ -125,6 +126,47 @@ AGENT_TOOLS_SCHEMA = [
                     }
                 },
                 "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "generate_sgc_customer_reminders",
+            "description": "Generates 1-Click WhatsApp payment reminders (in Tamil or English) for all overdue customers (M.S.K Fabrics, Sowbhagiya, GAIA, etc.) with Drive PDF links.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Optional specific customer name (e.g. 'M.S.K Fabrics') or leave empty for all customers overview."
+                    },
+                    "language": {
+                        "type": "string",
+                        "description": "Language for reminder ('tamil' or 'english')"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "dispatch_sgc_reminder",
+            "description": "Dispatches the payment reminder to the customer via WhatsApp on PC. High-privilege action requiring Stark passcode protocol or confirmation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Customer name to send payment reminder to"
+                    },
+                    "confirmed": {
+                        "type": "boolean",
+                        "description": "Set to true if user confirmed or provided 'AURA Protocol Stark 55'"
+                    }
+                },
+                "required": ["customer_name"]
             }
         }
     },
@@ -375,6 +417,7 @@ class AutonomousAgentBrain:
         job_agent: Optional[JobApplyAgent] = None,
         memory_vault: Optional[MemoryVault] = None,
         drive_manager: Optional[DriveVaultManager] = None,
+        sgc_reminder_agent: Optional[SGCReminderAgent] = None,
     ):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         self.gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
@@ -383,6 +426,7 @@ class AutonomousAgentBrain:
         self.job_agent = job_agent or JobApplyAgent(api_key=self.api_key)
         self.memory_vault = memory_vault or MemoryVault()
         self.drive_manager = drive_manager or DriveVaultManager()
+        self.sgc_reminder_agent = sgc_reminder_agent or SGCReminderAgent()
         self._client: Optional[Groq] = None
         if self.api_key:
             try:
@@ -517,6 +561,67 @@ class AutonomousAgentBrain:
             
             lines.append(f"☁️ *Vault Link*: [Open Active SGC Drive Vault](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)")
             return "\n".join(lines), None
+
+        elif tool_name == "generate_sgc_customer_reminders":
+            c_name = args.get("customer_name")
+            lang = args.get("language", "tamil")
+            if c_name:
+                rem = self.sgc_reminder_agent.generate_reminder_message(customer_name=c_name, language=lang)
+                res_md = (
+                    f"🧾 *SGC PAYMENT REMINDER PITCH FOR {c_name.upper()}*\n\n"
+                    f"💰 *Total Overdue Balance*: `₹{rem['total_balance']:,.2f}` ({rem['bills_count']} Invoices)\n"
+                    f"☁️ *Active Drive Vault*: [Open SGC Bills Folder]({rem['drive_vault_url']})\n\n"
+                    f"💬 *Generated WhatsApp Pitch ({lang.capitalize()})*:\n```\n{rem['chosen_message']}\n```\n\n"
+                    f"🔗 [1-Click Direct WhatsApp Share Link]({rem['whatsapp_share_url']})\n\n"
+                    f"🔒 *Stark Security Protocol*: Say _'Send reminder to {c_name}'_ or _'AURA Protocol Stark 55'_ to automatically open WhatsApp on PC and dispatch!"
+                )
+                return res_md, None
+            else:
+                summary_text = self.sgc_reminder_agent.generate_all_reminders_summary()
+                return summary_text, None
+
+        elif tool_name == "dispatch_sgc_reminder":
+            c_name = args.get("customer_name", "Unknown")
+            is_confirmed = args.get("confirmed", False)
+
+            rem = self.sgc_reminder_agent.generate_reminder_message(customer_name=c_name)
+            wa_url = rem.get("whatsapp_share_url")
+            tot_bal = rem.get("total_balance", 0.0)
+
+            if not is_confirmed:
+                warn_msg = (
+                    f"🔒 *STARK SECURITY PROTOCOL CONFIRMATION REQUIRED*\n\n"
+                    f"⚠️ Boss, idhu customer-ku payment reminder send panra critical action!\n"
+                    f"• *Customer*: `{c_name}`\n"
+                    f"• *Total Overdue Balance*: `₹{tot_bal:,.2f}`\n"
+                    f"• *Action*: Open WhatsApp Web on PC with pre-filled Tamil reminder pitch.\n\n"
+                    f"👉 *Proceed panna 'Yes', 'Confirm', or 'AURA Protocol Stark 55' nu reply pannunga Boss!*"
+                )
+                return warn_msg, None
+
+            # User Confirmed -> Execute live on PC
+            if wa_url:
+                self.pc_pilot.open_url(wa_url)
+            
+            self.sgc_reminder_agent.log_reminder_sent(
+                customer_name=c_name,
+                amount=tot_bal,
+                channel="WhatsApp",
+                status="DISPATCHED"
+            )
+            
+            # Capture visual screen proof
+            _, photo_path, _ = self.pc_pilot.capture_screen()
+
+            success_msg = (
+                f"🚀 *STARK PROTOCOL VERIFIED — PAYMENT REMINDER DISPATCHED*!\n\n"
+                f"✅ *Customer*: `{c_name}`\n"
+                f"💰 *Amount*: `₹{tot_bal:,.2f}`\n"
+                f"📱 *WhatsApp*: _Opened on PC screen with pre-filled message & Drive invoice attachment!_\n"
+                f"📸 *Visual Proof*: _Screenshot of opened WhatsApp screen captured and sent below!_\n"
+                f"📋 *Audit Tracker*: _Logged in SGC Reminder Records & 5TB Drive Vault, Boss!_"
+            )
+            return success_msg, photo_path
 
         elif tool_name == "view_drive_vaults":
             return self.drive_manager.get_vault_summary(), None
