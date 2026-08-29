@@ -494,6 +494,22 @@ TOOLS_DEFINITION = [
                 "required": ["subagent_name", "task_prompt"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "tailor_ats_resume",
+            "description": "Tailor Mukil's Master Resume for a specific company and job description, calculate ATS score (>90%), and generate customized cover letter.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "company": {"type": "string", "description": "Target company name (e.g. 'Zoho', 'Freshworks', 'Swiggy')."},
+                    "role": {"type": "string", "description": "Target role (e.g. 'AI Engineer', 'Software Developer')."},
+                    "jd_text": {"type": "string", "description": "Optional Job Description text or requirements."}
+                },
+                "required": ["company", "role"]
+            }
+        }
     }
 ]
 
@@ -586,6 +602,11 @@ class AgentBrain:
         elif name == "invoke_subagent":
             from brain.agentic_engine import swarm
             res = swarm.invoke(args.get("subagent_name", "research"), args.get("task_prompt", ""))
+            return json.dumps(res, indent=2)
+        elif name == "tailor_ats_resume":
+            from agents.placement_tailor_agent import ATSResumeTailorAgent
+            tailor = ATSResumeTailorAgent()
+            res = tailor.tailor_resume_for_job(args.get("company", "Tech Company"), args.get("role", "Software Engineer"), args.get("jd_text", ""))
             return json.dumps(res, indent=2)
         else:
             return f"Unknown tool: {name}"
