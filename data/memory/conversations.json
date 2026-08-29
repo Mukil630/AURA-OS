@@ -442,5 +442,29 @@
     "sender": "JARVIS",
     "channel": "Telegram",
     "text": "Boss, image generation (Midjourney/DALL-E style) direct-ah render panna namma system-la available illa — that's a hard limit, honest-ah solren.\n\n**But** — I can do these for you right now:\n\n1. **Web search for images** on a topic (Google Images / Unsplash / Pexels) and give you direct links\n2. **Download images** from the web to your PC (Python + requests)\n3. **Generate simple graphics/charts** using Python (Matplotlib, PIL) — logos, diagrams, data viz\n4. **Open any image site** in Chrome for you (Unsplash, Pexels, Freepik, Pixabay)\n\nSo tell me, Boss:\n- **Enna topic/image** venum? (e.g., \"AI engineer wallpaper\", \"SGC logo mockup\", \"Python chart\")\n- **Enna use-ku?** (resume, project, social media, personal)\n\nOr if you want, I can just open **Unsplash/Pexels** in Chrome with your search term — fastest route for high-quality free images.\n\nSay the word, Mapla! 🚀"
+  },
+  {
+    "timestamp": "2026-08-29T09:08:15.467594+00:00",
+    "sender": "Нина",
+    "channel": "Telegram",
+    "text": "so downalord ella endha flipcart la product images la erukum la atha access panni enga show panna mudiyathaa mapala ?? and unoda responce rombo slowaa eruku content replay simple small pannitu fastaa replay pannu"
+  },
+  {
+    "timestamp": "2026-08-29T09:08:17.647037+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "Boss, simple answer:\n\n**Direct Flipcart product images download panna — NO, I can't do that.**\n\nReason:\n- Flipcart has **anti-scraping + login wall** — images protected, direct access block aagum\n- My tools la **no browser automation** (Selenium/Playwright) available right now\n- Web search tool only gives **links**, not image files\n\n**What I CAN do (fast options):**\n\n1. **You give me product name** → I search → give you **direct Flipcart product link** → you right-click → Save Image (30 sec manual)\n\n2. **Bulk need?** → Tell me **how many products + category** → I write a **Python script** (Selenium/Playwright) → you run on your PC → auto-download all images to folder\n\n3. **Alternative sources** (no login, easy download):\n   - **Amazon.in** — easier to scrape\n   - **Myntra / Ajio** — public image URLs\n   - **Unsplash / Pexels** — free stock product images (if for design/mockup)\n\n**Quick decision, Boss:**\n- 🅰️ Single product? → Give me product name, I'll find link\n- 🅱️ Bulk (10+ products"
+  },
+  {
+    "timestamp": "2026-08-29T09:08:31.096408+00:00",
+    "sender": "Нина",
+    "channel": "Telegram",
+    "text": "ok open notepad"
+  },
+  {
+    "timestamp": "2026-08-29T09:08:32.135096+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "🚀 Successfully launched Notepad on your PC screen, Boss!"
   }
 ]
