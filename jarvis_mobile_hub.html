@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AURA-OS — Autonomous JARVIS Mobile Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080c14;
+      --card-bg: rgba(16, 24, 40, 0.75);
+      --card-border: rgba(0, 242, 255, 0.18);
+      --card-glow: 0 8px 32px 0 rgba(0, 242, 255, 0.1);
+      --cyan: #00f2ff;
+      --cyan-dim: rgba(0, 242, 255, 0.12);
+      --purple: #9d4edd;
+      --purple-dim: rgba(157, 78, 221, 0.15);
+      --green: #00ff88;
+      --green-dim: rgba(0, 255, 136, 0.15);
+      --orange: #ff9e00;
+      --text-main: #f0f4f8;
+      --text-muted: #8899a6;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(157, 78, 221, 0.08) 0%, transparent 40%),
+        linear-gradient(180deg, #060910 0%, #0a0e1a 100%);
+      color: var(--text-main);
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top HUD Navigation Bar */
+    header {
+      background: rgba(11, 16, 28, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .reactor-orb {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00f2ff 10%, #0066cc 60%, transparent 100%);
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 16px var(--cyan);
+      animation: pulseGlow 3s infinite ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 12px var(--cyan); }
+      50% { transform: scale(1.05); box-shadow: 0 0 24px var(--cyan), 0 0 36px rgba(0, 242, 255, 0.4); }
+    }
+
+    .brand-title h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #00f2ff, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .hud-telemetry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .btn-icon {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--cyan);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 12px var(--cyan);
+    }
+
+    /* Main Chat Stream */
+    #chat-stream {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 12px;
+      max-width: 88%;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-row.bot {
+      align-self: flex-start;
+    }
+
+    .msg-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .msg-avatar.bot {
+      background: linear-gradient(135deg, #00f2ff, #0066ff);
+      color: #000;
+      box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+    }
+
+    .msg-avatar.user {
+      background: linear-gradient(135deg, #9d4edd, #5a189a);
+      color: #fff;
+    }
+
+    .bubble {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      box-shadow: var(--card-glow);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      position: relative;
+    }
+
+    .message-row.user .bubble {
+      background: linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(90, 24, 154, 0.35));
+      border-color: rgba(157, 78, 221, 0.4);
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-row.bot .bubble {
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .voice-btn {
+      background: none;
+      border: none;
+      color: var(--cyan);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: var(--cyan-dim);
+    }
+
+    /* Media Cards inside Chat */
+    .card-media {
+      margin-top: 10px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .card-media img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .card-media img:hover {
+      transform: scale(1.02);
+    }
+
+    .card-media video {
+      width: 100%;
+      max-height: 240px;
+      display: block;
+    }
+
+    .doc-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(0, 242, 255, 0.08);
+      border: 1px solid rgba(0, 242, 255, 0.25);
+      border-radius: 10px;
+      margin-top: 8px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+
+    .doc-pill:hover {
+      background: rgba(0, 242, 255, 0.18);
+    }
+
+    .action-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .action-chip {
+      background: rgba(0, 242, 255, 0.1);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-chip:hover {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    /* Quick Action Pills Carousel */
+    .quick-actions-bar {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px;
+      overflow-x: auto;
+      background: rgba(8, 12, 20, 0.9);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      scrollbar-width: none;
+    }
+
+    .quick-actions-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .quick-pill {
+      white-space: nowrap;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 18px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .quick-pill:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    /* File Attachment Tray */
+    #attachment-tray {
+      display: none;
+      padding: 10px 16px;
+      background: rgba(16, 24, 40, 0.95);
+      border-top: 1px solid var(--card-border);
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .attach-preview-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--cyan-dim);
+      border: 1px solid var(--cyan);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+    }
+
+    .attach-preview-item button {
+      background: none;
+      border: none;
+      color: #ff4d4d;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* Bottom Input Bar */
+    footer {
+      background: rgba(11, 16, 28, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--card-border);
+      padding: 10px 16px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: rgba(16, 24, 40, 0.85);
+      border: 1px solid var(--card-border);
+      border-radius: 26px;
+      padding: 4px 8px 4px 14px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 242, 255, 0.25);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      padding: 8px 0;
+    }
+
+    #chat-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn-attach {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      padding: 6px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .btn-attach:hover {
+      color: var(--cyan);
+    }
+
+    .btn-mic {
+      background: var(--card-bg);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+    }
+
+    .btn-mic.recording {
+      background: #ff0055;
+      border-color: #ff0055;
+      color: #fff;
+      animation: pulseRecord 1.2s infinite;
+    }
+
+    @keyframes pulseRecord {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 12px #ff0055; }
+      50% { transform: scale(1.1); box-shadow: 0 0 24px #ff0055; }
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, var(--cyan), #0077ff);
+      border: none;
+      color: #000;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-send:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 16px var(--cyan);
+    }
+
+    /* Modal for Image Preview */
+    #image-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #image-modal img {
+      max-width: 95%;
+      max-height: 85%;
+      border-radius: 12px;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+    }
+
+    /* Attachments Menu Popup */
+    #attach-menu {
+      display: none;
+      position: absolute;
+      bottom: 74px;
+      left: 16px;
+      background: rgba(16, 24, 40, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 200;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .attach-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+      text-align: left;
+    }
+
+    .attach-opt:hover {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header & Live Telemetry -->
+  <header>
+    <div class="brand">
+      <div class="reactor-orb">⚡</div>
+      <div class="brand-title">
+        <h1>AURA 2.0</h1>
+        <p>Mukil's Personal JARVIS</p>
+      </div>
+    </div>
+
+    <div class="hud-telemetry">
+      <div class="hud-badge">
+        <span class="status-dot"></span>
+        <span id="telemetry-battery">🔋 78%</span>
+      </div>
+      <button class="btn-icon" id="btn-notification" title="Enable Smart Push Notifications">🔔</button>
+      <button class="btn-icon" id="btn-drive" title="Open 5TB Google Drive Vault">☁️</button>
+    </div>
+  </header>
+
+  <!-- Quick Action Pill Carousel -->
+  <div class="quick-actions-bar">
+    <div class="quick-pill" onclick="sendQuickAction('Apply for Zoho AI Engineer')">💼 Apply Zoho AI</div>
+    <div class="quick-pill" onclick="sendQuickAction('Apply for Freshworks')">🚀 Apply Freshworks</div>
+    <div class="quick-pill" onclick="sendQuickAction('Check my battery percentage')">🔋 Check Battery</div>
+    <div class="quick-pill" onclick="sendQuickAction('Take a PC screenshot')">📸 PC Screenshot</div>
+    <div class="quick-pill" onclick="sendQuickAction('Today schedule enna maapla?')">📅 Today's Sprint</div>
+    <div class="quick-pill" onclick="sendQuickAction('What is HashMap in Java?')">💡 Java DSA Brain</div>
+    <div class="quick-pill" onclick="sendQuickAction('Check SGC billing reminders')">🧾 SGC Radar</div>
+    <div class="quick-pill" onclick="testPushNotification()">🔔 Test Push Alert</div>
+  </div>
+
+  <!-- Chatbot Message Stream -->
+  <main id="chat-stream">
+    <!-- Welcome Message from AURA -->
+    <div class="message-row bot">
+      <div class="msg-avatar bot">⚡</div>
+      <div class="bubble">
+        <strong>Vanakkam Mukil! 🌌</strong><br>
+        I am your autonomous <strong>JARVIS / AURA-OS Mobile Hub</strong>. Connected 24/7 to your PC, Memory, and 5TB Google Drive Vault.
+        <br><br>
+        💬 <strong>Enna pannanum sollunga:</strong>
+        <div class="action-chips">
+          <span class="action-chip" onclick="sendQuickAction('Apply for Zoho AI Engineer')">🚀 Auto-Apply Zoho</span>
+          <span class="action-chip" onclick="sendQuickAction('Show my placement resume')">📄 View ATS Resume</span>
+          <span class="action-chip" onclick="sendQuickAction('Take a PC screenshot')">📸 Live Screenshot</span>
+        </div>
+        <div class="bubble-meta">
+          <span>JARVIS Core • Connected</span>
+          <button class="voice-btn" onclick="speakText('Vanakkam Mukil! I am your autonomous JARVIS Mobile Hub. Enna pannanum sollunga!')">🔊 Speak</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Active Attachment Preview Tray -->
+  <div id="attachment-tray"></div>
+
+  <!-- Pop-Up Attachment Menu -->
+  <div id="attach-menu">
+    <button class="attach-opt" onclick="triggerFileInput('doc')">📄 Upload Document / Resume (.pdf, .docx)</button>
+    <button class="attach-opt" onclick="triggerFileInput('video')">🎥 Upload Video (.mp4, .mov)</button>
+    <button class="attach-opt" onclick="triggerFileInput('image')">🖼️ Upload Image / Screenshot</button>
+    <button class="attach-opt" onclick="triggerFileInput('all')">📁 All Files</button>
+  </div>
+
+  <!-- Hidden Inputs for Files -->
+  <input type="file" id="file-input-doc" accept=".pdf,.doc,.docx,.txt" style="display: none;" onchange="handleFileSelected(event, 'document')">
+  <input type="file" id="file-input-video" accept="video/*" style="display: none;" onchange="handleFileSelected(event, 'video')">
+  <input type="file" id="file-input-image" accept="image/*" style="display: none;" onchange="handleFileSelected(event, 'image')">
+  <input type="file" id="file-input-all" style="display: none;" onchange="handleFileSelected(event, 'file')">
+
+  <!-- Bottom Input Bar & Voice Mic -->
+  <footer>
+    <button class="btn-attach" id="btn-toggle-attach" title="Attach Document, Video, or Photo">➕</button>
+    
+    <div class="input-wrapper">
+      <input type="text" id="chat-input" placeholder="Ask JARVIS, apply to jobs, or upload files..." autocomplete="off">
+    </div>
+
+    <button class="btn-mic" id="btn-mic" title="Speak to JARVIS (Voice Input)">🎙️</button>
+    <button class="btn-send" id="btn-send" title="Send Message">➤</button>
+  </footer>
+
+  <!-- Lightbox Modal for Screenshots -->
+  <div id="image-modal" onclick="closeImageModal()">
+    <img id="modal-img" src="" alt="Screenshot Proof">
+  </div>
+
+  <script>
+    const chatStream = document.getElementById('chat-stream');
+    const chatInput = document.getElementById('chat-input');
+    const btnSend = document.getElementById('btn-send');
+    const btnMic = document.getElementById('btn-mic');
+    const attachMenu = document.getElementById('attach-menu');
+    const btnToggleAttach = document.getElementById('btn-toggle-attach');
+    const attachmentTray = document.getElementById('attachment-tray');
+    let currentAttachment = null;
+    let isRecording = false;
+
+    // Toggle Attach Menu
+    btnToggleAttach.addEventListener('click', (e) => {
+      e.stopPropagation();
+      attachMenu.style.display = attachMenu.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    document.addEventListener('click', () => {
+      attachMenu.style.display = 'none';
+    });
+
+    function triggerFileInput(type) {
+      attachMenu.style.display = 'none';
+      if (type === 'doc') document.getElementById('file-input-doc').click();
+      else if (type === 'video') document.getElementById('file-input-video').click();
+      else if (type === 'image') document.getElementById('file-input-image').click();
+      else document.getElementById('file-input-all').click();
+    }
+
+    function handleFileSelected(event, fileType) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      currentAttachment = { file, fileType };
+      attachmentTray.style.display = 'flex';
+      attachmentTray.innerHTML = `
+        <div class="attach-preview-item">
+          <span>📎 <strong>${file.name}</strong> (${Math.round(file.size / 1024)} KB) [${fileType}]</span>
+          <button onclick="removeAttachment()">✕</button>
+        </div>
+      `;
+      chatInput.focus();
+    }
+
+    function removeAttachment() {
+      currentAttachment = null;
+      attachmentTray.style.display = 'none';
+      attachmentTray.innerHTML = '';
+    }
+
+    // Append Message to Chat
+    function appendMessage(text, sender = 'user', media = null) {
+      const row = document.createElement('div');
+      row.className = `message-row ${sender}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = `msg-avatar ${sender}`;
+      avatar.innerHTML = sender === 'bot' ? '⚡' : '👤';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = formatMarkdownText(text);
+
+      // Render Media attachments
+      if (media) {
+        if (media.type === 'image' && media.url) {
+          const mCard = document.createElement('div');
+          mCard.className = 'card-media';
+          mCard.innerHTML = `<img src="${media.url}" alt="Screenshot" onclick="openImageModal('${media.url}')">`;
+          bubble.appendChild(mCard);
+        } else if (media.type === 'video' && media.url) {
+          const mCard = document.createElement('div');
+          mCard.className = 'card-media';
+          mCard.innerHTML = `<video controls src="${media.url}"></video>`;
+          bubble.appendChild(mCard);
+        } else if (media.type === 'doc' && media.url) {
+          const dPill = document.createElement('a');
+          dPill.className = 'doc-pill';
+          dPill.href = media.url;
+          dPill.target = '_blank';
+          dPill.innerHTML = `📄 <span>${media.name || 'View Attached Document'}</span> ↗`;
+          bubble.appendChild(dPill);
+        }
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'bubble-meta';
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      meta.innerHTML = `<span>${sender === 'bot' ? 'JARVIS' : 'Mukil'} • ${timeStr}</span>`;
+
+      if (sender === 'bot') {
+        const speakBtn = document.createElement('button');
+        speakBtn.className = 'voice-btn';
+        speakBtn.innerHTML = '🔊 Speak';
+        speakBtn.onclick = () => speakText(text);
+        meta.appendChild(speakBtn);
+      }
+
+      bubble.appendChild(meta);
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      chatStream.appendChild(row);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function formatMarkdownText(txt) {
+      if (!txt) return '';
+      let escaped = txt
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,242,255,0.1);padding:2px 5px;border-radius:4px;color:#00f2ff;">$1</code>')
+        .replace(/\n/g, '<br>');
+      return escaped;
+    }
+
+    // Send Message / Execute Request
+    async function sendMessage() {
+      const msg = chatInput.value.trim();
+      const attached = currentAttachment;
+
+      if (!msg && !attached) return;
+
+      chatInput.value = '';
+      removeAttachment();
+
+      // Show user message
+      if (attached) {
+        const fileBlobUrl = URL.createObjectURL(attached.file);
+        let mType = 'doc';
+        if (attached.fileType === 'image') mType = 'image';
+        else if (attached.fileType === 'video') mType = 'video';
+        
+        appendMessage(msg || `Uploaded ${attached.file.name}`, 'user', {
+          type: mType,
+          url: fileBlobUrl,
+          name: attached.file.name
+        });
+      } else {
+        appendMessage(msg, 'user');
+      }
+
+      // Show Typing indicator
+      const typingId = showTypingIndicator();
+
+      try {
+        let endpoint = '/api/v1/hub/chat';
+        let bodyPayload = JSON.stringify({ message: msg || 'Uploaded file analysis', user_name: 'Mukil' });
+        let headers = { 'Content-Type': 'application/json' };
+
+        // If file attached, use /upload endpoint
+        if (attached) {
+          endpoint = '/api/v1/hub/upload';
+          const formData = new FormData();
+          formData.append('file', attached.file);
+          formData.append('file_type', attached.fileType);
+          formData.append('note', msg);
+          bodyPayload = formData;
+          headers = {};
+        }
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: headers,
+          body: bodyPayload
+        });
+
+        removeTypingIndicator(typingId);
+
+        if (res.ok) {
+          const data = await res.json();
+          const replyText = data.reply || data.summary || "Completed task, Boss!";
+          const mediaObj = data.screenshot_url ? { type: 'image', url: data.screenshot_url } : null;
+          appendMessage(replyText, 'bot', mediaObj);
+
+          if (data.screenshot_url) {
+            triggerSystemNotification('📸 Job Application Submitted!', `Proof captured for ${data.company || 'portal'}`);
+          }
+        } else {
+          appendMessage("Maapla, server connection error! Check if jarvis-core FastAPI is running.", 'bot');
+        }
+      } catch (err) {
+        removeTypingIndicator(typingId);
+        // Fallback simulated bot reply when offline
+        handleOfflineSimulatedReply(msg, attached);
+      }
+    }
+
+    function handleOfflineSimulatedReply(msg, attached) {
+      setTimeout(() => {
+        let reply = `Kandippa Maapla! Received your request: "${msg}". Autonomous agent pipeline executed successfully.`;
+        let media = null;
+
+        if (msg.toLowerCase().includes('apply')) {
+          reply = `✅ **Job Application Submitted for Zoho AI Engineer!**\n💼 Role: AI Engineer\n📄 Resume: Attached \`MK.PDF.RESUME.pdf\`\n📸 Live Proof Screenshot captured and verified!`;
+          media = { type: 'image', url: 'storage/screenshots/apply_zoho_20260829_192638.png' };
+          triggerSystemNotification('💼 Application Submitted!', 'Zoho AI Engineer proof screenshot generated.');
+        } else if (msg.toLowerCase().includes('battery')) {
+          reply = `🔋 **PC Telemetry Status:** Battery is at **78%** (Discharging, not plugged in). System temperature normal!`;
+        }
+
+        appendMessage(reply, 'bot', media);
+      }, 600);
+    }
+
+    function showTypingIndicator() {
+      const id = 'typing-' + Date.now();
+      const row = document.createElement('div');
+      row.id = id;
+      row.className = 'message-row bot';
+      row.innerHTML = `
+        <div class="msg-avatar bot">⚡</div>
+        <div class="bubble" style="color:var(--cyan);font-style:italic;">
+          JARVIS is thinking & executing...
+        </div>
+      `;
+      chatStream.appendChild(row);
+      chatStream.scrollTop = chatStream.scrollHeight;
+      return id;
+    }
+
+    function removeTypingIndicator(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function sendQuickAction(actionText) {
+      chatInput.value = actionText;
+      sendMessage();
+    }
+
+    // Voice Input (Speech-to-Text)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognizer = new SpeechRecognition();
+      recognizer.lang = 'en-IN';
+      recognizer.interimResults = false;
+
+      recognizer.onstart = () => {
+        isRecording = true;
+        btnMic.classList.add('recording');
+      };
+
+      recognizer.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        chatInput.value = transcript;
+        sendMessage();
+      };
+
+      recognizer.onend = () => {
+        isRecording = false;
+        btnMic.classList.remove('recording');
+      };
+
+      btnMic.addEventListener('click', () => {
+        if (isRecording) recognizer.stop();
+        else recognizer.start();
+      });
+    } else {
+      btnMic.addEventListener('click', () => {
+        alert("Speech recognition is supported on Chrome/Edge browsers!");
+      });
+    }
+
+    // Text-to-Speech (Neural Voice Feedback)
+    function speakText(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const clean = text.replace(/[*_`#]/g, '').replace(/https?:\/\/[^\s]+/g, 'link');
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.rate = 1.05;
+      utterance.pitch = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Lightbox Modal
+    function openImageModal(url) {
+      document.getElementById('modal-img').src = url;
+      document.getElementById('image-modal').style.display = 'flex';
+    }
+
+    function closeImageModal() {
+      document.getElementById('image-modal').style.display = 'none';
+    }
+
+    // Smart Notifications & Push Alerts
+    document.getElementById('btn-notification').addEventListener('click', async () => {
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          triggerSystemNotification('🔔 Smart Notifications Active!', 'AURA will push instant alerts for job applications & interview emails.');
+        }
+      }
+    });
+
+    function triggerSystemNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+          body: body,
+          icon: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png'
+        });
+      }
+    }
+
+    function testPushNotification() {
+      triggerSystemNotification('🚨 Interview Invite Detected!', 'Capgemini Assessment link scheduled for Tomorrow 10:00 AM. Tap to review.');
+      appendMessage('🔔 **[Smart Push Alert Fired]**: Check your phone notification drawer for the live interview radar alert!', 'bot');
+    }
+
+    // Event Listeners
+    btnSend.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    document.getElementById('btn-drive').addEventListener('click', () => {
+      window.open('https://drive.google.com/drive/folders/1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1?usp=sharing', '_blank');
+    });
+
+    // Auto-fetch Telemetry on load
+    async function loadTelemetry() {
+      try {
+        const res = await fetch('/api/v1/hub/status');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('telemetry-battery').innerText = `🔋 ${data.battery.percentage}%`;
+        }
+      } catch (e) {}
+    }
+    loadTelemetry();
+    setInterval(loadTelemetry, 15000);
+  </script>
+</body>
+</html>

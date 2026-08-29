@@ -1,5 +1,41 @@
 [
   {
+    "application_id": "job_54ef57e1",
+    "company": "Zoho",
+    "role": "AI Engineer",
+    "apply_url": "https://www.zoho.com/careers/",
+    "resume_link": "https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link",
+    "screenshot_path": "C:\\Users\\mukil\\jarvis-core\\storage\\screenshots\\apply_zoho_20260829_192745.png",
+    "resume_attached": false,
+    "applied_at": "2026-08-29T13:57:53.940680+00:00",
+    "status": "APPLIED",
+    "notes": "Autonomous Playwright application with live screenshot proof"
+  },
+  {
+    "application_id": "job_c57eaacf",
+    "company": "Zoho",
+    "role": "AI Engineer",
+    "apply_url": "https://www.zoho.com/careers/",
+    "resume_link": "https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link",
+    "screenshot_path": "C:\\Users\\mukil\\jarvis-core\\storage\\screenshots\\apply_zoho_20260829_192638.png",
+    "resume_attached": false,
+    "applied_at": "2026-08-29T13:56:46.154873+00:00",
+    "status": "APPLIED",
+    "notes": "Autonomous Playwright application with live screenshot proof"
+  },
+  {
+    "application_id": "job_019cccce",
+    "company": "Zoho",
+    "role": "AI Engineer",
+    "apply_url": "https://www.zoho.com/careers/",
+    "resume_link": "https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link",
+    "screenshot_path": "C:\\Users\\mukil\\jarvis-core\\storage\\screenshots\\apply_zoho_20260829_192604.png",
+    "resume_attached": false,
+    "applied_at": "2026-08-29T13:56:29.439171+00:00",
+    "status": "APPLIED",
+    "notes": "Autonomous Playwright application with live screenshot proof"
+  },
+  {
     "application_id": "job_e48576eb",
     "company": "Postman",
     "role": "AI Engineer",

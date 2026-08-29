@@ -39,6 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• Ask me to perform PC tasks (Create files, check battery/status, run commands)\n"
         "• Ask technical doubts & brainstorm in Tanglish\n\n"
         "📌 **Quick Commands:**\n"
+        "• `/apply <company|link>` - Autonomous Job Apply + Live Screenshot Receipt\n"
         "• `/status` - Check PC & Memory Live Status\n"
         "• `/drive` - Access 5TB Google Drive Vault\n\n"
         "Press the mic button and speak to me, Maapla!"
@@ -64,6 +65,36 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(status_text, parse_mode="Markdown", disable_web_page_preview=True)
 
+async def apply_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    target = " ".join(args) if args else "Zoho"
+    await update.message.reply_text(f"🚀 *Launching Autonomous Placement Auto-Apply for '{target}'...*", parse_mode="Markdown")
+    await update.effective_chat.send_action("upload_photo")
+
+    try:
+        from tools.career_auto_apply import CareerAutoApplyEngine
+        engine = CareerAutoApplyEngine()
+        is_url = target.startswith("http")
+        res = engine.execute_auto_apply(
+            company="Job Portal" if is_url else target,
+            role="AI Engineer",
+            portal_url=target if is_url else None,
+            headless=True
+        )
+        summary = res.get("summary", "Application completed!")
+        await update.message.reply_text(summary, parse_mode="Markdown")
+
+        screenshot_path = res.get("screenshot_path")
+        if screenshot_path and os.path.exists(screenshot_path):
+            with open(screenshot_path, "rb") as photo_file:
+                await update.message.reply_photo(
+                    photo=photo_file,
+                    caption=f"📸 Live Application Verification Proof - {target}"
+                )
+    except Exception as e:
+        logger.error(f"Auto-apply command error: {e}")
+        await update.message.reply_text(f"❌ Auto-apply error: {str(e)}")
+
 async def drive_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
         "☁️ *5TB Google Drive Master Vault:*\n\n"
@@ -71,6 +102,32 @@ async def drive_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "All projects, resumes, datasets, and memory backups are safely stored here."
     )
     await update.message.reply_text(msg, parse_mode="Markdown")
+
+def _find_screenshot_path(text: str) -> Optional[str]:
+    patterns = [
+        r'(?:Proof Screenshot|Screenshot saved successfully at|Screenshot):\s*`?([^\s`\n\r]+\.png)`?',
+        r'([A-Za-z]:\\[^\s\n\r]+\.png)',
+        r'(storage[\\/]screenshots[\\/][^\s`\n\r]+\.png)',
+        r'([^\s`\n\r]+screenshot[^\s`\n\r]*\.png)'
+    ]
+    for pat in patterns:
+        m = re.search(pat, text, re.IGNORECASE)
+        if m:
+            candidate = m.group(1).strip().strip('`').strip()
+            if not os.path.isabs(candidate):
+                candidate = os.path.join(os.path.dirname(os.path.dirname(__file__)), candidate)
+            if os.path.exists(candidate):
+                return candidate
+    return None
+
+async def _send_screenshot_if_present(update: Update, text: str):
+    img_path = _find_screenshot_path(text)
+    if img_path and os.path.exists(img_path):
+        try:
+            with open(img_path, "rb") as photo_file:
+                await update.message.reply_photo(photo=photo_file, caption="📸 Live Application / System Proof")
+        except Exception as photo_err:
+            logger.error(f"Error sending photo: {photo_err}")
 
 async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name or "Mukil"
@@ -112,15 +169,7 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(reply)
 
         # If screenshot was taken, send photo directly to Telegram
-        screenshot_match = re.search(r'screenshot[^\s\n\r]*\.png', reply, re.IGNORECASE) or re.search(r'Screenshot saved successfully at:\s*([^\n\r]+)', reply)
-        if screenshot_match:
-            img_path = screenshot_match.group(1).strip() if screenshot_match.groups() else screenshot_match.group(0)
-            if os.path.exists(img_path):
-                try:
-                    with open(img_path, "rb") as photo_file:
-                        await update.message.reply_photo(photo=photo_file, caption="📸 Live PC Screenshot")
-                except Exception as photo_err:
-                    logger.error(f"Error sending photo: {photo_err}")
+        await _send_screenshot_if_present(update, reply)
 
         # Generate and send Voice Note back to User
         try:
@@ -150,15 +199,7 @@ async def chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(reply)
 
     # If screenshot was taken, send photo directly to Telegram
-    screenshot_match = re.search(r'screenshot[^\s\n\r]*\.png', reply, re.IGNORECASE) or re.search(r'Screenshot saved successfully at:\s*([^\n\r]+)', reply)
-    if screenshot_match:
-        img_path = screenshot_match.group(1).strip() if screenshot_match.groups() else screenshot_match.group(0)
-        if os.path.exists(img_path):
-            try:
-                with open(img_path, "rb") as photo_file:
-                    await update.message.reply_photo(photo=photo_file, caption="📸 Live PC Screenshot")
-            except Exception as photo_err:
-                logger.error(f"Error sending photo: {photo_err}")
+    await _send_screenshot_if_present(update, reply)
 
     # If always voice reply is on or requested
     if ALWAYS_VOICE_REPLY and len(reply) < 350:
@@ -187,6 +228,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("status", status_cmd))
     app.add_handler(CommandHandler("drive", drive_cmd))
+    app.add_handler(CommandHandler("apply", apply_cmd))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_handler))
     

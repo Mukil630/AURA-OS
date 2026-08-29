@@ -1,9 +1,9 @@
-"""Main FastAPI Application Entrypoint for MUKIL MASTER AGENT."""
+import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 
 from app.api.v1.router import api_v1_router
 from app.api.v1.routes.health import health_check
@@ -52,15 +52,14 @@ def create_app() -> FastAPI:
     # Root Level Endpoints
     app.add_api_route("/health", health_check, methods=["GET"], tags=["Health"])
 
-    @app.get("/", tags=["Root"])
-    async def root():
-        return {
-            "name": settings.APP_NAME,
-            "version": settings.API_VERSION,
-            "status": "online",
-            "docs": "/docs",
-            "health": "/health",
-        }
+    @app.get("/", tags=["Root"], response_class=HTMLResponse)
+    @app.get("/app", tags=["Root"], response_class=HTMLResponse)
+    async def root_hub():
+        hub_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "jarvis_mobile_hub.html")
+        if os.path.exists(hub_path):
+            with open(hub_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+        return HTMLResponse("<h1>AURA-OS Mobile Hub is online.</h1>")
 
     # Mount API v1 Routes
     app.include_router(api_v1_router)

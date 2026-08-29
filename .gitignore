@@ -78,6 +78,8 @@ data/outbox_queue.json
 logs/
 tmp/
 temp/
+storage/screenshots/
+storage/uploads/
 .system_generated/
 jarvis_attachments/
 

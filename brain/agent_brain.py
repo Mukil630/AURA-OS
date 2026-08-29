@@ -361,6 +361,31 @@ TOOLS_DEFINITION = [
                 "required": ["url"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "auto_apply_job",
+            "description": "Autonomously apply for a job on any career portal or company website (e.g. Zoho, Freshworks, Swiggy, Capgemini, Postman). Automatically fills Mukil's profile, attaches master PDF resume, captures live proof screenshot, and tracks the application.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "company": {
+                        "type": "string",
+                        "description": "The target company name (e.g. 'Zoho', 'Freshworks', 'Swiggy', 'Postman', 'Capgemini')."
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "The target role (e.g. 'AI Engineer', 'Software Engineer', 'Python Developer')."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Optional direct job portal URL."
+                    }
+                },
+                "required": ["company"]
+            }
+        }
     }
 ]
 
@@ -372,7 +397,13 @@ class AgentBrain:
         self.router = IntentRouter()
 
     def _execute_tool_sync(self, name: str, args: dict) -> str:
-        if name == "create_placement_sprint":
+        if name == "auto_apply_job":
+            return pc_tools.auto_apply_job(
+                company=args.get("company", "Tech Company"),
+                role=args.get("role", "AI Engineer"),
+                url=args.get("url")
+            )
+        elif name == "create_placement_sprint":
             sched = AdaptiveScheduler()
             res = sched.create_sprint_override(
                 event_name=args.get("company_name", "Placement Drive Sprint"),

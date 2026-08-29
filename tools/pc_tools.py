@@ -227,6 +227,17 @@ def browser_auto_fill_form(url: str) -> str:
     except Exception as e:
         return f"Browser form filler error: {str(e)}"
 
+def auto_apply_job(company: str, role: str = "AI Engineer", url: str = None) -> str:
+    """Autonomous Placement Auto-Apply: Fills form, attaches Mukil's PDF resume, captures live screenshot, and returns summary."""
+    try:
+        from tools.career_auto_apply import CareerAutoApplyEngine
+        engine = CareerAutoApplyEngine()
+        res = engine.execute_auto_apply(company=company, role=role, portal_url=url, headless=True)
+        return res.get("summary", f"Application submitted for {company}!") + f"\nScreenshot saved successfully at: {res.get('screenshot_path')}"
+    except Exception as e:
+        return f"Auto-apply error for {company}: {str(e)}"
+
+
 
 
 
