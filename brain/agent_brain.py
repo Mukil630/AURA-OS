@@ -386,6 +386,114 @@ TOOLS_DEFINITION = [
                 "required": ["company"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "view_file_slice",
+            "description": "View a specific line range slice of a code file with 1-based indexing.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {"type": "string", "description": "Absolute or relative file path to view."},
+                    "start_line": {"type": "integer", "description": "Starting line number (1-indexed)."},
+                    "end_line": {"type": "integer", "description": "Ending line number (1-indexed)."}
+                },
+                "required": ["file_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "replace_file_content",
+            "description": "Perform an atomic surgical search-and-replace edit on a file without rewriting the entire file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {"type": "string", "description": "Target file to edit."},
+                    "target_content": {"type": "string", "description": "The exact existing text chunk to replace."},
+                    "replacement_content": {"type": "string", "description": "The new replacement text chunk."}
+                },
+                "required": ["file_path", "target_content", "replacement_content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_to_file",
+            "description": "Create a new file or overwrite an existing file cleanly on disk.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {"type": "string", "description": "Target file path."},
+                    "code_content": {"type": "string", "description": "Full file content to write."},
+                    "overwrite": {"type": "boolean", "description": "Whether to overwrite if file exists."}
+                },
+                "required": ["file_path", "code_content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "grep_search",
+            "description": "Perform fast regex or keyword pattern search across code files in a directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "The search pattern or keyword."},
+                    "search_path": {"type": "string", "description": "Directory path to search in."}
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "find_by_name",
+            "description": "Find files and directories matching a glob pattern.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string", "description": "Glob pattern (e.g. '*.py', 'login*')."},
+                    "search_path": {"type": "string", "description": "Directory to search in."}
+                },
+                "required": ["pattern"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_command_and_heal",
+            "description": "Execute a shell command with autonomous self-healing and error correction.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {"type": "string", "description": "PowerShell command to execute."},
+                    "cwd": {"type": "string", "description": "Working directory path."}
+                },
+                "required": ["command"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "invoke_subagent",
+            "description": "Delegate a deep research, coding, placement, or finance task to a specialized background subagent.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "subagent_name": {"type": "string", "description": "Subagent type: 'research', 'coder', 'placement_hunter', or 'finance_analyst'."},
+                    "task_prompt": {"type": "string", "description": "Detailed actionable task prompt for the subagent."}
+                },
+                "required": ["subagent_name", "task_prompt"]
+            }
+        }
     }
 ]
 
@@ -456,6 +564,29 @@ class AgentBrain:
             return pc_tools.browser_read_page(args.get("url", ""))
         elif name == "browser_auto_fill_form":
             return pc_tools.browser_auto_fill_form(args.get("url", ""))
+        elif name == "view_file_slice":
+            from brain.agentic_engine import view_file_slice
+            return view_file_slice(args.get("file_path", ""), args.get("start_line", 1), args.get("end_line", 100))
+        elif name == "replace_file_content":
+            from brain.agentic_engine import replace_file_content
+            return replace_file_content(args.get("file_path", ""), args.get("target_content", ""), args.get("replacement_content", ""))
+        elif name == "write_to_file":
+            from brain.agentic_engine import write_to_file
+            return write_to_file(args.get("file_path", ""), args.get("code_content", ""), args.get("overwrite", True))
+        elif name == "grep_search":
+            from brain.agentic_engine import grep_search
+            return grep_search(args.get("query", ""), args.get("search_path"))
+        elif name == "find_by_name":
+            from brain.agentic_engine import find_by_name
+            return find_by_name(args.get("pattern", ""), args.get("search_path"))
+        elif name == "run_command_and_heal":
+            from brain.agentic_engine import run_command_and_heal
+            res = run_command_and_heal(args.get("command", ""), args.get("cwd"))
+            return json.dumps(res, indent=2)
+        elif name == "invoke_subagent":
+            from brain.agentic_engine import swarm
+            res = swarm.invoke(args.get("subagent_name", "research"), args.get("task_prompt", ""))
+            return json.dumps(res, indent=2)
         else:
             return f"Unknown tool: {name}"
 
