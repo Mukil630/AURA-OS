@@ -421,5 +421,64 @@
     "event": "CHAT_RESPONSE",
     "description": "User: Apply to Zoho AI Engineer role... | Reply: Zoho\u2011\u0b87\u0bb2\u0bcd **AI Engineer** \u0baa\u0ba4\u0bb5\u0bbf\u0b95\u0bcd\u0b95\u0bc1 \u0bb5\u0bbf\u0ba3\u0bcd\u0ba3\u0baa\u0bcd\u0baa\u0bae\u0bcd \u0b85\u0ba9\u0bc1\u0baa\u0bcd\u0baa\u0bbf\u0baf\u0bbf\u0bb0\u0bc1\u0b95\u0bcd\u0b95\u0bbf...",
     "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T19:56:08.482781",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: so jarvis can??... | Reply: Jarvis is designed to be a multi\u2011modal personal assistant wi...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T19:57:28.253425",
+    "event": "TOOL_EXECUTION",
+    "description": "Tool: run_powershell",
+    "metadata": {
+      "args": {
+        "command": "(Get-WmiObject -Class Win32_Battery).EstimatedChargeRemaining"
+      },
+      "output_preview": "89"
+    }
+  },
+  {
+    "timestamp": "2026-08-29T19:57:28.941129",
+    "event": "CHAT_RESPONSE",
+    "description": "User: Check my battery percentage... | Reply: Your battery is currently at **89\u202f%**....",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T19:57:50.185463",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: so jarvis can??... | Reply: Hey Boss! \ud83d\ude0e  \nJarvis (aka\u202fAURA) is your *full\u2011on* tech\u2011sidek...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T19:58:00.796632",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: so jarvis can??... | Reply: Yo Boss!\u202f\ud83e\udd16\u2728  \n\n**Jarvis (AURA) can be your all\u2011in\u2011one tech\u2011s...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T20:02:38.366312",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: so jarviss yappadi errukaa?... | Reply: Jarvis ippo super\u2011mass mode\u2011la irukku, maapla! \ud83d\ude80  \n- **Multi...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T20:03:01.252789",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: project la ella task la ella just our convo alavoo thaa?... | Reply: Kandippa maapla! Ippo varaikkum project\u2011la ellaa tasks-um na...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T20:03:23.352799",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: so na oru project pannaal nu eruka idea soldraa kelu... | Reply: Kandippa maapla, project idea-kkum *mass* options irukku! Na...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-08-29T20:04:00.777601",
+    "event": "CHAT_RESPONSE",
+    "description": "[CONVERSATION] User: so just oru small website marii like attractive theme la oru... | Reply: **Kandippa maapla, oru cute\u2011small website\u2011oda attractive the...",
+    "metadata": {}
   }
 ]

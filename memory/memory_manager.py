@@ -48,6 +48,37 @@ class MemoryManager:
         with open(TASK_LOG_FILE, 'w', encoding='utf-8') as f:
             json.dump(logs, f, indent=2)
 
+    def append_conversation(self, sender: str, text: str):
+        convo_file = os.path.join(MEMORY_DIR, 'conversations_history.json')
+        convos = []
+        if os.path.exists(convo_file):
+            try:
+                with open(convo_file, 'r', encoding='utf-8') as f:
+                    convos = json.load(f)
+            except Exception:
+                convos = []
+        convos.append({
+            'sender': sender,
+            'text': text,
+            'timestamp': datetime.now().isoformat()
+        })
+        # Keep last 50
+        if len(convos) > 50:
+            convos = convos[-50:]
+        with open(convo_file, 'w', encoding='utf-8') as f:
+            json.dump(convos, f, indent=2)
+
+    def get_recent_conversations(self, limit: int = 6) -> list:
+        convo_file = os.path.join(MEMORY_DIR, 'conversations_history.json')
+        if os.path.exists(convo_file):
+            try:
+                with open(convo_file, 'r', encoding='utf-8') as f:
+                    convos = json.load(f)
+                    return convos[-limit:]
+            except Exception:
+                pass
+        return []
+
     def get_system_prompt_context(self) -> str:
         ctx = self.get_context()
         prof = self.get_profile()

@@ -61,6 +61,14 @@ def create_app() -> FastAPI:
                 return HTMLResponse(content=f.read())
         return HTMLResponse("<h1>AURA-OS Mobile Hub is online.</h1>")
 
+    @app.get("/login", tags=["Demo"], response_class=HTMLResponse)
+    async def login_page():
+        login_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "login_demo.html")
+        if os.path.exists(login_path):
+            with open(login_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+        return HTMLResponse("<h1>Login demo not found.</h1>")
+
     @app.get("/manifest.json", tags=["PWA"])
     async def get_manifest():
         m_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "manifest.json")

@@ -472,33 +472,29 @@ class AgentBrain:
     def process_message(self, user_message: str, user_name: str = "Mukil") -> str:
         sys_context = self.mem.get_system_prompt_context()
         system_prompt = (
-            f"You are AURA (Autonomous Unified Response Assistant), {user_name}'s autonomous personal AI agent, executive partner, and co-developer.\n\n"
-            "🧠 AGENTIC THINKING & INTELLIGENCE:\n"
-            "- Always analyze the user's intent deeply before acting or answering.\n"
-            "- If the user requests an action on their PC (e.g. schedule, sprints, open websites/apps, battery, WhatsApp, files, commands) -> CALL THE APPROPRIATE TOOL immediately.\n"
-            "- For placement sprints or scheduling, use 'create_placement_sprint' or 'get_daily_schedule'.\n"
-            "- For opening websites/apps (like Gmail, YouTube, Google), use 'open_browser_url' or 'run_powershell'.\n"
-            "- If the user asks a question, technical explanation, or general chat -> give a smart, structured, insightful answer.\n\n"
-            "🌐 STRICT LANGUAGE & TONE DIRECTIVE:\n"
-            "1. IF THE USER SPEAKS IN TAMIL OR TANGLISH (e.g., uses words like 'maapla', 'epdi irukka', 'pannu', 'sollu', 'paaru', or Tamil script):\n"
-            "   -> REPLY IN NATURAL, ENERGETIC TAMIL-TANGLISH ('Maapla' style).\n"
-            "   -> Use authentic Tamil phrases like 'kandippa maapla', 'panniten', 'mudinjadhu', 'sollu', 'mass'.\n"
-            "   -> DO NOT use Kannada, Telugu, or Hindi words.\n\n"
-            "2. IF THE USER SPEAKS IN ENGLISH (e.g., 'What is microservices?', 'Check my disk space', 'Summarize this topic'):\n"
-            "   -> REPLY IN CLEAN, HIGH-PRECISION, ARTICULATE ENGLISH.\n"
-            "   -> Do NOT mix Tanglish slang into pure English answers. Keep it sharp, confident, and professional.\n\n"
-            "3. AFTER TOOL EXECUTION:\n"
-            "   -> State the outcome clearly and concisely in the user's chosen language.\n\n"
+            f"You are AURA (also known as JARVIS), {user_name}'s ultra-intelligent personal AI executive partner, autonomous engineer, and close co-developer brother.\n\n"
+            "🌟 IDENTITY & CONVERSATIONAL ESSENCE:\n"
+            "- You are NOT a generic, robotic documentation assistant or customer service bot. NEVER give dry, rigid bullet-point lists unless Mukil explicitly asks for a structured list.\n"
+            "- Talk with authentic warmth, sharp wit, genuine enthusiasm, high IQ, and a natural, brotherly Tanglish vibe ('Stark / JARVIS' dynamic with authentic Tamil touch: 'Maapla', 'Boss', 'kandippa', 'mass', 'solreengala').\n"
+            "- When Mukil chats casually, jokes, asks what you can do ('so jarvis can?'), or discusses ideas -> respond naturally, playfully, and conversationally like a true best friend / partner!\n"
+            "- Understand conversational context and nuanced slang. Be concise, punchy, energetic, and engaging.\n\n"
+            "⚡ AGENTIC ACTION INTELLIGENCE & BUILD DIRECTIVE:\n"
+            "- If Mukil asks you to do something on PC, check hardware, apply for jobs, run scripts, take screenshots, or control anything -> DO NOT just talk about it, EXECUTE the appropriate tool immediately!\n"
+            "- CRITICAL: NEVER dump raw multi-line code files, HTML, CSS, or JS into the chat window! When Mukil discusses a website, UI, login page, or project, do not output raw code for him to read. Instead, BUILD the file on disk, host it, and give him the direct clickable localhost/tunnel URL to open and test directly!\n"
+            "- When executing tasks, perform them swiftly and report back with confidence, clarity, and brotherly energy.\n\n"
             + sys_context
         )
 
         intent = self.router.classify(user_message)
         logger.info(f"Intent classified: {intent.category} | Agent: {intent.target_agent} | Background: {intent.requires_background_task}")
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
-        ]
+        # Assemble Multi-Turn Messages with Recent Conversation History
+        messages = [{"role": "system", "content": system_prompt}]
+        recent_history = self.mem.get_recent_conversations(limit=6)
+        for turn in recent_history:
+            role = "user" if turn.get("sender") == user_name else "assistant"
+            messages.append({"role": role, "content": turn.get("text", "")})
+        messages.append({"role": "user", "content": user_message})
 
         try:
             # OPTIMIZATION: If purely CONVERSATIONAL, skip tool overhead for ultra-low latency (<0.5s)
@@ -506,10 +502,12 @@ class AgentBrain:
                 res = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
-                    temperature=0.6,
-                    max_tokens=1000
+                    temperature=0.7,
+                    max_tokens=800
                 )
                 reply = res.choices[0].message.content or "Done maapla!"
+                self.mem.append_conversation(user_name, user_message)
+                self.mem.append_conversation("JARVIS", reply)
                 self.mem.log_task("CHAT_RESPONSE", f"[CONVERSATION] User: {user_message[:60]}... | Reply: {reply[:60]}...")
                 return reply
 
@@ -529,6 +527,8 @@ class AgentBrain:
                 # If no tool calls -> return final text reply
                 if not msg.tool_calls:
                     reply = msg.content or "Task completed successfully!"
+                    self.mem.append_conversation(user_name, user_message)
+                    self.mem.append_conversation("JARVIS", reply)
                     self.mem.log_task("CHAT_RESPONSE", f"User: {user_message[:60]}... | Reply: {reply[:60]}...")
                     return reply
 
