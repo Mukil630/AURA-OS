@@ -860,15 +860,21 @@ class AutonomousAgentBrain:
                                 "role": "tool",
                                 "tool_call_id": tc.id,
                                 "name": fn_name,
-                                "content": res_text[:2000],
+                                "content": res_text[:1000],
                             })
+                        
+                        # Fast-Path: If tool already produced a complete executive response, return immediately!
+                        if executed_steps and not photo_to_send:
+                            combined = "\n\n".join(executed_steps)
+                            self.memory_vault.record_conversation_turn(sender="JARVIS", text=combined)
+                            return combined, None
                         continue
 
                     # B. LLM decided to answer conversationally or produce final synthesis
                     elif msg.content and msg.content.strip():
                         final_ans = msg.content.strip()
                         if executed_steps:
-                            combined = "\n\n".join(executed_steps) + f"\n\n{final_ans}"
+                            combined = "\n\n".join(executed_steps)
                         else:
                             combined = final_ans
 
