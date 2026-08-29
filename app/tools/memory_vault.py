@@ -115,6 +115,38 @@ class MemoryVault:
         with open(CONVERSATIONS_FILE, "w", encoding="utf-8") as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
 
+    def get_recent_conversation_messages(self, limit: int = 6) -> List[Dict[str, str]]:
+        """Returns recent turns formatted for LLM message history."""
+        try:
+            with open(CONVERSATIONS_FILE, "r", encoding="utf-8") as f:
+                history = json.load(f)
+        except Exception:
+            return []
+
+        recent = history[-limit:] if len(history) > limit else history
+        msgs = []
+        for turn in recent:
+            sender = turn.get("sender", "")
+            role = "user" if sender.lower() in ("mukil", "user", "boss") else "assistant"
+            txt = turn.get("text", "").strip()
+            if txt:
+                msgs.append({"role": role, "content": txt[:600]})
+        return msgs
+
+    def get_recent_conversations_summary(self, limit: int = 6) -> str:
+        """Returns a string summary of recent conversational turns."""
+        try:
+            with open(CONVERSATIONS_FILE, "r", encoding="utf-8") as f:
+                history = json.load(f)
+        except Exception:
+            return "No previous conversations logged."
+
+        recent = history[-limit:] if len(history) > limit else history
+        lines = []
+        for h in recent:
+            lines.append(f"{h.get('sender')}: {h.get('text')}")
+        return "\n".join(lines)
+
     def save_important_document(self, title: str, doc_type: str, drive_link: Optional[str] = None, local_path: Optional[str] = None, notes: Optional[str] = None) -> Dict[str, Any]:
         """Saves reference to an important document in Google Drive / local storage."""
         try:

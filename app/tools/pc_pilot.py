@@ -36,9 +36,12 @@ KNOWN_SITES = {
 class PCPilot:
     """Controls local PC actions, browser workflows, and system commands."""
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # 1. BROWSER AUTOMATION & WEB SEARCH
-    # ─────────────────────────────────────────────────────────────────────────
+    def __init__(self):
+        self.last_launched_app: Optional[str] = None
+        self.screenshot_dir = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "screenshots"
+        )
+        os.makedirs(self.screenshot_dir, exist_ok=True)
 
     def search_google(self, query: str) -> str:
         """Opens Google search in default browser for given query."""
@@ -143,6 +146,7 @@ class PCPilot:
 
         if matched:
             app_id_or_cmd, display_name, proc_name = matched
+            self.last_launched_app = clean
             try:
                 if "!" in app_id_or_cmd or "Microsoft." in app_id_or_cmd or "Google." in app_id_or_cmd or "Chrome" in app_id_or_cmd:
                     # Launch via shell:AppsFolder (Universal 100% reliable Windows 11 method)
@@ -169,6 +173,7 @@ class PCPilot:
         found = self.search_windows_start_apps(clean)
         if found:
             f_name, f_appid = found
+            self.last_launched_app = clean
             try:
                 subprocess.Popen(
                     ["powershell", "-NoProfile", "-NonInteractive", "-Command", f"Start-Process 'shell:AppsFolder\\{f_appid}'"],
@@ -180,6 +185,7 @@ class PCPilot:
 
         # 4. Fallback execution & Honest Diagnostic Reporting
         try:
+            self.last_launched_app = clean
             subprocess.Popen(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command", f"Start-Process '{clean}'"],
                 shell=True,
@@ -194,8 +200,12 @@ class PCPilot:
 
     def close_app(self, app_name: str) -> str:
         """Closes or terminates a running application or browser tab."""
-        clean = app_name.lower().strip()
+        clean = (app_name or "").lower().strip()
         
+        # If user says generic 'it' / 'app' / 'atha', use last launched app
+        if not clean or clean in ["it", "app", "atha", "adha", "recent", "recent app", "current"]:
+            clean = self.last_launched_app or "notepad"
+
         # 1. Close browser tab or active window
         if clean in ["tab", "browser tab", "chrome tab", "youtube", "web tab"]:
             try:
@@ -205,7 +215,7 @@ class PCPilot:
             except Exception:
                 pass
 
-        if clean in ["window", "active window", "current window", "app"]:
+        if clean in ["window", "active window", "current window"]:
             try:
                 import pyautogui
                 pyautogui.hotkey("alt", "f4")
@@ -218,6 +228,10 @@ class PCPilot:
             "notepad": "notepad.exe",
             "chrome": "chrome.exe",
             "browser": "chrome.exe",
+            "whatsapp": "WhatsApp.exe",
+            "telegram": "Telegram.exe",
+            "word": "WINWORD.EXE",
+            "excel": "EXCEL.EXE",
             "code": "Code.exe",
             "vscode": "Code.exe",
             "calc": "CalculatorApp.exe",

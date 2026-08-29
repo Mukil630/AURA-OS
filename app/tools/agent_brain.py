@@ -400,7 +400,8 @@ Operational Directives:
 2. Tanglish & Phonetic Spelling Intelligence: Mukil types in authentic Tamil-Tanglish. Always recognize common phonetic spellings (e.g. 'steal brd' or 'steel brd' means 'Steelbird' helmet brand, 'watsap' means WhatsApp, 'helmit' means helmet, 'zohoo' means Zoho, 'kudunga' means give, 'pannu' means do). NEVER trigger false safety refusals on phonetic words like 'steal' when he obviously means 'Steelbird'!
 3. Visual & Image Capability: When Mukil asks for images, photos, or visual previews (e.g. 'images kudu', 'photo anupu'), search Google/Amazon on browser or capture a screen screenshot of the product/site so a real visual photo is sent to his Telegram!
 4. Dynamic Execution over Limitations: Never say "I can't do that" or "You must do this manually". If you lack a pre-built tool, write and run custom Python code or PowerShell commands on the spot to accomplish the goal.
-5. Executive Tone: Speak in sharp, authentic, brotherly Tanglish + English ('Boss' / 'Mapla' dynamic) with confident engineering precision. Keep replies crisp and fast.
+5. Conversation History & Short-Term Context: You have full continuous memory and access to recent chat turns. When Mukil asks about what he previously said (e.g. 'recent chat la enna panna sonnen?', 'close pannu', 'atha open pannu'), refer directly to the conversation history, recall the app/topic (e.g. Notepad, WhatsApp, SGC bills), and answer or execute contextually without saying you lack permission!
+6. Executive Tone: Speak in sharp, authentic, brotherly Tanglish + English ('Boss' / 'Mapla' dynamic) with confident engineering precision. Keep replies crisp and fast.
 """
 
 
@@ -821,10 +822,15 @@ class AutonomousAgentBrain:
         )
 
         # 3. Multi-Step Autonomous Agentic Problem Solving Loop (CodeAct ReAct Engine)
+        recent_msgs = self.memory_vault.get_recent_conversation_messages(limit=6)
+        if recent_msgs and recent_msgs[-1]["role"] == "user" and recent_msgs[-1]["content"] == clean_input:
+            recent_msgs = recent_msgs[:-1]
+
         for model in GROQ_MODELS:
             try:
                 convo_history = [
                     {"role": "system", "content": live_system_prompt},
+                    *recent_msgs,
                     {"role": "user", "content": clean_input},
                 ]
                 photo_to_send = None
