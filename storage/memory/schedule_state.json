@@ -1,0 +1,55 @@
+{
+  "base_routine": {
+    "morning_08_00": {
+      "task": "Placement & Gmail Radar Check + Morning Daily Brief",
+      "category": "ROUTINE"
+    },
+    "evening_19_00": {
+      "task": "Java Collections & DSA Drill (Set, Subarrays, Trees)",
+      "category": "STUDY"
+    },
+    "evening_20_00": {
+      "task": "Python & Problem Solving (Loops, Arrays, Matrix)",
+      "category": "STUDY"
+    },
+    "night_21_00": {
+      "task": "Aptitude & Logical Reasoning (Time & Work, Percentages)",
+      "category": "APTITUDE"
+    },
+    "night_22_00": {
+      "task": "Daily Review, GitHub Green Streak Sync & 5TB Drive Backup",
+      "category": "REVIEW"
+    }
+  },
+  "active_override": null,
+  "completed_sprints": [
+    {
+      "sprint_name": "Capgemini Placement Drive Sprint",
+      "start_date": "2026-08-29",
+      "expiry_date": "2026-08-28",
+      "duration_days": 7,
+      "focus_topics": [
+        "Capgemini Pseudo Code",
+        "Game-Based Aptitude",
+        "Technical Interview"
+      ],
+      "sprint_schedule": {
+        "morning_08_00": {
+          "task": "[Capgemini Placement Drive Sprint] Company Test Syllabus & Pattern Drill",
+          "category": "SPRINT_PRIORITY"
+        },
+        "evening_19_00": {
+          "task": "[Capgemini Placement Drive Sprint] Mock Coding Assessment & Technical Round Prep",
+          "category": "SPRINT_PRIORITY"
+        },
+        "night_21_00": {
+          "task": "[Capgemini Placement Drive Sprint] Company-Specific Aptitude & Core Concepts",
+          "category": "SPRINT_PRIORITY"
+        }
+      },
+      "status": "COMPLETED",
+      "completed_at": "2026-08-29 13:39:51"
+    }
+  ],
+  "last_checked": "2026-08-29 13:39:51"
+}

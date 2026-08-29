@@ -59,8 +59,8 @@ class WindowsSidecarConnector(IConnector):
     def __init__(self, is_mock: Optional[bool] = None):
         self._connector_id = "connector_windows_sidecar"
         self._connector_type = ConnectorType.WINDOWS_SIDECAR
-        env_mode = os.getenv("ENVIRONMENT", "mock").lower()
-        self._is_mock = is_mock if is_mock is not None else (env_mode in ("mock", "test"))
+        env_mode = os.getenv("ENVIRONMENT", "local").lower()
+        self._is_mock = is_mock if is_mock is not None else (env_mode in ("mock", "test", "local"))
         self._connected = True
         self._collector = WindowsTelemetryCollector(is_mock=self._is_mock)
 

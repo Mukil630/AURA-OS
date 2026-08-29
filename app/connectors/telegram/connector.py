@@ -33,8 +33,8 @@ class TelegramConnector(IConnector):
         self._connector_id = "connector_telegram"
         self._connector_type = ConnectorType.TELEGRAM
         self._base_url = base_url
-        env_mode = os.getenv("ENVIRONMENT", "mock").lower()
-        self._is_mock = is_mock if is_mock is not None else (env_mode in ("mock", "test"))
+        env_mode = os.getenv("ENVIRONMENT", "local").lower()
+        self._is_mock = is_mock if is_mock is not None else (env_mode in ("mock", "test", "local"))
         self._connected = True
 
         # In-memory sent message store for verification and mock assertions

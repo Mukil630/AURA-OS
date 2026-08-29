@@ -106,6 +106,31 @@ AGENT_TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
+            "name": "get_sgc_billing_summary",
+            "description": "Analyzes all SGC (Sri Ganapathi Colours) customer bills, total revenue collected, pending/overdue balances, and active Google Drive storage link (11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9).",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_sgc_bills",
+            "description": "Searches for specific SGC bills, customer names (e.g. M.S.K Fabrics, Sri Laxmi Export, Sowbhagiya, GAIA), yarn counts, GST numbers, or bill items using Drive RAG retrieval.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Customer name, bill number, or search query"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "view_drive_vaults",
             "description": "Views the 5TB Google Drive Master Vault matrix, official Master Resume link, and SGC billing dual vaults.",
             "parameters": {"type": "object", "properties": {}}
@@ -441,6 +466,57 @@ class AutonomousAgentBrain:
         elif tool_name == "view_job_pipeline":
             summary = self.job_agent.get_pipeline_summary()
             return summary, None
+
+        elif tool_name == "get_sgc_billing_summary":
+            from app.brain.drive_rag_engine import DriveRAGEngine
+            rag = DriveRAGEngine()
+            rag.sync_sgc_billing_data()
+            summary = rag.get_sgc_financial_summary()
+            
+            drive_link = summary.get("drive_url")
+            lines = [
+                "🧾 *SRI GANAPATHI COLOURS (SGC) BILLING & FINANCIAL SUMMARY*\n",
+                f"☁️ *Live Cloud Storage Vault*: [Open Active Bills Drive Folder]({drive_link})\n",
+                f"📊 *Total Invoices Generated*: `{summary.get('total_bills_count')}`",
+                f"💰 *Total Billed Revenue*: `Rs {summary.get('total_billed_amount'):,}`",
+                f"🟢 *Total Collected (Paid)*: `Rs {summary.get('total_collected_amount'):,}` ({summary.get('paid_count')} Bill)",
+                f"🔴 *Total Pending / Overdue*: `Rs {summary.get('total_pending_amount'):,}` ({summary.get('pending_count')} Bills)\n",
+                "📋 *Pending Customer Invoices (Overdue)*:"
+            ]
+            for p in summary.get("pending_bills_details", []):
+                lines.append(f"• 🔴 *Bill #{p['billNo']}* | `{p['customer']}` | Date: `{p['date']}` | *Rs {p['amount']:,}* | GST: `{p.get('partyGst', 'N/A')}`")
+            
+            if summary.get("paid_bills_details"):
+                lines.append("\n✅ *Settled / Paid Invoices*:")
+                for pd in summary.get("paid_bills_details", []):
+                    lines.append(f"• 🟢 *Bill #{pd['billNo']}* | `{pd['customer']}` | *Rs {pd['amount']:,}* | Receipt: `{pd.get('receiptNo')}`")
+
+            return "\n".join(lines), None
+
+        elif tool_name == "search_sgc_bills":
+            from app.brain.drive_rag_engine import DriveRAGEngine
+            rag = DriveRAGEngine()
+            rag.sync_sgc_billing_data()
+            query = args.get("query", "")
+            hits = rag.query_rag_context(query=query, folder_alias="sgc_billing_active_vault", top_k=5)
+            
+            if not hits:
+                return f"🔍 *No matching SGC billing documents found for query:* '{query}'", None
+            
+            lines = [f"🔍 *SGC Billing RAG Search Results for '{query}'*:\n"]
+            for h in hits:
+                meta = h.get("metadata", {})
+                b_no = meta.get("billNo")
+                cust = meta.get("customer")
+                amt = meta.get("netAmount")
+                st = meta.get("status", "").upper()
+                dt = meta.get("date")
+                gst = meta.get("partyGst", "")
+                st_icon = "🟢" if st == "PAID" else "🔴"
+                lines.append(f"{st_icon} *Bill #{b_no}* — `{cust}`\n   • Amount: *Rs {amt}* | Status: *{st}* | Date: `{dt}`\n   • Party GST: `{gst}`\n   • File: `{h.get('filename')}`\n")
+            
+            lines.append(f"☁️ *Vault Link*: [Open Active SGC Drive Vault](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)")
+            return "\n".join(lines), None
 
         elif tool_name == "view_drive_vaults":
             return self.drive_manager.get_vault_summary(), None

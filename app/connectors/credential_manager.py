@@ -44,8 +44,8 @@ class CredentialManager:
         if env_val:
             return env_val
 
-        # 3. If in mock/test mode, provide safe dummy credentials
-        if os.getenv("ENVIRONMENT", "mock").lower() in ("mock", "test"):
+        # 3. If in mock/test/local mode, provide safe dummy credentials
+        if os.getenv("ENVIRONMENT", "local").lower() in ("mock", "test", "local"):
             return f"mock_{provider.value}_key_{user_id}"
 
         return None

@@ -1,0 +1,359 @@
+{
+  "doc_c548aad8": {
+    "doc_id": "doc_c548aad8",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0001_Sri Laxmi Export.pdf",
+    "content_text": "Bill No: 1 | Date: 2026-05-01 | Customer: Sri Laxmi Export | GST: 33ABDPL8401A1ZD | Status: PAID | Subtotal: Rs 825 | CGST: Rs 20.625 | SGST: Rs 20.625 | Total Net Amount: Rs 866 | Items: red (10s, 1 kattu, 10 kazhi @ Rs 550)",
+    "metadata": {
+      "billNo": 1,
+      "customer": "Sri Laxmi Export",
+      "partyGst": "33ABDPL8401A1ZD",
+      "date": "2026-05-01",
+      "status": "paid",
+      "netAmount": 866,
+      "driveUrl": "https://drive.google.com/file/d/1AGK6eFdwhGML1G1wzol7n95SK7pLcyo0/view?usp=drivesdk",
+      "driveFileId": "1AGK6eFdwhGML1G1wzol7n95SK7pLcyo0"
+    },
+    "indexed_at": "2026-08-29T08:28:21.634242+00:00"
+  },
+  "doc_22a39af5": {
+    "doc_id": "doc_22a39af5",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0002_M.S.K Fabrics.pdf",
+    "content_text": "Bill No: 2 | Date: 2026-07-25 | Customer: M.S.K Fabrics | GST: 33AAVFM9953BIZW | Status: PENDING | Subtotal: Rs 5226.67 | CGST: Rs 130.66675 | SGST: Rs 130.66675 | Total Net Amount: Rs 5488 | Items: Blue (2/30s, 7 kattu, 7 kazhi @ Rs 700)",
+    "metadata": {
+      "billNo": 2,
+      "customer": "M.S.K Fabrics",
+      "partyGst": "33AAVFM9953BIZW",
+      "date": "2026-07-25",
+      "status": "pending",
+      "netAmount": 5488,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:28:21.635249+00:00"
+  },
+  "doc_9207a95a": {
+    "doc_id": "doc_9207a95a",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0003_SRI GANAPATHI COLOURS.pdf",
+    "content_text": "Bill No: 3 | Date: 2026-07-30 | Customer: SRI GANAPATHI COLOURS | GST: 33HKSPS1735K1ZH | Status: PENDING | Subtotal: Rs 679.41 | CGST: Rs 16.98525 | SGST: Rs 16.98525 | Total Net Amount: Rs 713 | Items: green (2/40s, 1 kattu, 60 kazhi @ Rs 150)",
+    "metadata": {
+      "billNo": 3,
+      "customer": "SRI GANAPATHI COLOURS",
+      "partyGst": "33HKSPS1735K1ZH",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 713,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:28:21.636251+00:00"
+  },
+  "doc_99735432": {
+    "doc_id": "doc_99735432",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0003_SRI GANAPATHI COLOURS.pdf",
+    "content_text": "Bill No: 3 | Date: 2026-07-30 | Customer: SRI GANAPATHI COLOURS | GST: 33HKSPS1735K1ZH | Status: PENDING | Subtotal: Rs 679.41 | CGST: Rs 16.98525 | SGST: Rs 16.98525 | Total Net Amount: Rs 713 | Items: green (2/40s, 1 kattu, 60 kazhi @ Rs 150)",
+    "metadata": {
+      "billNo": 3,
+      "customer": "SRI GANAPATHI COLOURS",
+      "partyGst": "33HKSPS1735K1ZH",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 713,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:28:21.637250+00:00"
+  },
+  "doc_75d340e8": {
+    "doc_id": "doc_75d340e8",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0004_Sowbhagiya Home Textiles.pdf",
+    "content_text": "Bill No: 4 | Date: 2026-07-30 | Customer: Sowbhagiya Home Textiles | GST: 33AGSPR4149P1ZI | Status: PENDING | Subtotal: Rs 1000 | CGST: Rs 25 | SGST: Rs 25 | Total Net Amount: Rs 1050 | Items: green red (10s, 1 kattu, 20 kazhi @ Rs 500)",
+    "metadata": {
+      "billNo": 4,
+      "customer": "Sowbhagiya Home Textiles",
+      "partyGst": "33AGSPR4149P1ZI",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 1050,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:28:21.638251+00:00"
+  },
+  "doc_5b7ceebc": {
+    "doc_id": "doc_5b7ceebc",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0005_Sowbhagiya Home Textiles.pdf",
+    "content_text": "Bill No: 5 | Date: 2026-07-30 | Customer: Sowbhagiya Home Textiles | GST: 33AGSPR4149P1ZI | Status: PENDING | Subtotal: Rs 875 | CGST: Rs 21.875 | SGST: Rs 21.875 | Total Net Amount: Rs 919 | Items: 646 (10s, 1 kattu, 15 kazhi @ Rs 500)",
+    "metadata": {
+      "billNo": 5,
+      "customer": "Sowbhagiya Home Textiles",
+      "partyGst": "33AGSPR4149P1ZI",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 919,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:28:21.640250+00:00"
+  },
+  "doc_beea998e": {
+    "doc_id": "doc_beea998e",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0006_GAIA SUSTAINABLE SOLUTION.pdf",
+    "content_text": "Bill No: 6 | Date: 2026-08-07 | Customer: GAIA SUSTAINABLE SOLUTION | GST: 33AAJCG6975A1ZMT | Status: PENDING | Subtotal: Rs 910 | CGST: Rs 22.75 | SGST: Rs 22.75 | Total Net Amount: Rs 956 | Items: cone vinding (10s, 1 kattu, 15 kazhi @ Rs 520)",
+    "metadata": {
+      "billNo": 6,
+      "customer": "GAIA SUSTAINABLE SOLUTION",
+      "partyGst": "33AAJCG6975A1ZMT",
+      "date": "2026-08-07",
+      "status": "pending",
+      "netAmount": 956,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:28:21.641251+00:00"
+  },
+  "doc_9904c848": {
+    "doc_id": "doc_9904c848",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0001_Sri Laxmi Export.pdf",
+    "content_text": "Bill No: 1 | Date: 2026-05-01 | Customer: Sri Laxmi Export | GST: 33ABDPL8401A1ZD | Status: PAID | Subtotal: Rs 825 | CGST: Rs 20.625 | SGST: Rs 20.625 | Total Net Amount: Rs 866 | Items: red (10s, 1 kattu, 10 kazhi @ Rs 550)",
+    "metadata": {
+      "billNo": 1,
+      "customer": "Sri Laxmi Export",
+      "partyGst": "33ABDPL8401A1ZD",
+      "date": "2026-05-01",
+      "status": "paid",
+      "netAmount": 866,
+      "driveUrl": "https://drive.google.com/file/d/1AGK6eFdwhGML1G1wzol7n95SK7pLcyo0/view?usp=drivesdk",
+      "driveFileId": "1AGK6eFdwhGML1G1wzol7n95SK7pLcyo0"
+    },
+    "indexed_at": "2026-08-29T08:29:02.281477+00:00"
+  },
+  "doc_bb65418b": {
+    "doc_id": "doc_bb65418b",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0002_M.S.K Fabrics.pdf",
+    "content_text": "Bill No: 2 | Date: 2026-07-25 | Customer: M.S.K Fabrics | GST: 33AAVFM9953BIZW | Status: PENDING | Subtotal: Rs 5226.67 | CGST: Rs 130.66675 | SGST: Rs 130.66675 | Total Net Amount: Rs 5488 | Items: Blue (2/30s, 7 kattu, 7 kazhi @ Rs 700)",
+    "metadata": {
+      "billNo": 2,
+      "customer": "M.S.K Fabrics",
+      "partyGst": "33AAVFM9953BIZW",
+      "date": "2026-07-25",
+      "status": "pending",
+      "netAmount": 5488,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:02.283827+00:00"
+  },
+  "doc_b1d15205": {
+    "doc_id": "doc_b1d15205",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0003_SRI GANAPATHI COLOURS.pdf",
+    "content_text": "Bill No: 3 | Date: 2026-07-30 | Customer: SRI GANAPATHI COLOURS | GST: 33HKSPS1735K1ZH | Status: PENDING | Subtotal: Rs 679.41 | CGST: Rs 16.98525 | SGST: Rs 16.98525 | Total Net Amount: Rs 713 | Items: green (2/40s, 1 kattu, 60 kazhi @ Rs 150)",
+    "metadata": {
+      "billNo": 3,
+      "customer": "SRI GANAPATHI COLOURS",
+      "partyGst": "33HKSPS1735K1ZH",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 713,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:02.285884+00:00"
+  },
+  "doc_0a7fc668": {
+    "doc_id": "doc_0a7fc668",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0003_SRI GANAPATHI COLOURS.pdf",
+    "content_text": "Bill No: 3 | Date: 2026-07-30 | Customer: SRI GANAPATHI COLOURS | GST: 33HKSPS1735K1ZH | Status: PENDING | Subtotal: Rs 679.41 | CGST: Rs 16.98525 | SGST: Rs 16.98525 | Total Net Amount: Rs 713 | Items: green (2/40s, 1 kattu, 60 kazhi @ Rs 150)",
+    "metadata": {
+      "billNo": 3,
+      "customer": "SRI GANAPATHI COLOURS",
+      "partyGst": "33HKSPS1735K1ZH",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 713,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:02.287968+00:00"
+  },
+  "doc_66d75805": {
+    "doc_id": "doc_66d75805",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0004_Sowbhagiya Home Textiles.pdf",
+    "content_text": "Bill No: 4 | Date: 2026-07-30 | Customer: Sowbhagiya Home Textiles | GST: 33AGSPR4149P1ZI | Status: PENDING | Subtotal: Rs 1000 | CGST: Rs 25 | SGST: Rs 25 | Total Net Amount: Rs 1050 | Items: green red (10s, 1 kattu, 20 kazhi @ Rs 500)",
+    "metadata": {
+      "billNo": 4,
+      "customer": "Sowbhagiya Home Textiles",
+      "partyGst": "33AGSPR4149P1ZI",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 1050,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:02.289993+00:00"
+  },
+  "doc_86cd96a3": {
+    "doc_id": "doc_86cd96a3",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0005_Sowbhagiya Home Textiles.pdf",
+    "content_text": "Bill No: 5 | Date: 2026-07-30 | Customer: Sowbhagiya Home Textiles | GST: 33AGSPR4149P1ZI | Status: PENDING | Subtotal: Rs 875 | CGST: Rs 21.875 | SGST: Rs 21.875 | Total Net Amount: Rs 919 | Items: 646 (10s, 1 kattu, 15 kazhi @ Rs 500)",
+    "metadata": {
+      "billNo": 5,
+      "customer": "Sowbhagiya Home Textiles",
+      "partyGst": "33AGSPR4149P1ZI",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 919,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:02.291973+00:00"
+  },
+  "doc_cbeb5d22": {
+    "doc_id": "doc_cbeb5d22",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0006_GAIA SUSTAINABLE SOLUTION.pdf",
+    "content_text": "Bill No: 6 | Date: 2026-08-07 | Customer: GAIA SUSTAINABLE SOLUTION | GST: 33AAJCG6975A1ZMT | Status: PENDING | Subtotal: Rs 910 | CGST: Rs 22.75 | SGST: Rs 22.75 | Total Net Amount: Rs 956 | Items: cone vinding (10s, 1 kattu, 15 kazhi @ Rs 520)",
+    "metadata": {
+      "billNo": 6,
+      "customer": "GAIA SUSTAINABLE SOLUTION",
+      "partyGst": "33AAJCG6975A1ZMT",
+      "date": "2026-08-07",
+      "status": "pending",
+      "netAmount": 956,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:02.293972+00:00"
+  },
+  "doc_d3057b5a": {
+    "doc_id": "doc_d3057b5a",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0001_Sri Laxmi Export.pdf",
+    "content_text": "Bill No: 1 | Date: 2026-05-01 | Customer: Sri Laxmi Export | GST: 33ABDPL8401A1ZD | Status: PAID | Subtotal: Rs 825 | CGST: Rs 20.625 | SGST: Rs 20.625 | Total Net Amount: Rs 866 | Items: red (10s, 1 kattu, 10 kazhi @ Rs 550)",
+    "metadata": {
+      "billNo": 1,
+      "customer": "Sri Laxmi Export",
+      "partyGst": "33ABDPL8401A1ZD",
+      "date": "2026-05-01",
+      "status": "paid",
+      "netAmount": 866,
+      "driveUrl": "https://drive.google.com/file/d/1AGK6eFdwhGML1G1wzol7n95SK7pLcyo0/view?usp=drivesdk",
+      "driveFileId": "1AGK6eFdwhGML1G1wzol7n95SK7pLcyo0"
+    },
+    "indexed_at": "2026-08-29T08:29:15.526839+00:00"
+  },
+  "doc_d54575fa": {
+    "doc_id": "doc_d54575fa",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0002_M.S.K Fabrics.pdf",
+    "content_text": "Bill No: 2 | Date: 2026-07-25 | Customer: M.S.K Fabrics | GST: 33AAVFM9953BIZW | Status: PENDING | Subtotal: Rs 5226.67 | CGST: Rs 130.66675 | SGST: Rs 130.66675 | Total Net Amount: Rs 5488 | Items: Blue (2/30s, 7 kattu, 7 kazhi @ Rs 700)",
+    "metadata": {
+      "billNo": 2,
+      "customer": "M.S.K Fabrics",
+      "partyGst": "33AAVFM9953BIZW",
+      "date": "2026-07-25",
+      "status": "pending",
+      "netAmount": 5488,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:15.531879+00:00"
+  },
+  "doc_c1571ae0": {
+    "doc_id": "doc_c1571ae0",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0003_SRI GANAPATHI COLOURS.pdf",
+    "content_text": "Bill No: 3 | Date: 2026-07-30 | Customer: SRI GANAPATHI COLOURS | GST: 33HKSPS1735K1ZH | Status: PENDING | Subtotal: Rs 679.41 | CGST: Rs 16.98525 | SGST: Rs 16.98525 | Total Net Amount: Rs 713 | Items: green (2/40s, 1 kattu, 60 kazhi @ Rs 150)",
+    "metadata": {
+      "billNo": 3,
+      "customer": "SRI GANAPATHI COLOURS",
+      "partyGst": "33HKSPS1735K1ZH",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 713,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:15.536550+00:00"
+  },
+  "doc_93c7648c": {
+    "doc_id": "doc_93c7648c",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0003_SRI GANAPATHI COLOURS.pdf",
+    "content_text": "Bill No: 3 | Date: 2026-07-30 | Customer: SRI GANAPATHI COLOURS | GST: 33HKSPS1735K1ZH | Status: PENDING | Subtotal: Rs 679.41 | CGST: Rs 16.98525 | SGST: Rs 16.98525 | Total Net Amount: Rs 713 | Items: green (2/40s, 1 kattu, 60 kazhi @ Rs 150)",
+    "metadata": {
+      "billNo": 3,
+      "customer": "SRI GANAPATHI COLOURS",
+      "partyGst": "33HKSPS1735K1ZH",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 713,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:15.539650+00:00"
+  },
+  "doc_1ffd0461": {
+    "doc_id": "doc_1ffd0461",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0004_Sowbhagiya Home Textiles.pdf",
+    "content_text": "Bill No: 4 | Date: 2026-07-30 | Customer: Sowbhagiya Home Textiles | GST: 33AGSPR4149P1ZI | Status: PENDING | Subtotal: Rs 1000 | CGST: Rs 25 | SGST: Rs 25 | Total Net Amount: Rs 1050 | Items: green red (10s, 1 kattu, 20 kazhi @ Rs 500)",
+    "metadata": {
+      "billNo": 4,
+      "customer": "Sowbhagiya Home Textiles",
+      "partyGst": "33AGSPR4149P1ZI",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 1050,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:15.543007+00:00"
+  },
+  "doc_47447055": {
+    "doc_id": "doc_47447055",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0005_Sowbhagiya Home Textiles.pdf",
+    "content_text": "Bill No: 5 | Date: 2026-07-30 | Customer: Sowbhagiya Home Textiles | GST: 33AGSPR4149P1ZI | Status: PENDING | Subtotal: Rs 875 | CGST: Rs 21.875 | SGST: Rs 21.875 | Total Net Amount: Rs 919 | Items: 646 (10s, 1 kattu, 15 kazhi @ Rs 500)",
+    "metadata": {
+      "billNo": 5,
+      "customer": "Sowbhagiya Home Textiles",
+      "partyGst": "33AGSPR4149P1ZI",
+      "date": "2026-07-30",
+      "status": "pending",
+      "netAmount": 919,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:15.547058+00:00"
+  },
+  "doc_b1e081de": {
+    "doc_id": "doc_b1e081de",
+    "folder_alias": "sgc_billing_active_vault",
+    "filename": "Bill_0006_GAIA SUSTAINABLE SOLUTION.pdf",
+    "content_text": "Bill No: 6 | Date: 2026-08-07 | Customer: GAIA SUSTAINABLE SOLUTION | GST: 33AAJCG6975A1ZMT | Status: PENDING | Subtotal: Rs 910 | CGST: Rs 22.75 | SGST: Rs 22.75 | Total Net Amount: Rs 956 | Items: cone vinding (10s, 1 kattu, 15 kazhi @ Rs 520)",
+    "metadata": {
+      "billNo": 6,
+      "customer": "GAIA SUSTAINABLE SOLUTION",
+      "partyGst": "33AAJCG6975A1ZMT",
+      "date": "2026-08-07",
+      "status": "pending",
+      "netAmount": 956,
+      "driveUrl": null,
+      "driveFileId": null
+    },
+    "indexed_at": "2026-08-29T08:29:15.550054+00:00"
+  }
+}

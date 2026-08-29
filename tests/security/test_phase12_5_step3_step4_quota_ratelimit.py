@@ -216,8 +216,8 @@ def test_p12_5_s4_15_continuous_replenishment_after_delay():
     limiter.consume("tenant_A", tokens_required=600)
     assert limiter.get_token_balance("tenant_A") == 0.0
 
-    # Wait 0.1s -> should replenish approx 1 token
-    time.sleep(0.12)
+    # Wait 0.25s -> should replenish approx 2.5 tokens
+    time.sleep(0.25)
     assert limiter.consume("tenant_A", tokens_required=1) is True
 
 

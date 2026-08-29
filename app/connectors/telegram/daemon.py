@@ -58,6 +58,7 @@ from app.tools.conversation_engine import ConversationEngine
 from app.tools.pc_pilot import PCPilot
 from app.tools.reminder_scheduler import ReminderScheduler
 from app.tools.tts_engine import JARVISVoiceEngine, VoiceMode
+from app.brain.master_orchestrator import MasterOrchestrator
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -127,6 +128,7 @@ class TelegramBotDaemon:
         self.voice_engine = JARVISVoiceEngine()
         self.reminder_scheduler = ReminderScheduler()
         self.pc_pilot = PCPilot()
+        self.master_orchestrator = MasterOrchestrator()
         self.agent_brain = AutonomousAgentBrain(
             pc_pilot=self.pc_pilot,
             reminder_scheduler=self.reminder_scheduler,

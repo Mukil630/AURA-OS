@@ -15,6 +15,10 @@ SHARED_VAULT_URL = "https://drive.google.com/drive/folders/1nGZG5-eIcxmkgQxBtZ7t
 MASTER_RESUME_FILE_ID = "1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ"
 MASTER_RESUME_URL = "https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link"
 
+# Active SGC Billing Software Storage Vault (Live each bill store location)
+SGC_BILLING_ACTIVE_VAULT_ID = "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9"
+SGC_BILLING_ACTIVE_VAULT_URL = "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link"
+
 SGC_BILLING_VAULT_1_ID = "155EqYOwPJ2Fc9QfqVSrZu5VnYzZgRcyZ"
 SGC_BILLING_VAULT_1_URL = "https://drive.google.com/drive/folders/155EqYOwPJ2Fc9QfqVSrZu5VnYzZgRcyZ?usp=drive_link"
 
@@ -40,6 +44,9 @@ class DriveVaultManager:
             f"   • Role: Universal storage for all projects, resumes, and persistent states.\n\n"
             f"📄 *Official Master Resume*: [View Resume PDF]({MASTER_RESUME_URL})\n"
             f"   • File ID: `{MASTER_RESUME_FILE_ID}`\n\n"
+            f"🧾 *SGC Billing Active Storage Vault*: [Open Active Bills Vault]({SGC_BILLING_ACTIVE_VAULT_URL})\n"
+            f"   • Folder ID: `{SGC_BILLING_ACTIVE_VAULT_ID}`\n"
+            f"   • Role: Live cloud vault where each customer invoice PDF is stored.\n\n"
             f"🧾 *SGC Billing Dual Vault 1*: [Open Billing Vault 1]({SGC_BILLING_VAULT_1_URL})\n"
             f"🧾 *SGC Billing Dual Vault 2*: [Open Billing Vault 2]({SGC_BILLING_VAULT_2_URL})\n"
             f"   • Storage Directive: Every bill generated is automatically uploaded to BOTH folders concurrently."

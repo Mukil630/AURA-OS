@@ -68,9 +68,12 @@ storage/browser_session/
 *.sqlite3
 data/*.db
 data/*.sqlite3
+data/test_*.json
+data/outbox_queue.json
 
 # Logs & Temporary Artifacts
 *.log
+*.mp3
 logs/
 tmp/
 temp/

@@ -59,8 +59,8 @@ class GoogleDriveConnector(IConnector):
         self._connector_id = "connector_google_drive"
         self._connector_type = ConnectorType.GOOGLE_DRIVE
         self._base_url = base_url
-        env_mode = os.getenv("ENVIRONMENT", "mock").lower()
-        self._is_mock = is_mock if is_mock is not None else (env_mode in ("mock", "test"))
+        env_mode = os.getenv("ENVIRONMENT", "local").lower()
+        self._is_mock = is_mock if is_mock is not None else (env_mode in ("mock", "test", "local"))
         self._connected = True
 
         # In-memory mock vault database
