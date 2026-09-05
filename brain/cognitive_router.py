@@ -50,11 +50,14 @@ class CognitiveRouter:
         text = (user_text or "").strip()
         lower_text = text.lower()
 
-        # ── TRACK 3: FAST-PATH DEVICE PRESENTATION ("Open panni kaatu", "Show me on screen") ──
+        # ── TRACK 3: FAST-PATH DEVICE PRESENTATION & PHYSICAL PC ACTION ────────
         presentation_patterns = [
             r"(open.*panni.*kaatu|open.*pannu.*screen|screen.*la.*open|screen.*la.*kaatu)",
-            r"(show.*on.*screen|display.*on.*pc|open.*on.*pc|open.*in.*browser)",
-            r"(open.*this.*file|open.*excel|open.*invoice|show.*proof)"
+            r"(show.*on.*screen|display.*on.*pc|open.*on.*pc|open.*in.*browser|open.*on.*lap|open.*lap)",
+            r"(open.*this.*file|open.*excel|open.*invoice|show.*proof)",
+            r"(open.*notepad|open.*chrome|open.*browser|open.*youtube|open.*whatsapp|open.*calc)",
+            r"(play.*youtube|play.*song|play.*video|play.*pannu|lap.*la.*play|play.*vj.*siddhu|vj.*siddhu)",
+            r"(close.*notepad|close.*app|close.*window|take.*screenshot|screen.*shot)"
         ]
         for pat in presentation_patterns:
             if re.search(pat, lower_text):
@@ -62,7 +65,7 @@ class CognitiveRouter:
                     track="DEVICE_PRESENTATION",
                     target_swarm_agent="PCPilot",
                     confidence=0.98,
-                    goal_summary="User requested to display/open file or application on screen",
+                    goal_summary="User requested to display/open file, application, or media on physical PC screen",
                     requires_pc=True
                 )
 
@@ -161,7 +164,7 @@ class CognitiveRouter:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.1,
-                max_tokens=200,
+                max_tokens=1000,
                 response_format={"type": "json_object"}
             )
             raw_json = json.loads(resp.choices[0].message.content or "{}")

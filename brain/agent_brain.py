@@ -691,13 +691,44 @@ class AgentBrain:
                 self.mem.append_conversation("JARVIS", reply)
                 return reply
 
-            # ── TRACK 3: DEVICE_PRESENTATION ("Open panni kaatu") ────────────
+            # ── TRACK 3: DEVICE_PRESENTATION & PHYSICAL PC ACTION ────────────
             elif route.track == "DEVICE_PRESENTATION":
                 import asyncio
-                pres_res = asyncio.run(self.device_router.route_presentation(user_message, user_name=user_name))
-                self.mem.append_conversation(user_name, user_message)
-                self.mem.append_conversation("JARVIS", pres_res.status_message)
-                return pres_res.status_message
+                msg_lower = user_message.lower()
+                if "notepad" in msg_lower:
+                    if any(w in msg_lower for w in ["close", "moodu", "kill", "exit"]):
+                        action = "EXECUTE_POWERSHELL"
+                        payload = {"command": "Stop-Process -Name notepad -Force -ErrorAction SilentlyContinue", "summary": "Done Boss! Notepad closed on your laptop screen."}
+                    else:
+                        action = "EXECUTE_POWERSHELL"
+                        payload = {"command": "Start-Process notepad", "summary": "🚀 Successfully launched Notepad on your laptop screen, Boss!"}
+                elif any(w in msg_lower for w in ["youtube", "play", "song", "video", "siddhu", "vlog"]):
+                    action = "PLAY_MEDIA"
+                    payload = {"query": user_message}
+                elif any(w in msg_lower for w in ["screenshot", "screen proof", "screen capture"]):
+                    action = "TAKE_SCREENSHOT"
+                    payload = {}
+                elif "calc" in msg_lower:
+                    action = "EXECUTE_POWERSHELL"
+                    payload = {"command": "Start-Process calc", "summary": "🚀 Calculator opened on your laptop screen, Boss!"}
+                elif "chrome" in msg_lower or "browser" in msg_lower:
+                    action = "OPEN_ON_SCREEN"
+                    payload = {"target": "https://google.com"}
+                else:
+                    action = "OPEN_ON_SCREEN"
+                    payload = {"target": user_message}
+
+                swarm_res = asyncio.run(self.swarm.dispatch("PCPilot", action, payload))
+                if swarm_res.status == "COMPLETED" and swarm_res.result:
+                    reply = swarm_res.result.get("summary", "PC command executed successfully!")
+                    self.mem.append_conversation(user_name, user_message)
+                    self.mem.append_conversation("JARVIS", reply)
+                    return reply
+                else:
+                    pres_res = asyncio.run(self.device_router.route_presentation(user_message, user_name=user_name))
+                    self.mem.append_conversation(user_name, user_message)
+                    self.mem.append_conversation("JARVIS", pres_res.status_message)
+                    return pres_res.status_message
 
             # ── TRACK 4: AUTONOMOUS_HEAVY_TASK via Swarm ─────────────────────
             elif route.track == "AUTONOMOUS_HEAVY_TASK" and route.target_swarm_agent in ["WebScout", "PlacementHunter", "SGCExecutive", "Antigravity"]:

@@ -227,7 +227,7 @@ def sleep_pc() -> str:
 # 5. SCREENSHOT & VISION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def take_pc_screenshot(save_path: str = None) -> str:
+def take_pc_screenshot(save_path: str = None) -> Optional[str]:
     """Captures a screenshot of the PC screen and returns the saved file path."""
     target_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "storage", "screenshots")
     os.makedirs(target_dir, exist_ok=True)
@@ -239,9 +239,10 @@ def take_pc_screenshot(save_path: str = None) -> str:
     # Tier 1: PIL ImageGrab
     try:
         from PIL import ImageGrab
-        img = ImageGrab.grab()
+        img = ImageGrab.grab(all_screens=True)
         img.save(save_path, "PNG")
-        return f"Screenshot saved successfully at: {save_path}"
+        if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
+            return save_path
     except Exception:
         pass
 
@@ -251,9 +252,12 @@ def take_pc_screenshot(save_path: str = None) -> str:
         pyautogui.FAILSAFE = False
         img = pyautogui.screenshot()
         img.save(save_path)
-        return f"Screenshot saved successfully at: {save_path}"
-    except Exception as e:
-        return f"Failed to take screenshot: {str(e)}"
+        if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
+            return save_path
+    except Exception:
+        pass
+
+    return None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
