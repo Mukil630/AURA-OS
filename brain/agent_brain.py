@@ -679,9 +679,14 @@ class AgentBrain:
             elif route.track == "STATUS_OR_MEMORY_QUERY":
                 import asyncio
                 agent_name = route.target_swarm_agent or "MemoryVault"
-                swarm_res = asyncio.run(self.swarm.dispatch(agent_name, "QUERY_TASK_STATUS" if agent_name == "MemoryVault" else "CHECK_OVERDUE", {}))
+                if agent_name == "SGCExecutive":
+                    action = "GET_LATEST_BILL" if any(w in user_message.lower() for w in ["last bill", "bill number", "latest bill", "bill no", "poitu", "evalo", "bill"]) else "CHECK_OVERDUE"
+                else:
+                    action = "CONFIRM_MEMORY_STATUS" if any(w in user_message.lower() for w in ["memory", "store", "remember", "save"]) else "QUERY_TASK_STATUS"
+                
+                swarm_res = asyncio.run(self.swarm.dispatch(agent_name, action, {"query": user_message}))
                 summary = swarm_res.result.get("summary", "Status retrieved successfully.") if swarm_res.result else "All tasks tracked in persistent memory."
-                reply = f"📊 *JARVIS Live Status & Memory:*\n\n{summary}\n\nMaapla, ella tasks-um persistent ledger-la tracked-aa irukku! Let me know if you need specific details."
+                reply = f"{summary}\n\nMaapla, ella data-vum persistent ledger-la tracked-aa irukku! Let me know if you need specific details."
                 self.mem.append_conversation(user_name, user_message)
                 self.mem.append_conversation("JARVIS", reply)
                 return reply

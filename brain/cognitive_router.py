@@ -70,8 +70,9 @@ class CognitiveRouter:
         status_patterns = [
             r"(task.*enna.*aachu|status.*enna|enna.*nadandhadhu|update.*sollu)",
             r"(what.*is.*the.*status|how.*is.*the.*task|did.*you.*finish)",
-            r"(sgc.*bill.*evalo|latest.*invoice|pending.*overdue)",
-            r"(list.*files|changed.*files|show.*logs?|task.*ledger)"
+            r"(sgc.*bill|business.*bill|buisness.*bill|bill.*number|last.*bill|latest.*bill|bill.*no|invoice|pending.*overdue|evalo.*bill|bill.*poitu)",
+            r"(list.*files|changed.*files|show.*logs?|task.*ledger)",
+            r"(memory.*eruka|memory.*irukka|store.*panni|remember|unaku.*memory|save.*data|store.*pannu)"
         ]
         for pat in status_patterns:
             if re.search(pat, lower_text):
@@ -80,7 +81,7 @@ class CognitiveRouter:
                     track="STATUS_OR_MEMORY_QUERY",
                     target_swarm_agent=agent,
                     confidence=0.96,
-                    goal_summary="User is querying status of a previous task or persistent memory",
+                    goal_summary="User is querying status of a previous task, business bills, or persistent memory",
                     requires_pc=False
                 )
 
@@ -154,8 +155,11 @@ class CognitiveRouter:
                 "\"confidence\": 0.95, \"goal_summary\": \"...\", \"requires_pc\": true|false}"
             )
             resp = self.client.chat.completions.create(
-                model=self.fast_model,
-                messages=[{"role": "user", "content": prompt}],
+                model="openai/gpt-oss-120b",
+                messages=[
+                    {"role": "system", "content": "You are a classifier that strictly returns JSON matching the required schema."},
+                    {"role": "user", "content": prompt}
+                ],
                 temperature=0.1,
                 max_tokens=200,
                 response_format={"type": "json_object"}

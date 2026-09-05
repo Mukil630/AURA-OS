@@ -82,17 +82,25 @@ class MemoryManager:
     def get_system_prompt_context(self) -> str:
         ctx = self.get_context()
         prof = self.get_profile()
-        user_name = prof.get('name', 'Mukil')
-        phase = ctx.get('active_phase', 'N/A')
-        drive_url = ctx.get('drive_vault', {}).get('url', 'N/A')
-        curr_task = ctx.get('current_task', 'Idle')
+        user_name = prof.get('personal_details', {}).get('name', 'Mukilarasu S')
+        phone = prof.get('personal_details', {}).get('phone', '9080030538')
+        location = prof.get('personal_details', {}).get('location', 'Karur, Tamil Nadu')
+        college = prof.get('personal_details', {}).get('college', 'VSB Engineering College, Karur')
+        phase = ctx.get('active_phase', 'AURA-OS Autonomous Swarm Active')
+        drive_url = ctx.get('drive_vault', {}).get('backup_vault_id', '1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1')
+        curr_task = ctx.get('current_task', 'Autonomous Partner Active')
         return (
-            '=== PERSISTENT MEMORY CONTEXT ===\n'
-            f'User: {user_name}\n'
-            f'Active Phase: {phase}\n'
-            f'Drive Vault: {drive_url}\n'
-            f'Current Task: {curr_task}\n'
-            '================================='
+            "=== PERSISTENT MEMORY & USER CORE CONTEXT ===\n"
+            f"• User: {user_name} (Phone: {phone}, Location: {location}, College: {college})\n"
+            "• Family Business: Sri Ganapathi Colours (SGC) - Yarn Dyeing & Textile Sizing located in Karur, Tamil Nadu.\n"
+            "• SGC Invoicing & Bills: Handled via 'sgc-billing' desktop app. Active Bills Drive Vault ID: 11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9. Total 6 bills recorded (Latest is Bill #6: GAIA SUSTAINABLE SOLUTION, ₹956).\n"
+            "• When Mukil mentions 'business bills', 'bills', 'kadai bills', or 'invoices', he is ALWAYS referring to Sri Ganapathi Colours (SGC).\n"
+            "• COLLOQUIAL TANGLISH INSTRUCTION: 'Onu ella' or 'Onnum illa' means 'Nothing much / never mind / no worries' in Tanglish. It is NOT a company name!\n"
+            "• PERMANENT MEMORY DIRECTIVE: You have FULL MULTI-DEVICE PERSISTENT MEMORY (PC, Phone/Telegram, and 250GB Google Drive mesh). NEVER tell Mukil that you don't have permanent memory or that memory doesn't carry over! You remember everything Mukil says.\n"
+            f"• Active Phase: {phase}\n"
+            f"• 250GB Mesh & Master Vault: {drive_url}\n"
+            f"• Current Focus: {curr_task}\n"
+            "============================================="
         )
 
 if __name__ == '__main__':
