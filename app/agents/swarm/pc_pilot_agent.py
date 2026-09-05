@@ -101,6 +101,34 @@ class PCPilotAgent(BaseSwarmAgent):
                 }
                 return message
 
+            elif action in ["LOCK_PC", "LOCK_WORKSTATION"]:
+                res = pc_tools.lock_workstation()
+                message.status = "COMPLETED"
+                message.result = {
+                    "summary": "🔒 Laptop locked successfully, Boss!"
+                }
+                return message
+
+            elif action in ["SET_VOLUME", "VOLUME"]:
+                lvl = payload.get("level", 50)
+                pc_tools.set_system_volume(lvl)
+                message.status = "COMPLETED"
+                message.result = {
+                    "level": lvl,
+                    "summary": f"🔊 Laptop volume set to {lvl}%, Boss!"
+                }
+                return message
+
+            elif action in ["SET_BRIGHTNESS", "BRIGHTNESS"]:
+                lvl = payload.get("level", 80)
+                pc_tools.set_screen_brightness(lvl)
+                message.status = "COMPLETED"
+                message.result = {
+                    "level": lvl,
+                    "summary": f"☀️ Laptop screen brightness set to {lvl}%, Boss!"
+                }
+                return message
+
             else:
                 message.status = "FAILED"
                 message.error = f"Unsupported PCPilot action: {action}"

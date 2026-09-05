@@ -130,6 +130,20 @@ async def _send_screenshot_if_present(update: Update, text: str):
         except Exception as photo_err:
             logger.error(f"Error sending photo: {photo_err}")
 
+async def _send_reply_safely(update: Update, text: str):
+    """Safely sends replies splitting chunks >4000 chars and falling back if Markdown fails."""
+    if not text:
+        return
+    chunks = [text[i:i+4000] for i in range(0, len(text), 4000)]
+    for chunk in chunks:
+        try:
+            await update.message.reply_text(chunk, parse_mode="Markdown")
+        except Exception:
+            try:
+                await update.message.reply_text(chunk)
+            except Exception as ex:
+                logger.error(f"Error delivering Telegram message: {ex}")
+
 async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name or "Mukil"
     voice = update.message.voice or update.message.audio
@@ -167,7 +181,7 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Process through AgentBrain
         reply = brain.process_message(transcribed_text, user_name=user_name)
-        await update.message.reply_text(reply)
+        await _send_reply_safely(update, reply)
 
         # If screenshot was taken, send photo directly to Telegram
         await _send_screenshot_if_present(update, reply)
@@ -197,7 +211,7 @@ async def chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.effective_chat.send_action("typing")
     reply = brain.process_message(user_text, user_name=user_name)
-    await update.message.reply_text(reply)
+    await _send_reply_safely(update, reply)
 
     # If screenshot was taken, send photo directly to Telegram
     await _send_screenshot_if_present(update, reply)

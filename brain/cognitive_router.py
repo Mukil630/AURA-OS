@@ -55,9 +55,13 @@ class CognitiveRouter:
             r"(open.*panni.*kaatu|open.*pannu.*screen|screen.*la.*open|screen.*la.*kaatu)",
             r"(show.*on.*screen|display.*on.*pc|open.*on.*pc|open.*in.*browser|open.*on.*lap|open.*lap)",
             r"(open.*this.*file|open.*excel|open.*invoice|show.*proof)",
-            r"(open.*notepad|open.*chrome|open.*browser|open.*youtube|open.*whatsapp|open.*calc)",
+            r"(open.*notepad|open.*chrome|open.*browser|open.*youtube|open.*whatsapp|open.*calc|open.*code)",
             r"(play.*youtube|play.*song|play.*video|play.*pannu|lap.*la.*play|play.*vj.*siddhu|vj.*siddhu)",
-            r"(close.*notepad|close.*app|close.*window|take.*screenshot|screen.*shot)"
+            r"(close.*notepad|close.*app|close.*window|take.*screenshot|screen.*shot)",
+            r"(battery.*status|battery.*evalo|charge.*evalo|battery.*percentage|battery.*level)",
+            r"(lock.*pc|lock.*laptop|lock.*workstation|sleep.*pc)",
+            r"(volume.*yethu|volume.*kora|sound.*yethu|sound.*kora|mute|unmute|set.*volume)",
+            r"(brightness.*yethu|brightness.*kora|set.*brightness)"
         ]
         for pat in presentation_patterns:
             if re.search(pat, lower_text):
@@ -73,13 +77,13 @@ class CognitiveRouter:
         status_patterns = [
             r"(task.*enna.*aachu|status.*enna|enna.*nadandhadhu|update.*sollu)",
             r"(what.*is.*the.*status|how.*is.*the.*task|did.*you.*finish)",
-            r"(sgc.*bill|business.*bill|buisness.*bill|bill.*number|last.*bill|latest.*bill|bill.*no|invoice|pending.*overdue|evalo.*bill|bill.*poitu)",
+            r"(sgc|bill|invoice|overdue|balance|ledger|party)",
             r"(list.*files|changed.*files|show.*logs?|task.*ledger)",
             r"(memory.*eruka|memory.*irukka|store.*panni|remember|unaku.*memory|save.*data|store.*pannu)"
         ]
         for pat in status_patterns:
             if re.search(pat, lower_text):
-                agent = "SGCExecutive" if any(k in lower_text for k in ["sgc", "bill", "invoice", "overdue"]) else "MemoryVault"
+                agent = "SGCExecutive" if any(k in lower_text for k in ["sgc", "bill", "invoice", "overdue", "balance", "ledger", "msk", "sowbhagiya", "laxmi", "gaia"]) else "MemoryVault"
                 return CognitiveRoute(
                     track="STATUS_OR_MEMORY_QUERY",
                     target_swarm_agent=agent,

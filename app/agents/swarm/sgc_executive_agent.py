@@ -7,6 +7,7 @@ Family Business (Sri Ganapathi Colours) Autonomous Financial Operations:
   - Live query resolution for latest bill number, pending balance, and party statuses
 """
 import os
+import re
 import json
 import logging
 from typing import Dict, Any, List
@@ -60,7 +61,34 @@ class SGCExecutiveAgent(BaseSwarmAgent):
 
         try:
             if action in ["GET_LATEST_BILL", "LATEST_BILL", "QUERY_BILLS"]:
-                if live_data:
+                query_text = (payload.get("query") or "").lower()
+                query_norm = re.sub(r'[^a-z0-9]', '', query_text)
+                matching_bill = None
+                if live_data and live_data.get("bills"):
+                    target_keywords = ["msk", "sowbhagiya", "laxmi", "gaia", "ganapathi"]
+                    matched_keys = [k for k in target_keywords if k in query_norm]
+                    if matched_keys:
+                        for b in reversed(live_data.get("bills", [])):
+                            cust_norm = re.sub(r'[^a-z0-9]', '', (b.get("customer") or "").lower())
+                            if any(k in cust_norm for k in matched_keys):
+                                matching_bill = b
+                                break
+
+                if matching_bill:
+                    summary = (
+                        f"🧾 *SGC Bill Details for {matching_bill['customer']}:*\n\n"
+                        f"• **Bill Number**: `#{matching_bill['billNo']}`\n"
+                        f"• **Net Amount**: ₹{matching_bill['netAmount']:,.2f}\n"
+                        f"• **Date**: {matching_bill['date']}\n"
+                        f"• **Status**: {matching_bill['status'].upper()}\n"
+                        f"• **Variety**: {matching_bill.get('items', [{}])[0].get('variety', 'Yarn')} ({matching_bill.get('items', [{}])[0].get('count', 'N/A')})\n\n"
+                        f"☁️ **Drive Vault**: [SGC Bills Folder](https://drive.google.com/drive/folders/{live_data.get('drive_folder_id', self.active_vault_id)})"
+                    )
+                    message.status = "COMPLETED"
+                    message.result = {"bill": matching_bill, "summary": summary}
+                    return message
+
+                elif live_data:
                     summary = (
                         f"🧾 *Sri Ganapathi Colours (SGC) Live Billing Status:*\n\n"
                         f"• **Last Bill Number**: `#{live_data['latest_bill_no']}`\n"

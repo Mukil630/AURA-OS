@@ -708,9 +708,30 @@ class AgentBrain:
                 elif any(w in msg_lower for w in ["screenshot", "screen proof", "screen capture"]):
                     action = "TAKE_SCREENSHOT"
                     payload = {}
+                elif any(w in msg_lower for w in ["battery", "charge"]):
+                    action = "GET_BATTERY"
+                    payload = {}
+                elif any(w in msg_lower for w in ["lock", "sleep"]):
+                    action = "LOCK_PC"
+                    payload = {}
+                elif any(w in msg_lower for w in ["volume", "sound", "mute"]):
+                    import re
+                    digits = re.findall(r'\b\d+\b', msg_lower)
+                    lvl = int(digits[0]) if digits else (0 if "mute" in msg_lower else 50)
+                    action = "SET_VOLUME"
+                    payload = {"level": lvl}
+                elif "brightness" in msg_lower:
+                    import re
+                    digits = re.findall(r'\b\d+\b', msg_lower)
+                    lvl = int(digits[0]) if digits else 80
+                    action = "SET_BRIGHTNESS"
+                    payload = {"level": lvl}
                 elif "calc" in msg_lower:
                     action = "EXECUTE_POWERSHELL"
                     payload = {"command": "Start-Process calc", "summary": "🚀 Calculator opened on your laptop screen, Boss!"}
+                elif "whatsapp" in msg_lower:
+                    action = "EXECUTE_POWERSHELL"
+                    payload = {"command": "start whatsapp:", "summary": "🚀 WhatsApp desktop opened on your laptop screen, Boss!"}
                 elif "chrome" in msg_lower or "browser" in msg_lower:
                     action = "OPEN_ON_SCREEN"
                     payload = {"target": "https://google.com"}
