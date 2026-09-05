@@ -44,7 +44,7 @@ class CognitiveRouter:
 
     def __init__(self, groq_api_key: Optional[str] = None):
         self.client = Groq(api_key=groq_api_key or GROQ_API_KEY)
-        self.fast_model = "llama-3.3-70b-versatile"
+        self.fast_model = "openai/gpt-oss-20b"
 
     def route(self, user_text: str) -> CognitiveRoute:
         text = (user_text or "").strip()

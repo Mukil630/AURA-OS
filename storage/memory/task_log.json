@@ -947,5 +947,41 @@
         "app/agents/swarm/"
       ]
     }
+  },
+  {
+    "timestamp": "2026-09-05T21:59:28.784691",
+    "event": "CHAT_RESPONSE",
+    "description": "[FAST_CONVO] User: Hi maapla eppadi irukka?... | Reply: Hey maapla, nalla irukken. Neenga eppadi irukeenga?...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-09-05T21:59:34.879382",
+    "event": "SWARM_TASK_COMPLETED",
+    "description": "Extracted 5 verified B2B leads for 'Karur Spinning Mills'.",
+    "metadata": {
+      "agent": "WebScout"
+    }
+  },
+  {
+    "timestamp": "2026-09-05T21:59:56.516495",
+    "event": "CHAT_RESPONSE",
+    "description": "[FAST_CONVO] User: Hi maapla eppadi irukka?... | Reply: Hey maapla, nalla irukken. Neenga eppadi irukeenga?...",
+    "metadata": {}
+  },
+  {
+    "timestamp": "2026-09-05T21:59:56.879260",
+    "event": "EMAIL_SENT_SIMULATION",
+    "description": "[Sandbox] Email 'Application for AI Engineer - Mukilarasu S' dispatched to recruiter@zoho.com",
+    "metadata": {
+      "recipient": "recruiter@zoho.com"
+    }
+  },
+  {
+    "timestamp": "2026-09-05T22:00:06.046426",
+    "event": "EMAIL_SENT_SIMULATION",
+    "description": "[Sandbox] Email 'Interview Confirmation - Mukilarasu S' dispatched to careers@zoho.com",
+    "metadata": {
+      "recipient": "careers@zoho.com"
+    }
   }
 ]

@@ -39,7 +39,7 @@ class CodeActCloudRunner:
         self.scratch_dir = scratch_dir or os.path.join(base_dir, "storage", "scratch")
         os.makedirs(self.scratch_dir, exist_ok=True)
         self.client = Groq(api_key=GROQ_API_KEY)
-        self.repair_model = "llama-3.3-70b-versatile"
+        self.repair_model = "openai/gpt-oss-120b"
 
     def execute_script(self, script_code: str, task_name: str = "dynamic_task", max_retries: int = 2) -> CodeActResult:
         task_id = f"task_{uuid4().hex[:8]}"
