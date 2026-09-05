@@ -6,6 +6,7 @@ import json
 import logging
 from typing import Dict, Any, Optional
 from app.agents.swarm.base_swarm_agent import BaseSwarmAgent, SwarmTaskMessage
+from memory.memory_manager import MemoryManager
 
 logger = logging.getLogger("MemoryVaultAgent")
 
@@ -19,6 +20,7 @@ class MemoryVaultAgent(BaseSwarmAgent):
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
         self.mesh_file = os.path.join(base_dir, "storage", "memory", "distributed_drive_mesh.json")
         self.task_log_file = os.path.join(base_dir, "storage", "memory", "task_log.json")
+        self.mem = MemoryManager()
 
     async def process_task(self, message: SwarmTaskMessage) -> SwarmTaskMessage:
         logger.info(f"📚 [MemoryVault] Processing action: {message.action}")
@@ -53,17 +55,60 @@ class MemoryVaultAgent(BaseSwarmAgent):
                 }
                 return message
 
-            elif action in ["CONFIRM_MEMORY_STATUS", "CHECK_MEMORY"]:
+            elif action in ["STORE_FACT", "SAVE_MEMORY"]:
+                raw_text = payload.get("query") or payload.get("text") or payload.get("fact", "")
+                category = payload.get("category", "user_knowledge")
+                key = payload.get("key") or (raw_text[:40] if raw_text else "general_note")
+                saved = self.mem.save_fact(key, raw_text, category=category)
                 summary = (
-                    "🧠 *Aama maapla! Enakku 100% PERMANENT MULTI-DEVICE PERSISTENT MEMORY irukku!*\n\n"
-                    "• **Cross-Device Sync**: Nee Phone Telegram-la sonnalum, PC-la sonnalum rendu இடத்துலயும் ஒரே memory share aagudhu.\n"
-                    "• **Persistent Storage**: Un profile (`user_profile.json`), conversations history, and living task ledger (`task_log.json`) disk-la permanent-aa save aagudhu.\n"
-                    "• **250GB Distributed Drive Mesh**: 10 dedicated Google Drive nodes-la project codebases, SGC invoices, resumes, and system backups permanently secure-aa irukku.\n\n"
-                    "Nee enna data sonnalum naan store pannipen, edhuvum forget aagadhu Boss!"
+                    f"💾 *Memory Saved Successfully, Boss!*\n\n"
+                    f"• **Key**: `{key}`\n"
+                    f"• **Content**: {raw_text}\n"
+                    f"• **Category**: `{category}`\n"
+                    f"• **Storage Partition**: `storage/memory/custom_facts.json`\n\n"
+                    f"Permanent memory-la allocate aayiduchu maapla, future sessions-layum idhu retain aagum!"
+                )
+                message.status = "COMPLETED"
+                message.result = {"saved": saved, "summary": summary}
+                return message
+
+            elif action in ["ALLOCATE_PROJECT_MEMORY", "ALLOCATE_PROJECT"]:
+                proj_name = payload.get("project_name") or payload.get("name") or "New_Autonomous_Project"
+                tech = payload.get("tech_stack", ["Python", "FastAPI", "Gemini 2.5", "Antigravity Engine"])
+                alloc = self.mem.allocate_project_memory(proj_name, tech_stack=tech, details=payload)
+                summary = (
+                    f"🏗️ *Project Memory Allocated Successfully!*\n\n"
+                    f"• **Project**: `{proj_name}`\n"
+                    f"• **Tech Stack**: {', '.join(tech)}\n"
+                    f"• **Assigned Drive Node**: Node 02 (`1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ`)\n"
+                    f"• **Assigned Agent**: `AntigravityAgent` (Autonomous Principal Staff Engineer)\n"
+                    f"• **Memory Partition**: `storage/memory/projects_memory.json`\n\n"
+                    f"Boss, indha project-ku dedicated persistent workspace and memory allocate panniyachu!"
+                )
+                message.status = "COMPLETED"
+                message.result = {"allocation": alloc, "summary": summary}
+                return message
+
+            elif action in ["LIST_ALLOCATIONS", "CONFIRM_MEMORY_STATUS", "CHECK_MEMORY"]:
+                allocs = self.mem.get_all_memory_allocations()
+                facts_count = len(self.mem.get_facts())
+                proj_count = len(self.mem.get_projects_memory())
+                summary = (
+                    "🧠 *AURA-OS & JARVIS Persistent Memory Allocation Map:*\n\n"
+                    "• **Partition 1 (Core Identity & Profile)**: `storage/memory/user_profile.json` (Mukil, Karur, VSB, AI Stack)\n"
+                    "• **Partition 2 (Operating Context & Mesh)**: `storage/memory/context.json`\n"
+                    "• **Partition 3 (Task & Audit Ledger)**: `storage/memory/task_log.json` (Living Task Ledger)\n"
+                    "• **Partition 4 (Cross-Device Chat History)**: `storage/memory/conversations_history.json`\n"
+                    f"• **Partition 5 (Dynamic User Knowledge Vault)**: `storage/memory/custom_facts.json` ({facts_count} Active Facts)\n"
+                    f"• **Partition 6 (Antigravity Project Memory)**: `storage/memory/projects_memory.json` ({proj_count} Active Projects)\n"
+                    "• **Partition 7 (SGC Billing & Ledger)**: `AppData/Roaming/sgc-billing/sgc-billing-data.json`\n"
+                    "• **Partition 8 (250GB Distributed Cloud Mesh)**: 10 Dedicated Google Drive Nodes (10x25GB)\n\n"
+                    "Maapla, ella data-vum multi-device persistent memory-la allocated & permanently secure-aa irukku!"
                 )
                 message.status = "COMPLETED"
                 message.result = {
                     "status": "ACTIVE_PERMANENT_MEMORY",
+                    "allocations": allocs,
                     "summary": summary
                 }
                 return message

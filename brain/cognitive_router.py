@@ -79,7 +79,7 @@ class CognitiveRouter:
             r"(what.*is.*the.*status|how.*is.*the.*task|did.*you.*finish)",
             r"(sgc|bill|invoice|overdue|balance|ledger|party)",
             r"(list.*files|changed.*files|show.*logs?|task.*ledger)",
-            r"(memory.*eruka|memory.*irukka|store.*panni|remember|unaku.*memory|save.*data|store.*pannu)"
+            r"(memory.*eruka|memory.*irukka|store.*panni|remember|unaku.*memory|save.*data|store.*pannu|allocate|allocation|note.*pannu|note.*panniko|save.*pannu)"
         ]
         for pat in status_patterns:
             if re.search(pat, lower_text):
