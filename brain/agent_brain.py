@@ -695,10 +695,22 @@ class AgentBrain:
                 return pres_res.status_message
 
             # ── TRACK 4: AUTONOMOUS_HEAVY_TASK via Swarm ─────────────────────
-            elif route.track == "AUTONOMOUS_HEAVY_TASK" and route.target_swarm_agent in ["WebScout", "PlacementHunter", "SGCExecutive"]:
+            elif route.track == "AUTONOMOUS_HEAVY_TASK" and route.target_swarm_agent in ["WebScout", "PlacementHunter", "SGCExecutive", "Antigravity"]:
                 import asyncio
-                action = "SCRAPE_MILLS" if "mill" in user_message.lower() else ("SCRAPE_JOBS" if any(w in user_message.lower() for w in ["job", "opening", "fresher"]) else "TAILOR_RESUME")
-                swarm_res = asyncio.run(self.swarm.dispatch(route.target_swarm_agent, action, {"query": user_message, "company": "Zoho", "role": "AI Engineer"}))
+                if route.target_swarm_agent == "Antigravity":
+                    action = "BUILD_PROJECT" if any(w in user_message.lower() for w in ["build", "scaffold", "create", "project", "app"]) else ("RUN_TERMINAL" if any(w in user_message.lower() for w in ["cmd", "command", "terminal", "powershell", "run"]) else "GENERAL_ENGINEERING")
+                    swarm_payload = {"description": user_message, "project_name": "autonomous_project", "command": user_message}
+                elif route.target_swarm_agent == "WebScout":
+                    action = "SCRAPE_MILLS" if "mill" in user_message.lower() else ("SCRAPE_JOBS" if any(w in user_message.lower() for w in ["job", "opening", "fresher"]) else "SCRAPE_JOBS")
+                    swarm_payload = {"query": user_message}
+                elif route.target_swarm_agent == "PlacementHunter":
+                    action = "TAILOR_RESUME"
+                    swarm_payload = {"company": "Zoho", "role": "AI Engineer", "query": user_message}
+                else:
+                    action = "CHECK_OVERDUE"
+                    swarm_payload = {"query": user_message}
+
+                swarm_res = asyncio.run(self.swarm.dispatch(route.target_swarm_agent, action, swarm_payload))
                 if swarm_res.status == "COMPLETED" and swarm_res.result:
                     summary = swarm_res.result.get("summary", "Task executed successfully by Swarm!")
                     reply = f"✅ *Task Executed by {route.target_swarm_agent}:*\n\n{summary}\n\nMaapla, output verified & saved in Distributed Mesh!"

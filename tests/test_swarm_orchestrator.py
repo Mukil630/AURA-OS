@@ -6,7 +6,8 @@ from app.agents.swarm import (
     PlacementHunterAgent,
     SGCExecutiveAgent,
     PCPilotAgent,
-    MemoryVaultAgent
+    MemoryVaultAgent,
+    AntigravityAgent
 )
 
 
@@ -41,11 +42,28 @@ def test_memory_vault_distributed_drive_mesh():
     assert msg.result["total_nodes"] == 10
 
 
+def test_antigravity_agent_build_and_terminal():
+    agent = AntigravityAgent()
+    # Test Scaffold
+    msg1 = asyncio.run(agent.process_task(agent._prepare_mock_msg("BUILD_PROJECT", {"project_name": "gemini_voice_stream", "files": ["main.py", "requirements.txt"]})))
+    assert msg1.status == "COMPLETED"
+    assert "gemini_voice_stream" in msg1.result["project_name"]
+
+    # Test Terminal Execution
+    msg2 = asyncio.run(agent.process_task(agent._prepare_mock_msg("RUN_TERMINAL", {"command": "Write-Output 'Antigravity Verified'"})))
+    assert msg2.status == "COMPLETED"
+    assert msg2.result["execution_result"]["status"] == "SUCCESS"
+
+
 def test_swarm_orchestrator_delegation():
     orchestrator = SwarmOrchestrator()
     res = asyncio.run(orchestrator.dispatch("SGCExecutive", "DRAFT_REMINDER", {"party_name": "Rajesh Textiles", "amount": 24500}))
     assert res.status == "COMPLETED"
     assert "Rajesh Textiles" in res.result["summary"]
+
+    res_anti = asyncio.run(orchestrator.dispatch("Antigravity", "GENERAL_ENGINEERING", {"description": "Audit system memory and verify mesh"}))
+    assert res_anti.status == "COMPLETED"
+    assert "Antigravity" in res_anti.result["engine"]
 
 
 # Helper method monkey-patched for testing
@@ -57,3 +75,4 @@ WebScoutAgent._prepare_mock_msg = _prepare_mock_msg
 PlacementHunterAgent._prepare_mock_msg = _prepare_mock_msg
 SGCExecutiveAgent._prepare_mock_msg = _prepare_mock_msg
 MemoryVaultAgent._prepare_mock_msg = _prepare_mock_msg
+AntigravityAgent._prepare_mock_msg = _prepare_mock_msg

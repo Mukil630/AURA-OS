@@ -58,9 +58,27 @@ def create_app() -> FastAPI:
     # Root Level Endpoints
     app.add_api_route("/health", health_check, methods=["GET"], tags=["Health"])
 
-    @app.get("/", tags=["Root"], response_class=HTMLResponse)
+    @app.get("/", tags=["Root"])
+    async def root_hub(request: Request):
+        accept_header = request.headers.get("accept", "")
+        if "text/html" in accept_header and "application/json" not in accept_header:
+            hub_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "jarvis_mobile_hub.html")
+            if os.path.exists(hub_path):
+                with open(hub_path, "r", encoding="utf-8") as f:
+                    return HTMLResponse(content=f.read())
+            return HTMLResponse("<h1>AURA-OS Mobile Hub is online.</h1>")
+        return JSONResponse(
+            content={
+                "name": settings.APP_NAME,
+                "version": settings.API_VERSION,
+                "status": "online",
+                "docs": "/docs",
+                "hub": "/app",
+            }
+        )
+
     @app.get("/app", tags=["Root"], response_class=HTMLResponse)
-    async def root_hub():
+    async def app_hub():
         hub_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "jarvis_mobile_hub.html")
         if os.path.exists(hub_path):
             with open(hub_path, "r", encoding="utf-8") as f:

@@ -675,6 +675,89 @@
       background: var(--cyan-dim);
       color: var(--cyan);
     }
+
+    /* Gmail Verification & Radar Modal */
+    #gmail-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 9, 16, 0.95);
+      backdrop-filter: blur(16px);
+      z-index: 900;
+      flex-direction: column;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .gmail-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--card-glow);
+    }
+
+    .gmail-status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .gmail-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-verified {
+      background: rgba(0, 255, 136, 0.15);
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+
+    .badge-warning {
+      background: rgba(255, 158, 0, 0.15);
+      border: 1px solid var(--orange);
+      color: var(--orange);
+    }
+
+    .assessment-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .assessment-item:hover {
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .assessment-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .deadline-tag {
+      font-size: 0.72rem;
+      background: rgba(255, 0, 85, 0.2);
+      border: 1px solid var(--red);
+      color: #ff5588;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -694,6 +777,7 @@
         <span class="status-dot"></span>
         <span id="telemetry-battery">🔋 78%</span>
       </div>
+      <button class="btn-icon" id="btn-gmail" title="Gmail Verification & Interview Radar" onclick="toggleGmailModal()">📧</button>
       <button class="btn-icon" id="btn-terminal" title="Remote Project Builder & Terminal" onclick="toggleTerminalModal()">💻</button>
       <button class="btn-icon" id="btn-notification" title="Enable Smart Push Notifications">🔔</button>
       <button class="btn-icon" id="btn-drive" title="Open 5TB Google Drive Vault">☁️</button>
@@ -716,6 +800,7 @@
 
   <!-- Quick Action Pill Carousel -->
   <div class="quick-actions-bar">
+    <div class="quick-pill" onclick="toggleGmailModal()">📧 Gmail Radar & Verify</div>
     <div class="quick-pill" onclick="sendQuickAction('Apply for Zoho AI Engineer')">💼 Apply Zoho AI</div>
     <div class="quick-pill" onclick="sendQuickAction('Apply for Freshworks')">🚀 Apply Freshworks</div>
     <div class="quick-pill" onclick="sendQuickAction('Check my battery percentage')">🔋 Check Battery</div>
@@ -798,6 +883,55 @@
       <button class="action-chip" onclick="runRemoteCommand()">⚡ Run</button>
       <button class="action-chip" onclick="runRemoteCommand('pytest')">🧪 Pytest</button>
       <button class="action-chip" onclick="runRemoteCommand('git status')">🐙 Git Status</button>
+    </div>
+  </div>
+
+  <!-- Gmail Verification & Placement Radar Modal -->
+  <div id="gmail-modal">
+    <div class="term-header">
+      <div class="term-title">📧 GMAIL VERIFICATION & 24/7 PLACEMENT RADAR</div>
+      <button class="btn-icon" onclick="toggleGmailModal()">✕</button>
+    </div>
+    <div style="padding-top: 14px;">
+      <!-- Connection Status Card -->
+      <div class="gmail-card">
+        <div class="gmail-status-header">
+          <div>
+            <h3 style="font-size: 1rem; color: var(--text-main);" id="gmail-target-email">mukilarasu55@gmail.com</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted);" id="gmail-sync-meta">Multi-Tier OAuth2 / IMAP Radar Active</p>
+          </div>
+          <span class="gmail-badge badge-verified" id="gmail-status-badge">🟢 VERIFIED</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+          <button class="action-chip" onclick="runGmailVerification()">⚡ Run Handshake Verification</button>
+          <button class="action-chip" onclick="runPlacementRadarScan()">🎯 Scan Placement Radar</button>
+          <button class="action-chip" onclick="toggleGmailConfig()">⚙️ Credentials</button>
+        </div>
+      </div>
+
+      <!-- Credentials Update Panel (Hidden by default) -->
+      <div class="gmail-card" id="gmail-config-panel" style="display: none;">
+        <h4 style="font-size: 0.85rem; color: var(--cyan); margin-bottom: 8px;">🔐 Update Gmail Credentials</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="email" id="input-gmail-email" class="input-wrapper" style="width: 100%; border-radius: 8px; padding: 8px 12px;" value="mukilarasu55@gmail.com" placeholder="Your Gmail address">
+          <input type="password" id="input-gmail-apppwd" class="input-wrapper" style="width: 100%; border-radius: 8px; padding: 8px 12px;" placeholder="16-character Gmail App Password">
+          <div style="display: flex; gap: 8px;">
+            <button class="action-chip" style="background: var(--cyan); color: #000;" onclick="saveGmailCredentials()">💾 Save & Verify</button>
+            <button class="action-chip" onclick="toggleGmailConfig()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Placement Radar Findings -->
+      <div class="gmail-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <h4 style="font-size: 0.9rem; color: var(--text-main);">🎯 Detected Placement Opportunities & Test Links</h4>
+          <span style="font-size: 0.75rem; color: var(--cyan);" id="gmail-radar-count">3 Active Alerts</span>
+        </div>
+        <div id="gmail-radar-list">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1249,6 +1383,108 @@
     }
     loadTelemetry();
     setInterval(loadTelemetry, 15000);
+
+    // Gmail Verification & Placement Radar Logic
+    function toggleGmailModal() {
+      const m = document.getElementById('gmail-modal');
+      const isOpen = m.style.display === 'flex';
+      m.style.display = isOpen ? 'none' : 'flex';
+      if (!isOpen) {
+        runPlacementRadarScan();
+      }
+    }
+
+    function toggleGmailConfig() {
+      const p = document.getElementById('gmail-config-panel');
+      p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function runGmailVerification() {
+      const badge = document.getElementById('gmail-status-badge');
+      const meta = document.getElementById('gmail-sync-meta');
+      badge.className = 'gmail-badge badge-warning';
+      badge.innerText = '⏳ Verifying...';
+      meta.innerText = 'Executing active handshake verification...';
+
+      try {
+        const res = await fetch('/api/v1/gmail/verify', { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          badge.className = data.is_verified ? 'gmail-badge badge-verified' : 'gmail-badge badge-warning';
+          badge.innerText = data.is_verified ? '🟢 VERIFIED' : '⚠️ AUTH REQUIRED';
+          meta.innerText = `${data.message} • Unread: ${data.unread_count} emails`;
+          appendMessage(`📧 **Gmail Verification Check**: ${data.message} (Latency: ${data.latency_ms}ms)`, 'bot');
+        } else {
+          badge.className = 'gmail-badge badge-warning';
+          badge.innerText = '⚠️ ERROR';
+          meta.innerText = 'Handshake test returned error.';
+        }
+      } catch (err) {
+        badge.className = 'gmail-badge badge-warning';
+        badge.innerText = '⚠️ OFFLINE';
+        meta.innerText = `Verification error: ${err.message}`;
+      }
+    }
+
+    async function runPlacementRadarScan() {
+      const listEl = document.getElementById('gmail-radar-list');
+      const countEl = document.getElementById('gmail-radar-count');
+      listEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); padding: 8px;">🔍 Scanning inbox for assessments & interview links...</div>';
+
+      try {
+        const res = await fetch('/api/v1/gmail/radar');
+        if (res.ok) {
+          const data = await res.json();
+          countEl.innerText = `${data.placement_alerts_count} Active Alerts (${data.urgent_count} Urgent)`;
+          if (data.assessments && data.assessments.length > 0) {
+            listEl.innerHTML = '';
+            data.assessments.forEach(item => {
+              const card = document.createElement('div');
+              card.className = 'assessment-item';
+              card.innerHTML = `
+                <div class="assessment-title">
+                  <span>🏢 ${item.company} — <small style="color:var(--text-main);">${item.role}</small></span>
+                  <span class="deadline-tag">${item.priority}</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-main); margin: 6px 0;"><strong>Subject:</strong> ${item.subject}</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">${item.snippet}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.72rem; color: var(--text-muted);">
+                  <span>⏰ Deadline: <strong style="color:var(--orange);">${item.deadline || 'Immediate'}</strong></span>
+                  ${item.assessment_link ? `<a href="${item.assessment_link}" target="_blank" class="action-chip" style="text-decoration:none;">🚀 Open Test Link</a>` : ''}
+                </div>
+              `;
+              listEl.appendChild(card);
+            });
+          } else {
+            listEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); padding: 8px;">No active placement emails detected in radar.</div>';
+          }
+        }
+      } catch (err) {
+        listEl.innerHTML = `<div style="font-size: 0.8rem; color: var(--red); padding: 8px;">Radar error: ${err.message}</div>`;
+      }
+    }
+
+    async function saveGmailCredentials() {
+      const email = document.getElementById('input-gmail-email').value.trim();
+      const appPwd = document.getElementById('input-gmail-apppwd').value.trim();
+      if (!email) return;
+
+      try {
+        const res = await fetch('/api/v1/gmail/configure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email_address: email, app_password: appPwd || null })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('gmail-target-email').innerText = data.email_address;
+          toggleGmailConfig();
+          runGmailVerification();
+        }
+      } catch (err) {
+        alert('Failed to update credentials: ' + err.message);
+      }
+    }
   </script>
 </body>
 </html>

@@ -3,6 +3,7 @@ import sys
 import re
 import logging
 import tempfile
+from typing import Optional, List, Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from config import TELEGRAM_BOT_TOKEN, GROQ_API_KEY, DRIVE_VAULT_URL

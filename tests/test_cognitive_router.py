@@ -35,3 +35,11 @@ def test_heavy_scraping_task():
     res = router.route("Karur spinning mills 5 scrape panni Excel podu")
     assert res.track == "AUTONOMOUS_HEAVY_TASK"
     assert res.target_swarm_agent == "WebScout"
+
+
+def test_antigravity_heavy_task():
+    router = CognitiveRouter()
+    res = router.route("Antigravity build project for real-time speech assistant")
+    assert res.track == "AUTONOMOUS_HEAVY_TASK"
+    assert res.target_swarm_agent == "Antigravity"
+

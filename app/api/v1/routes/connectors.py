@@ -10,6 +10,7 @@ from app.connectors.pc_sidecar.connector import WindowsSidecarConnector
 from app.connectors.policy import default_policy_engine
 from app.connectors.router import CapabilityRouter
 from app.connectors.telegram.connector import TelegramConnector
+from app.connectors.gmail.connector import GoogleGmailConnector
 from app.core.contracts.connector import (
     CapabilityContract,
     ConnectorContract,
@@ -31,11 +32,13 @@ _github_conn = GitHubConnector()
 _drive_conn = GoogleDriveConnector()
 _telegram_conn = TelegramConnector()
 _pc_conn = WindowsSidecarConnector()
+_gmail_conn = GoogleGmailConnector()
 
 _capability_router.register_connector(_github_conn)
 _capability_router.register_connector(_drive_conn)
 _capability_router.register_connector(_telegram_conn)
 _capability_router.register_connector(_pc_conn)
+_capability_router.register_connector(_gmail_conn)
 
 
 class SetCredentialRequest(BaseModel):

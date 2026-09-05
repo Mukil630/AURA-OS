@@ -108,6 +108,19 @@ class CognitiveRouter:
             )
 
         # ── TRACK 4: OBVIOUS HEAVY AUTONOMOUS TASKS ──────────────────────────
+        if any(k in lower_text for k in [
+            "antigravity", "build project", "create project", "scaffold", "refactor",
+            "run command", "terminal command", "fix bug", "new project", "build app",
+            "write code", "codebase", "make project", "develop app"
+        ]):
+            return CognitiveRoute(
+                track="AUTONOMOUS_HEAVY_TASK",
+                target_swarm_agent="Antigravity",
+                confidence=0.98,
+                goal_summary="Autonomous software engineering, project scaffolding, terminal execution or code refactoring via Antigravity Agent",
+                requires_pc=False
+            )
+
         if any(k in lower_text for k in ["scrape", "crawl", "spinning.*mills?", "b2b", "leads?", "export"]):
             return CognitiveRoute(
                 track="AUTONOMOUS_HEAVY_TASK",
@@ -137,7 +150,7 @@ class CognitiveRouter:
                 f"User Message: \"{text}\"\n\n"
                 "Return valid JSON strictly matching:\n"
                 "{\"track\": \"FAST_CONVERSATION\"|\"STATUS_OR_MEMORY_QUERY\"|\"DEVICE_PRESENTATION\"|\"AUTONOMOUS_HEAVY_TASK\", "
-                "\"target_swarm_agent\": \"WebScout\"|\"PlacementHunter\"|\"SGCExecutive\"|\"CodeMaster\"|\"PCPilot\"|\"MemoryVault\"|null, "
+                "\"target_swarm_agent\": \"Antigravity\"|\"WebScout\"|\"PlacementHunter\"|\"SGCExecutive\"|\"CodeMaster\"|\"PCPilot\"|\"MemoryVault\"|null, "
                 "\"confidence\": 0.95, \"goal_summary\": \"...\", \"requires_pc\": true|false}"
             )
             resp = self.client.chat.completions.create(
