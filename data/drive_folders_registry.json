@@ -5,5 +5,75 @@
     "folder_url": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
     "description": "Official SGC Billing Software Google Drive Storage Vault",
     "registered_at": "2026-08-29T08:29:15.522655+00:00"
+  },
+  "mesh_vault_01_core_memory": {
+    "alias": "mesh_vault_01_core_memory",
+    "folder_id": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+    "folder_url": "https://drive.google.com/open?id=14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+    "description": "Persistent JSON Context, Task Logs & Memory Backups",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_02_project_codebases": {
+    "alias": "mesh_vault_02_project_codebases",
+    "folder_id": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+    "folder_url": "https://drive.google.com/open?id=1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+    "description": "Zipped Codebases & Git Mirrored Project Repositories",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_03_placement_resumes": {
+    "alias": "mesh_vault_03_placement_resumes",
+    "folder_id": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+    "folder_url": "https://drive.google.com/open?id=1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+    "description": "ATS Tailored Resumes, Cover Letters & Job Portfolios",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_04_b2b_scraped_data": {
+    "alias": "mesh_vault_04_b2b_scraped_data",
+    "folder_id": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+    "folder_url": "https://drive.google.com/open?id=1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+    "description": "B2B Leads, Textile Exporter CSVs & Business Datasets",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_05_sgc_invoices": {
+    "alias": "mesh_vault_05_sgc_invoices",
+    "folder_id": "1plcIv7vWwG60EYGYyVqoFEfwx9OQGP_-",
+    "folder_url": "https://drive.google.com/open?id=1plcIv7vWwG60EYGYyVqoFEfwx9OQGP_-",
+    "description": "Sri Ganapathi Colours PDF Bills, Ledgers & Overdue Lists",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_06_visual_screenshots": {
+    "alias": "mesh_vault_06_visual_screenshots",
+    "folder_id": "1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+    "folder_url": "https://drive.google.com/open?id=1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+    "description": "PC & Browser Verification Proof Photos & Visual Evidence",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_07_ai_model_weights": {
+    "alias": "mesh_vault_07_ai_model_weights",
+    "folder_id": "1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+    "folder_url": "https://drive.google.com/open?id=1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+    "description": "Local Embedding Vectors, Audio Notes & Scratch Cache",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_08_learning_materials": {
+    "alias": "mesh_vault_08_learning_materials",
+    "folder_id": "18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+    "folder_url": "https://drive.google.com/open?id=18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+    "description": "Java DSA, Python, Aptitude Tests & Interview Questionnaires",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_09_cloud_backups": {
+    "alias": "mesh_vault_09_cloud_backups",
+    "folder_id": "1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+    "folder_url": "https://drive.google.com/open?id=1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+    "description": "Database Snapshots, Disaster Recovery & Outbox Dumps",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
+  },
+  "mesh_vault_10_shared_overflow": {
+    "alias": "mesh_vault_10_shared_overflow",
+    "folder_id": "1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+    "folder_url": "https://drive.google.com/open?id=1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+    "description": "General Multi-Agent Shared Workspace & File Staging",
+    "registered_at": "2026-09-05T21:21:00.000000+00:00"
   }
 }

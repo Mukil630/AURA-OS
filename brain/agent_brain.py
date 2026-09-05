@@ -10,6 +10,10 @@ from memory.memory_manager import MemoryManager
 from tools import pc_tools
 from groq import Groq
 from brain.intent_router import IntentRouter
+from brain.cognitive_router import CognitiveRouter, CognitiveRoute
+from brain.device_presence_router import DevicePresenceRouter
+from brain.codeact_cloud_runner import CodeActCloudRunner
+from app.agents.swarm import SwarmOrchestrator
 from brain.adaptive_scheduler import AdaptiveScheduler
 
 logger = logging.getLogger(__name__)
@@ -519,6 +523,10 @@ class AgentBrain:
         self.client = Groq(api_key=GROQ_API_KEY)
         self.model = "openai/gpt-oss-120b"
         self.router = IntentRouter()
+        self.cognitive_router = CognitiveRouter()
+        self.device_router = DevicePresenceRouter()
+        self.swarm = SwarmOrchestrator()
+        self.codeact_runner = CodeActCloudRunner()
 
     def _execute_tool_sync(self, name: str, args: dict) -> str:
         if name == "auto_apply_job":
@@ -641,8 +649,8 @@ class AgentBrain:
             + sys_context
         )
 
-        intent = self.router.classify(user_message)
-        logger.info(f"Intent classified: {intent.category} | Agent: {intent.target_agent} | Background: {intent.requires_background_task}")
+        route = self.cognitive_router.route(user_message)
+        logger.info(f"Cognitive track routed: {route.track} | Swarm Agent: {route.target_swarm_agent}")
 
         # Assemble Multi-Turn Messages with Recent Conversation History
         messages = [{"role": "system", "content": system_prompt}]
@@ -653,10 +661,10 @@ class AgentBrain:
         messages.append({"role": "user", "content": user_message})
 
         try:
-            # OPTIMIZATION: If purely CONVERSATIONAL, skip tool overhead for ultra-low latency (<0.5s)
-            if intent.category == "CONVERSATION":
+            # ── TRACK 1: FAST_CONVERSATION (Sub-500ms Instant Reply) ─────────
+            if route.track == "FAST_CONVERSATION":
                 res = self.client.chat.completions.create(
-                    model=self.model,
+                    model="llama-3.3-70b-versatile",
                     messages=messages,
                     temperature=0.7,
                     max_tokens=800
@@ -664,8 +672,40 @@ class AgentBrain:
                 reply = res.choices[0].message.content or "Done maapla!"
                 self.mem.append_conversation(user_name, user_message)
                 self.mem.append_conversation("JARVIS", reply)
-                self.mem.log_task("CHAT_RESPONSE", f"[CONVERSATION] User: {user_message[:60]}... | Reply: {reply[:60]}...")
+                self.mem.log_task("CHAT_RESPONSE", f"[FAST_CONVO] User: {user_message[:60]}... | Reply: {reply[:60]}...")
                 return reply
+
+            # ── TRACK 2: STATUS_OR_MEMORY_QUERY ──────────────────────────────
+            elif route.track == "STATUS_OR_MEMORY_QUERY":
+                import asyncio
+                agent_name = route.target_swarm_agent or "MemoryVault"
+                swarm_res = asyncio.run(self.swarm.dispatch(agent_name, "QUERY_TASK_STATUS" if agent_name == "MemoryVault" else "CHECK_OVERDUE", {}))
+                summary = swarm_res.result.get("summary", "Status retrieved successfully.") if swarm_res.result else "All tasks tracked in persistent memory."
+                reply = f"📊 *JARVIS Live Status & Memory:*\n\n{summary}\n\nMaapla, ella tasks-um persistent ledger-la tracked-aa irukku! Let me know if you need specific details."
+                self.mem.append_conversation(user_name, user_message)
+                self.mem.append_conversation("JARVIS", reply)
+                return reply
+
+            # ── TRACK 3: DEVICE_PRESENTATION ("Open panni kaatu") ────────────
+            elif route.track == "DEVICE_PRESENTATION":
+                import asyncio
+                pres_res = asyncio.run(self.device_router.route_presentation(user_message, user_name=user_name))
+                self.mem.append_conversation(user_name, user_message)
+                self.mem.append_conversation("JARVIS", pres_res.status_message)
+                return pres_res.status_message
+
+            # ── TRACK 4: AUTONOMOUS_HEAVY_TASK via Swarm ─────────────────────
+            elif route.track == "AUTONOMOUS_HEAVY_TASK" and route.target_swarm_agent in ["WebScout", "PlacementHunter", "SGCExecutive"]:
+                import asyncio
+                action = "SCRAPE_MILLS" if "mill" in user_message.lower() else ("SCRAPE_JOBS" if any(w in user_message.lower() for w in ["job", "opening", "fresher"]) else "TAILOR_RESUME")
+                swarm_res = asyncio.run(self.swarm.dispatch(route.target_swarm_agent, action, {"query": user_message, "company": "Zoho", "role": "AI Engineer"}))
+                if swarm_res.status == "COMPLETED" and swarm_res.result:
+                    summary = swarm_res.result.get("summary", "Task executed successfully by Swarm!")
+                    reply = f"✅ *Task Executed by {route.target_swarm_agent}:*\n\n{summary}\n\nMaapla, output verified & saved in Distributed Mesh!"
+                    self.mem.append_conversation(user_name, user_message)
+                    self.mem.append_conversation("JARVIS", reply)
+                    self.mem.log_task("SWARM_TASK_COMPLETED", summary, {"agent": route.target_swarm_agent})
+                    return reply
 
             # For SYNC_ACTION and ASYNC_PROCESS -> Run Tool-calling loop
             for turn in range(5):

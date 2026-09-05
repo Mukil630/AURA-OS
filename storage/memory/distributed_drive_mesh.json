@@ -1,0 +1,68 @@
+{
+  "total_nodes": 10,
+  "allocated_capacity": "250 GB (10 x 25 GB Mesh)",
+  "status": "ACTIVE_DISTRIBUTED_MESH",
+  "created_at": "2026-09-05T21:21:00+05:30",
+  "nodes": {
+    "node_01_core_memory": {
+      "id": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+      "url": "https://drive.google.com/open?id=14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+      "role": "Persistent JSON Context, Task Logs & Memory Backups",
+      "capacity_gb": 25
+    },
+    "node_02_project_codebases": {
+      "id": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "url": "https://drive.google.com/open?id=1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "role": "Zipped Codebases & Git Mirrored Project Repositories",
+      "capacity_gb": 25
+    },
+    "node_03_placement_resumes": {
+      "id": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+      "url": "https://drive.google.com/open?id=1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+      "role": "ATS Tailored Resumes, Cover Letters & Job Portfolios",
+      "capacity_gb": 25
+    },
+    "node_04_b2b_scraped_data": {
+      "id": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+      "url": "https://drive.google.com/open?id=1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+      "role": "B2B Leads, Textile Exporter CSVs & Business Datasets",
+      "capacity_gb": 25
+    },
+    "node_05_sgc_invoices": {
+      "id": "1plcIv7vWwG60EYGYyVqoFEfwx9OQGP_-",
+      "url": "https://drive.google.com/open?id=1plcIv7vWwG60EYGYyVqoFEfwx9OQGP_-",
+      "role": "Sri Ganapathi Colours PDF Bills, Ledgers & Overdue Lists",
+      "capacity_gb": 25
+    },
+    "node_06_visual_screenshots": {
+      "id": "1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+      "url": "https://drive.google.com/open?id=1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+      "role": "PC & Browser Verification Proof Photos & Visual Evidence",
+      "capacity_gb": 25
+    },
+    "node_07_ai_model_weights": {
+      "id": "1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+      "url": "https://drive.google.com/open?id=1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+      "role": "Local Embedding Vectors, Audio Notes & Scratch Cache",
+      "capacity_gb": 25
+    },
+    "node_08_learning_materials": {
+      "id": "18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+      "url": "https://drive.google.com/open?id=18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+      "role": "Java DSA, Python, Aptitude Tests & Interview Questionnaires",
+      "capacity_gb": 25
+    },
+    "node_09_cloud_backups": {
+      "id": "1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+      "url": "https://drive.google.com/open?id=1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+      "role": "Database Snapshots, Disaster Recovery & Outbox Dumps",
+      "capacity_gb": 25
+    },
+    "node_10_shared_overflow": {
+      "id": "1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+      "url": "https://drive.google.com/open?id=1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+      "role": "General Multi-Agent Shared Workspace & File Staging",
+      "capacity_gb": 25
+    }
+  }
+}

@@ -61,6 +61,28 @@ class AutonomousHeartbeatDaemon:
         except Exception as e:
             logger.error(f"Placement radar error: {e}")
 
+    async def scan_gmail_radar(self):
+        """Scans Gmail for new interview invitations, test links, and shortlists."""
+        try:
+            from tools.gmail_verifier import GmailVerifier
+            verifier = GmailVerifier()
+            radar_res = verifier.scan_placement_radar(max_results=5)
+            assessments = radar_res.get("assessments", [])
+            for item in assessments:
+                msg_id = item.get("id")
+                if msg_id and msg_id not in self.seen_email_ids:
+                    self.seen_email_ids.add(msg_id)
+                    company = item.get("company", "Company")
+                    role = item.get("role", "Candidate")
+                    link = item.get("assessment_link", "N/A")
+                    deadline = item.get("deadline", "Check inbox")
+                    alert_txt = f"🎯 **Placement Radar Alert**: {company} ({role}) assessment detected! Test Link: {link} | Deadline: {deadline}"
+                    logger.info(f"Gmail Radar: {alert_txt}")
+                    self.mem.log_task("GMAIL_PLACEMENT_ALERT", alert_txt, {"company": company, "link": link})
+                    self._dispatch_alert(f"Interview Radar: {company}", alert_txt)
+        except Exception as e:
+            logger.error(f"Gmail radar check error: {e}")
+
     async def sync_drive_vault_backup(self):
         """Periodically ensures latest task logs and application screenshots are synced to Drive."""
         now = time.time()
@@ -83,6 +105,7 @@ class AutonomousHeartbeatDaemon:
             try:
                 await self.scan_hardware_telemetry()
                 await self.scan_placement_radar()
+                await self.scan_gmail_radar()
                 await self.sync_drive_vault_backup()
             except Exception as loop_err:
                 logger.error(f"Heartbeat loop error: {loop_err}")
