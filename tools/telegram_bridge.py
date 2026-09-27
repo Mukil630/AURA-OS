@@ -1201,13 +1201,26 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
     # 1B. SGC Ledger / Bills Query & Calculation shortcut (Anti-Hallucination Guard)
     ledger_query_triggers = [
         "bills amount", "calculate panni", "bill calculate", "how many bills",
-        "total bills", "bill count", "ethana bill", "september month ku calculate",
-        "september month bill", "sep month bill", "bills calculate", "ledger calculate",
-        "sgc bill status", "invoices count", "how many invoices", "ethana bills",
-        "tax mattum", "tax calculate", "gst calculate", "5% tax", "tax evlo", "gst evlo"
+        "total bills", "bill count", "ethana bill", "yathana bill", "yethana bill",
+        "september month ku calculate", "september month bill", "sep month bill",
+        "bills calculate", "ledger calculate", "sgc bill status", "invoices count",
+        "how many invoices", "ethana bills", "yathana bills", "yethana bills",
+        "tax mattum", "tax calculate", "gst calculate", "5% tax", "tax evlo", "gst evlo",
+        "bills potu", "bill potu", "yathana bills eruku", "ethana bills eruku",
+        "bills irukku", "bills eruku"
     ]
-    is_ledger_query = any(q in t_lower for q in ledger_query_triggers) or (any(b in t_lower for b in ["bill", "invoice"]) and any(w in t_lower for w in ["calculate", "amount", "total", "count", "ethana", "evlo", "tax", "gst"]))
-    is_tax_specific = any(k in t_lower for k in ["tax mattum", "tax calculate", "5% tax", "gst mattum", "gst calculate", "tax amount", "gst amount", "tax evlo", "gst evlo"]) or ("tax" in t_lower and any(w in t_lower for w in ["calculate", "add panni", "solla", "evlo", "total"]))
+    is_ledger_query = any(q in t_lower for q in ledger_query_triggers) or (
+        any(b in t_lower for b in ["bill", "invoice"]) and 
+        any(w in t_lower for w in [
+            "calculate", "amount", "total", "count", "ethana", "yathana", "yethana",
+            "evlo", "yavlo", "yavalo", "yevlo", "tax", "gst", "potu", "iruku", "eruku",
+            "irukku", "list", "summary", "status"
+        ])
+    )
+    is_tax_specific = any(k in t_lower for k in [
+        "tax mattum", "tax calculate", "5% tax", "gst mattum", "gst calculate",
+        "tax amount", "gst amount", "tax evlo", "gst evlo"
+    ]) or ("tax" in t_lower and any(w in t_lower for w in ["calculate", "add panni", "solla", "evlo", "yavlo", "yavalo", "total"]))
 
     if is_ledger_query or is_tax_specific:
         from tools.sgc_billing_query import format_verified_bills_report, format_verified_tax_report, get_ledger_metrics
