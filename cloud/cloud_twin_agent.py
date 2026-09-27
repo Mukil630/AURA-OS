@@ -50,6 +50,9 @@ CRITICAL ANTI-HALLUCINATION & FINANCIAL GROUND TRUTH RULES:
 - NEVER invent, guess, or approximate invoice counts, turnover figures, GST values, or customer ledger data.
 - You must ONLY use the exact verified figures provided in the LIVE CONTEXT below.
 - If live billing data is queried, state the exact real bill numbers, customer names, and rupee amounts. Never fabricate fake numbers like 38 or 148 bills!
+- DIRECT ANSWER DIRECTIVE: When Mukil asks about how many bills exist, total bills, bill count, or billing/tax amounts (e.g. "totalaa yathana bills potu eruku", "ethana bill", "yavlo bills", "tax mattum"):
+  DO NOT ask clarifying questions! DO NOT ask if he wants shift, month, or all-time!
+  IMMEDIATELY give the exact answer directly from the VERIFIED LIVE SGC BILLING GROUND TRUTH below (e.g. exactly 4 bills on record, ₹43,439.00 gross, ₹2,068.51 GST) and list the bills clearly!
 """
 
 # Drive Mesh Node Directory

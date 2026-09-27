@@ -41,8 +41,25 @@ async def cloud_vitals():
     groq_key = os.getenv("GROQ_API_KEY", "")
     gemini_key = os.getenv("GEMINI_API_KEY", "")
 
+    import subprocess
+    git_hash = "unknown"
+    try:
+        git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode().strip()
+    except Exception:
+        pass
+
+    bills_count = 0
+    try:
+        from tools.sgc_billing_query import get_ledger_metrics
+        m = get_ledger_metrics("all")
+        bills_count = m.get("total_bills_in_db", 0)
+    except Exception:
+        pass
+
     return {
         "status": "online",
+        "git_commit": git_hash,
+        "verified_bills_in_db": bills_count,
         "telegram_bot_token_present": bool(tg_token),
         "telegram_bot_token_masked": f"{tg_token[:6]}...{tg_token[-4:]}" if tg_token else "NOT_SET",
         "groq_api_key_present": bool(groq_key),

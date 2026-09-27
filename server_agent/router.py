@@ -217,6 +217,22 @@ class ServerAgentRouter:
         if any(w in lower for w in ["gmail", "interview radar", "assessment link"]):
             return {"name": "check_gmail_interview_radar", "arguments": {"hours_back": 24}}
 
+        # Check for SGC bills, ledger, tax, or invoice queries
+        if any(b in lower for b in ["bill", "invoice"]) and any(w in lower for w in [
+            "calculate", "amount", "total", "count", "ethana", "yathana", "yethana",
+            "evlo", "yavlo", "yavalo", "yevlo", "tax", "gst", "potu", "iruku", "eruku",
+            "irukku", "list", "summary", "status"
+        ]) or any(q in lower for q in [
+            "bills amount", "calculate panni", "bill calculate", "how many bills",
+            "total bills", "bill count", "ethana bill", "yathana bill", "yethana bill",
+            "september month ku calculate", "september month bill", "sep month bill",
+            "bills calculate", "ledger calculate", "sgc bill status", "invoices count",
+            "how many invoices", "ethana bills", "yathana bills", "tax mattum", "5% tax",
+            "bills potu", "bill potu"
+        ]):
+            month = "all" if any(w in lower for w in ["all", "overall", "total"]) else "current"
+            return {"name": "get_sgc_ledger_summary", "arguments": {"month": month}}
+
         # Check for browser URL request (e.g. open link, roboform test)
         if any(w in lower for w in ["open", "browser", "url", "website", "http://", "https://", "roboform"]):
             import re
@@ -485,8 +501,10 @@ class ServerAgentRouter:
             )
 
         if tool_name == "get_sgc_ledger_summary":
-            from tools.sgc_billing_query import format_verified_bills_report
+            from tools.sgc_billing_query import format_verified_bills_report, format_verified_tax_report
             month = tool_args.get("month", "current")
+            if any(w in user_prompt.lower() for w in ["tax", "gst"]):
+                return format_verified_tax_report(month)
             return format_verified_bills_report(month)
 
         return (
