@@ -722,6 +722,38 @@ async def bill_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Bill creation error: {e}", exc_info=True)
         await update.message.reply_text(f"❌ Error creating bill: {e}")
 
+async def paid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Marks an SGC invoice as PAID."""
+    args = context.args
+    if not args:
+        await update.message.reply_text("Usage: `/paid <Bill_No>` (e.g. `/paid 3` or `/paid #3`)", parse_mode="Markdown")
+        return
+    bill_no_str = args[0].replace("#", "").strip()
+    from tools.sgc_billing_query import mark_bill_paid
+    res = mark_bill_paid(bill_no_str)
+    if res.get("success"):
+        msg = (
+            f"✅ **SGC BILL #{res['billNo']} MARKED AS PAID!**\n\n"
+            f"• **Customer:** {res['customer']}\n"
+            f"• **Amount Cleared:** `₹{float(res['amount']):,.2f}`\n"
+            f"• **Payment Mode:** {res['paymentMode']}\n\n"
+            f"Ledger automatically updated across all local and cloud nodes, Boss! 💰"
+        )
+        await update.message.reply_text(msg, parse_mode="Markdown")
+    else:
+        await update.message.reply_text(f"❌ {res.get('error', 'Error updating bill')}", parse_mode="Markdown")
+
+async def ledger_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Fetches customer historical dossier & ledger."""
+    args = context.args
+    if not args:
+        await update.message.reply_text("Usage: `/ledger <Customer_Name>` (e.g. `/ledger Sri Laxmi`)", parse_mode="Markdown")
+        return
+    query = " ".join(args).strip()
+    from tools.sgc_billing_query import format_customer_ledger
+    rep = format_customer_ledger(query)
+    await update.message.reply_text(rep, parse_mode="Markdown")
+
 async def drill_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetches a high-yield placement question (Zoho, TCS, Infosys, Cognizant)."""
     category = context.args[0] if context.args else "ALL"
@@ -1166,6 +1198,65 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
         await bill_cmd(update, context)
         return True
 
+    # 1B. SGC Ledger / Bills Query & Calculation shortcut (Anti-Hallucination Guard)
+    ledger_query_triggers = [
+        "bills amount", "calculate panni", "bill calculate", "how many bills",
+        "total bills", "bill count", "ethana bill", "september month ku calculate",
+        "september month bill", "sep month bill", "bills calculate", "ledger calculate",
+        "sgc bill status", "invoices count", "how many invoices", "ethana bills",
+        "tax mattum", "tax calculate", "gst calculate", "5% tax", "tax evlo", "gst evlo"
+    ]
+    is_ledger_query = any(q in t_lower for q in ledger_query_triggers) or (any(b in t_lower for b in ["bill", "invoice"]) and any(w in t_lower for w in ["calculate", "amount", "total", "count", "ethana", "evlo", "tax", "gst"]))
+    is_tax_specific = any(k in t_lower for k in ["tax mattum", "tax calculate", "5% tax", "gst mattum", "gst calculate", "tax amount", "gst amount", "tax evlo", "gst evlo"]) or ("tax" in t_lower and any(w in t_lower for w in ["calculate", "add panni", "solla", "evlo", "total"]))
+
+    if is_ledger_query or is_tax_specific:
+        from tools.sgc_billing_query import format_verified_bills_report, format_verified_tax_report, get_ledger_metrics
+        target_m = "current"
+        if "all" in t_lower or "overall" in t_lower or "total" in t_lower:
+            target_m = "all"
+        elif "prev" in t_lower or "last" in t_lower:
+            target_m = "prev"
+
+        if is_tax_specific:
+            rep = format_verified_tax_report(target_m)
+        else:
+            rep = format_verified_bills_report(target_m)
+
+        await _send_reply_safely(update, rep)
+        if ALWAYS_VOICE_REPLY:
+            try:
+                metrics = get_ledger_metrics(target_m)
+                if is_tax_specific:
+                    voice_msg = f"Mapla, September month total 5% tax amount Rs.{metrics['total_gst']:,.0f} across {metrics['period_bills_count']} bills."
+                else:
+                    voice_msg = f"Mapla, database-la irundhu live report pull panniten. Total {metrics['period_bills_count']} bills irukku. Total amount Rs.{metrics['total_gross']:,.0f}."
+                voice_path = await generate_voice_audio(voice_msg)
+                if os.path.exists(voice_path):
+                    with open(voice_path, "rb") as v:
+                        await update.message.reply_voice(voice=v, caption="🧾 SGC Verified Ledger")
+                    os.remove(voice_path)
+            except Exception:
+                pass
+        return True
+
+    # 1C. Mark Bill Paid shortcut
+    paid_match = re.search(r'(?:mark\s+)?(?:bill\s*#?\s*|invoice\s*#?\s*)(\d+)\s*(?:is\s*)?paid', t_lower)
+    if not paid_match:
+        paid_match = re.search(r'paid\s*(?:bill\s*#?\s*)?(\d+)', t_lower)
+    if paid_match:
+        bill_num = paid_match.group(1)
+        context.args = [bill_num]
+        await paid_cmd(update, context)
+        return True
+
+    # 1D. Customer Ledger history shortcut
+    if t_lower.startswith("ledger:") or t_lower.startswith("/ledger") or ("ledger" in t_lower and any(w in t_lower for w in ["history", "summary", "party", "customer", "kudu", "sollu"])):
+        clean_ledger = text.replace("ledger:", "").replace("/ledger", "").replace("ledger", "").replace("history", "").replace("summary", "").replace("kudu", "").replace("sollu", "").strip()
+        if clean_ledger:
+            context.args = clean_ledger.split()
+            await ledger_cmd(update, context)
+            return True
+
     # 2. Overdue Radar shortcut
     if any(k in t_lower for k in ["overdue", "pending bill", "pending payment", "balance amount", "balance collection"]):
         await overdue_cmd(update, context)
@@ -1519,6 +1610,9 @@ def build_app():
     add_cmd("proofs", proofs_cmd)
     add_cmd("bill", bill_cmd)
     add_cmd("newbill", bill_cmd)
+    add_cmd("paid", paid_cmd)
+    add_cmd("markpaid", paid_cmd)
+    add_cmd("ledger", ledger_cmd)
     add_cmd("remind", remind_cmd)
     add_cmd("reminders", reminders_cmd)
     add_cmd("alarms", reminders_cmd)

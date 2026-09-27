@@ -253,6 +253,10 @@ class ServerAgentRouter:
                 task_label=args.get("task_label", "cloud_task")
             )
             return res.model_dump(mode="json")
+        elif tool_name == "get_sgc_ledger_summary":
+            from tools.sgc_billing_query import get_ledger_metrics
+            month = args.get("month", "current")
+            return get_ledger_metrics(month)
 
         return {"success": True, "message": f"Server tool '{tool_name}' executed."}
 
@@ -479,6 +483,11 @@ class ServerAgentRouter:
                 f"• *Execution Time:* {verified_result.execution_time_ms}ms\n"
                 f"• *Sandbox:* `{data.get('sandbox_dir', 'Cloud Container')}`"
             )
+
+        if tool_name == "get_sgc_ledger_summary":
+            from tools.sgc_billing_query import format_verified_bills_report
+            month = tool_args.get("month", "current")
+            return format_verified_bills_report(month)
 
         return (
             f"✅ *Task Completed Successfully, {user_name}!*\n\n"

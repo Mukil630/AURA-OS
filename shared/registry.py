@@ -58,6 +58,10 @@ class CreateSgcBillInput(BaseModel):
     party_gst: Optional[str] = Field(default="", description="Optional customer GSTIN number")
 
 
+class GetSgcLedgerSummaryInput(BaseModel):
+    month: Optional[str] = Field(default="current", description="Target month to query and calculate (e.g. 'current', 'prev', 'all', or '2026-09')")
+
+
 class ExecutePythonCodeInput(BaseModel):
     code: str = Field(description="Python code to execute inside the server container sandbox")
     task_label: Optional[str] = Field(default="cloud_task", description="Label for the execution sandbox")
@@ -313,6 +317,19 @@ class ToolRegistry:
                 f"SGC Bill #{d.get('billNo')} created for ₹{d.get('netAmount')}"
             ),
             requires_semantic_verification=True
+        )
+
+        self.register(
+            name="get_sgc_ledger_summary",
+            description="Fetch ground-truth verified Sri Ganapathi Colours (SGC) billing ledger metrics, calculate exact monthly totals, CGST, SGST, gross amounts, and list real invoices directly from the database.",
+            route=TaskRoute.SERVER,
+            category="business",
+            input_schema=GetSgcLedgerSummaryInput,
+            structural_validator=lambda d: (
+                d.get("success", False) is True,
+                f"Ledger queried: {d.get('period_bills_count', 0)} bills, total ₹{d.get('total_gross', 0)}"
+            ),
+            requires_semantic_verification=False
         )
 
         self.register(

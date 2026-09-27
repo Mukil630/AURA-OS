@@ -45,6 +45,11 @@ CORE DIRECTIVES:
    - Persistent Memory (context.json & task_log.json)
 4. If a task requires physical PC actions (screen OCR typing, local Win32 apps), note that the request can be relayed to the Local PC worker when online.
 5. Be concise, decisive, and proactive.
+
+CRITICAL ANTI-HALLUCINATION & FINANCIAL GROUND TRUTH RULES:
+- NEVER invent, guess, or approximate invoice counts, turnover figures, GST values, or customer ledger data.
+- You must ONLY use the exact verified figures provided in the LIVE CONTEXT below.
+- If live billing data is queried, state the exact real bill numbers, customer names, and rupee amounts. Never fabricate fake numbers like 38 or 148 bills!
 """
 
 # Drive Mesh Node Directory
@@ -108,11 +113,34 @@ class CloudTwinAgent:
         now_ist = datetime.now(IST_TZ).strftime("%I:%M %p, %d %b %Y (%A) IST")
         ctx = self.get_live_system_context()
 
+        # Load live verified billing ground-truth if available
+        billing_ground_truth = "No billing data available."
+        try:
+            from tools.sgc_billing_query import get_ledger_metrics
+            m = get_ledger_metrics("current")
+            if m.get("success"):
+                bill_details = [
+                    f"  - Bill #{b.get('billNo')}: {b.get('customer')} | Date: {b.get('date')} | ₹{float(b.get('netAmount', 0)):,.2f} | Status: {b.get('status')}"
+                    for b in m.get("bills", [])
+                ]
+                billing_ground_truth = (
+                    f"Total Invoices in DB: {m['total_bills_in_db']} | Current Month ({m['period_name']}): {m['period_bills_count']} bills\n"
+                    f"Turnover: ₹{m['total_subtotal']:,.2f} | CGST: ₹{m['total_cgst']:,.2f} | SGST: ₹{m['total_sgst']:,.2f} | Total GST (5%): ₹{m['total_gst']:,.2f}\n"
+                    f"Gross Invoiced Total: ₹{m['total_gross']:,.2f}\n"
+                    f"Pending Payment Collection: ₹{m['pending_amount']:,.2f} ({m['pending_bills_count']} bills)\n"
+                    f"Verified Bills List:\n" + "\n".join(bill_details)
+                )
+        except Exception as be:
+            billing_ground_truth = f"Could not pull live billing metrics: {be}"
+
         context_snippet = (
             f"EXACT CURRENT TIME: {now_ist}\n"
             f"Active Task: {ctx.get('current_task', 'Dual-Brain Cloud Mode')}\n"
             f"Placement Status: {ctx.get('placement_pilot', {}).get('status', 'Operational')}\n"
-            f"SGC Billing: {ctx.get('sgc_billing', {}).get('status', 'Connected')}\n"
+            f"SGC Billing: {ctx.get('sgc_billing', {}).get('status', 'Connected')}\n\n"
+            f"=== VERIFIED LIVE SGC BILLING GROUND TRUTH ===\n"
+            f"{billing_ground_truth}\n"
+            f"==============================================\n"
         )
 
         full_system_prompt = f"{SYSTEM_INSTRUCTION}\n\nLIVE CONTEXT:\n{context_snippet}"
