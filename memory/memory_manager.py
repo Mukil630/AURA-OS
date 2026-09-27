@@ -185,11 +185,20 @@ class MemoryManager:
         projects = self.get_projects_memory()
         projects_summary = ", ".join(list(projects.keys())[:5]) if projects else "None"
 
+        sgc_line = "• SGC Invoicing & Bills: Handled via 'sgc-billing' desktop app. Active Bills Drive Vault ID: 11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9."
+        try:
+            from tools.sgc_billing_query import get_ledger_metrics
+            metrics = get_ledger_metrics("all")
+            if metrics.get("success"):
+                sgc_line += f" Verified Database: exactly {metrics['period_bills_count']} bills on record (Total Gross: Rs. {metrics['total_gross']:,.2f}, Pending: Rs. {metrics['pending_amount']:,.2f}, Paid: Rs. {metrics['paid_amount']:,.2f}). NEVER hallucinate or guess different bill counts."
+        except Exception:
+            pass
+
         return (
             "=== PERSISTENT MEMORY & USER CORE CONTEXT ===\n"
             f"• User: {user_name} (Phone: {phone}, Location: {location}, College: {college})\n"
             "• Family Business: Sri Ganapathi Colours (SGC) - Yarn Dyeing & Textile Sizing located in Karur, Tamil Nadu.\n"
-            "• SGC Invoicing & Bills: Handled via 'sgc-billing' desktop app. Active Bills Drive Vault ID: 11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9. Total 6 bills recorded (Latest is Bill #6: GAIA SUSTAINABLE SOLUTION, ₹956).\n"
+            f"{sgc_line}\n"
             "• When Mukil mentions 'business bills', 'bills', 'kadai bills', or 'invoices', he is ALWAYS referring to Sri Ganapathi Colours (SGC).\n"
             "• COLLOQUIAL TANGLISH INSTRUCTION: 'Onu ella' or 'Onnum illa' means 'Nothing much / never mind / no worries' in Tanglish. It is NOT a company name!\n"
             "• PERMANENT MEMORY DIRECTIVE: You have FULL MULTI-DEVICE PERSISTENT MEMORY (PC, Phone/Telegram, and 250GB Google Drive mesh). NEVER tell Mukil that you don't have permanent memory or that memory doesn't carry over! You remember everything Mukil says.\n"

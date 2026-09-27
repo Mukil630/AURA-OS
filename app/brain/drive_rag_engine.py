@@ -154,12 +154,13 @@ class DriveRAGEngine:
 
     def sync_sgc_billing_data(self) -> Dict[str, Any]:
         """Automatically reads and indexes all SGC bills from local desktop billing data and Google Drive."""
-        appdata_path = os.path.join(os.environ.get("APPDATA", ""), "sgc-billing", "sgc-billing-data.json")
-        if not os.path.exists(appdata_path):
+        from tools.sgc_billing_query import get_sgc_db_path
+        db_path = get_sgc_db_path()
+        if not db_path or not os.path.exists(db_path):
             return {"status": "NOT_FOUND", "indexed_count": 0}
 
         try:
-            with open(appdata_path, "r", encoding="utf-8") as f:
+            with open(db_path, "r", encoding="utf-8") as f:
                 billing_data = json.load(f)
 
             drive_folder_id = billing_data.get("drive-folder-id", "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9")
@@ -220,48 +221,30 @@ class DriveRAGEngine:
 
     def get_sgc_financial_summary(self) -> Dict[str, Any]:
         """Calculates executive financial metrics across all SGC customer bills."""
-        appdata_path = os.path.join(os.environ.get("APPDATA", ""), "sgc-billing", "sgc-billing-data.json")
-        if not os.path.exists(appdata_path):
-            return {"error": "SGC Billing data file not found"}
+        from tools.sgc_billing_query import get_ledger_metrics
+        m = get_ledger_metrics("all")
+        if not m.get("success"):
+            return {"error": m.get("error")}
 
-        with open(appdata_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        bills = data.get("sgc-bills", [])
-        total_billed = sum(b.get("netAmount", 0) for b in bills)
-        paid_bills = [b for b in bills if b.get("status", "").lower() == "paid"]
-        pending_bills = [b for b in bills if b.get("status", "").lower() == "pending"]
-
-        total_collected = sum(b.get("netAmount", 0) for b in paid_bills)
-        total_pending = sum(b.get("netAmount", 0) for b in pending_bills)
+        pending_invoices = [
+            {
+                "bill_no": b.get("billNo"),
+                "customer": b.get("customer"),
+                "amount": b.get("netAmount"),
+                "date": b.get("date"),
+                "status": b.get("status")
+            }
+            for b in m.get("bills", []) if (b.get("status") or "").lower() == "pending"
+        ]
 
         return {
-            "drive_folder_id": data.get("drive-folder-id", "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9"),
-            "drive_url": f"https://drive.google.com/drive/folders/{data.get('drive-folder-id', '11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9')}",
-            "total_bills_count": len(bills),
-            "total_billed_amount": total_billed,
-            "total_collected_amount": total_collected,
-            "total_pending_amount": total_pending,
-            "paid_count": len(paid_bills),
-            "pending_count": len(pending_bills),
-            "pending_bills_details": [
-                {
-                    "billNo": b.get("billNo"),
-                    "customer": b.get("customer"),
-                    "date": b.get("date"),
-                    "amount": b.get("netAmount"),
-                    "partyGst": b.get("partyGst"),
-                }
-                for b in pending_bills
-            ],
-            "paid_bills_details": [
-                {
-                    "billNo": b.get("billNo"),
-                    "customer": b.get("customer"),
-                    "date": b.get("date"),
-                    "amount": b.get("netAmount"),
-                    "receiptNo": b.get("receiptNo"),
-                }
-                for b in paid_bills
-            ],
+            "drive_folder_id": "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
+            "drive_url": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
+            "total_bills_count": m["period_bills_count"],
+            "total_billed_amount": m["total_gross"],
+            "total_collected_amount": m["paid_amount"],
+            "total_pending_amount": m["pending_amount"],
+            "paid_count": m["paid_bills_count"],
+            "pending_count": m["pending_bills_count"],
+            "pending_invoices": pending_invoices,
         }
