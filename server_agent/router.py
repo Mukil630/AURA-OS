@@ -366,7 +366,9 @@ class ServerAgentRouter:
                     temperature=0.7,
                     max_tokens=350
                 )
-                return resp.choices[0].message.content.strip()
+                content = (resp.choices[0].message.content or "").strip()
+                if content:
+                    return content
             except Exception as e:
                 logger.warning(f"Groq conversational chat error: {e}")
 

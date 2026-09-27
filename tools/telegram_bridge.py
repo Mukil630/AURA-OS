@@ -1270,6 +1270,57 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
             await ledger_cmd(update, context)
             return True
 
+    # 1E. Party / Customer GST & Details lookup shortcut
+    gst_triggers = ["gst number", "gst numbe", "gstin", "gst no", "party details", "customer details"]
+    is_gst_lookup = any(k in t_lower for k in gst_triggers) or (
+        any(w in t_lower for w in ["party", "customer", "mill", "client"]) and 
+        any(w in t_lower for w in ["gst", "number", "numbe", "details", "contact"])
+    )
+    if is_gst_lookup:
+        from tools.sgc_billing_query import format_customer_details, load_all_customers
+        customers = load_all_customers()
+        matched_party = None
+        for c in customers:
+            name_parts = c.get("name", "").lower().split()
+            if any(part in t_lower for part in name_parts if len(part) > 3):
+                matched_party = c.get("name")
+                break
+        if not matched_party:
+            clean_q = re.sub(r'(?:party\s+name|party|customer|avanga|oda|details|solla|sollu|kudu|gst|number|numbe|\?)', ' ', t_lower).strip()
+            matched_party = clean_q.split()[0] if clean_q else "amsa"
+        rep = format_customer_details(matched_party)
+        await _send_reply_safely(update, rep)
+        return True
+
+    # 1F. Bill Download / PDF Send shortcut
+    download_triggers = [
+        "bill send", "send pannu", "send panva", "downloard", "download",
+        "download format", "pdf send", "bill pdf", "send bill", "first bill",
+        "second bill", "third bill", "1st bill", "2nd bill", "3rd bill"
+    ]
+    is_download_bill = (
+        any(k in t_lower for k in download_triggers) and 
+        any(w in t_lower for w in ["bill", "format", "send", "kudu", "pdf", "downloard", "download", "link"])
+    )
+    if is_download_bill:
+        from tools.sgc_billing_query import format_bill_download_reply
+        bill_num = 1
+        num_match = re.search(r'(?:bill\s*#?\s*)(\d+)', t_lower)
+        if num_match:
+            bill_num = int(num_match.group(1))
+        elif "first" in t_lower or "1st" in t_lower:
+            bill_num = 1
+        elif "second" in t_lower or "2nd" in t_lower:
+            bill_num = 2
+        elif "third" in t_lower or "3rd" in t_lower:
+            bill_num = 3
+        elif "fourth" in t_lower or "4th" in t_lower:
+            bill_num = 4
+        
+        rep = format_bill_download_reply(bill_num)
+        await _send_reply_safely(update, rep)
+        return True
+
     # 2. Overdue Radar shortcut
     if any(k in t_lower for k in ["overdue", "pending bill", "pending payment", "balance amount", "balance collection"]):
         await overdue_cmd(update, context)
@@ -1440,10 +1491,21 @@ async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
             conversation_history=history_formatted,
             user_name=user_name
         )
-        return router_resp.reply
+        if router_resp and hasattr(router_resp, "reply") and router_resp.reply:
+            return router_resp.reply
     except Exception as e:
         logger.error(f"Cloud brain execution error: {e}")
-        return f"⚠️ Cloud brain issue: {e}"
+
+    # Fallback directly to Cloud Twin Gemini cascade
+    try:
+        from cloud.cloud_twin_agent import cloud_twin
+        tw = cloud_twin.process_prompt(prompt)
+        if tw and tw.get("reply"):
+            return tw["reply"]
+    except Exception as tw_err:
+        logger.error(f"Cloud Twin fallback error: {tw_err}")
+
+    return "Mapla! Naan online-la active-aa irukken. Unga request receive aayiduchu Boss. Enna task execute pannanum nu sollunga! 🚀"
 
 async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update):

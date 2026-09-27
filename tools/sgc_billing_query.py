@@ -309,4 +309,114 @@ def format_customer_ledger(customer_query: str) -> str:
         f"{rows_str}\n"
     )
 
+def load_all_customers() -> List[Dict[str, Any]]:
+    """Loads all registered customers from master registry and bills."""
+    db_path = get_sgc_db_path()
+    customers_map = {}
+    if db_path and db_path.exists():
+        try:
+            with open(db_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # 1. From sgc-customers master array
+            for c in data.get("sgc-customers", []):
+                name = c.get("name", "").strip()
+                if name:
+                    customers_map[name.lower()] = {
+                        "name": name,
+                        "gst": c.get("gst", ""),
+                        "phone": c.get("phone", "")
+                    }
+            # 2. Augment from sgc-bills
+            for b in data.get("sgc-bills", []):
+                cust = (b.get("customer") or "").strip()
+                if cust and cust.lower() not in customers_map:
+                    customers_map[cust.lower()] = {
+                        "name": cust,
+                        "gst": b.get("partyGst", ""),
+                        "phone": ""
+                    }
+        except Exception as e:
+            logger.error(f"Error loading customers: {e}")
+
+    return list(customers_map.values())
+
+def lookup_customer(query: str) -> Optional[Dict[str, Any]]:
+    """Finds a customer by partial name match."""
+    q = query.lower().strip()
+    customers = load_all_customers()
+    # Exact match first
+    for c in customers:
+        if q == c.get("name", "").lower():
+            return c
+    # Partial match
+    for c in customers:
+        if q in c.get("name", "").lower():
+            return c
+    return None
+
+def format_customer_details(query: str) -> str:
+    """Formats customer GSTIN, phone, and bill stats into an executive reply."""
+    cust = lookup_customer(query)
+    if not cust:
+        return f"🔍 **Party '{query}' not found in SGC master directory.**\nType `/ledger` to see recorded parties."
+
+    name = cust.get("name")
+    gst = cust.get("gst") or "Not Registered / Non-GST"
+    phone = cust.get("phone") or "Not Recorded"
+
+    # Also check if they have past bills
+    bills, _ = load_all_bills()
+    cust_bills = [b for b in bills if (b.get("customer") or "").lower() == name.lower()]
+    total_billed = sum(float(b.get("netAmount", 0) or 0) for b in cust_bills)
+    pending_amt = sum(float(b.get("netAmount", 0) or 0) for b in cust_bills if (b.get("status") or "").lower() == "pending")
+
+    return (
+        f"🏛️ **SRI GANAPATHI COLOURS — CLIENT DOSSIER**\n\n"
+        f"👤 **Customer Name:** **{name}**\n"
+        f"🆔 **GSTIN:** `{gst}`\n"
+        f"📞 **Phone:** `{phone}`\n"
+        f"────────────────────────\n"
+        f"🧾 **Invoices on Record:** {len(cust_bills)} Bills\n"
+        f"💰 **Total Invoiced:** `₹{total_billed:,.2f}`\n"
+        f"⚠️ **Pending Collection:** `₹{pending_amt:,.2f}`\n"
+        f"────────────────────────\n"
+        f"💡 *Tip: Type `/ledger {name.split()[0].lower()}` to view complete invoice history.*"
+    )
+
+def get_bill_by_no(bill_no: int) -> Optional[Dict[str, Any]]:
+    """Fetches a specific bill dictionary by bill number."""
+    bills, err = load_all_bills()
+    if err:
+        return None
+    for b in bills:
+        if int(b.get("billNo", 0)) == int(bill_no):
+            return b
+    return None
+
+def format_bill_download_reply(bill_no: int) -> str:
+    """Formats direct download link and invoice details for a specific bill."""
+    b = get_bill_by_no(bill_no)
+    if not b:
+        return f"❌ **Bill #{bill_no} not found in database.**"
+
+    b_no = b.get("billNo")
+    cust = b.get("customer", "Party")
+    amt = float(b.get("netAmount", 0) or 0)
+    dt = b.get("date", "")
+    st = (b.get("status") or "pending").upper()
+    drive_url = b.get("driveUrl") or f"https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9"
+
+    return (
+        f"🧾 **SRI GANAPATHI COLOURS — TAX INVOICE #{b_no}**\n\n"
+        f"👤 **Billed To:** {cust}\n"
+        f"📅 **Date:** {dt}\n"
+        f"💰 **Net Amount:** **₹{amt:,.2f}**\n"
+        f"📌 **Status:** *{st}*\n"
+        f"────────────────────────\n"
+        f"📥 **Official PDF Download Link:**\n"
+        f"🔗 [Open & Download Bill #{b_no} PDF]({drive_url})\n\n"
+        f"📁 *Main Bills Vault:* [Google Drive Node 05](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
+    )
+
+
 
