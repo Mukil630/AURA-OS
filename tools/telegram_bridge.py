@@ -1223,24 +1223,39 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
     ]) or ("tax" in t_lower and any(w in t_lower for w in ["calculate", "add panni", "solla", "evlo", "yavlo", "yavalo", "total"]))
 
     if is_ledger_query or is_tax_specific:
-        from tools.sgc_billing_query import format_verified_bills_report, format_verified_tax_report, get_ledger_metrics
+        from tools.sgc_billing_query import format_verified_bills_report, format_verified_tax_report, format_dual_month_tax_report, get_ledger_metrics
+        
+        # Check if user wants both/dual months
+        wants_dual = any(k in t_lower for k in [
+            "this month and previous month", "both", "rendu", "two month", "all month gst",
+            "this and prev", "current and last", "previous and this"
+        ])
+
         target_m = "current"
         if "all" in t_lower or "overall" in t_lower or "total" in t_lower:
             target_m = "all"
-        elif "prev" in t_lower or "last" in t_lower:
+        elif "prev" in t_lower or "last" in t_lower or "before" in t_lower:
             target_m = "prev"
 
-        if is_tax_specific:
+        if is_tax_specific and wants_dual:
+            rep = format_dual_month_tax_report()
+            metrics = get_ledger_metrics("prev")
+        elif is_tax_specific:
             rep = format_verified_tax_report(target_m)
+            metrics = get_ledger_metrics(target_m)
         else:
             rep = format_verified_bills_report(target_m)
+            metrics = get_ledger_metrics(target_m)
 
         await _send_reply_safely(update, rep)
         if ALWAYS_VOICE_REPLY:
             try:
-                metrics = get_ledger_metrics(target_m)
-                if is_tax_specific:
-                    voice_msg = f"Mapla, September month total 5% tax amount Rs.{metrics['total_gst']:,.0f} across {metrics['period_bills_count']} bills."
+                p_name = metrics.get('period_name', 'target month')
+                if is_tax_specific and wants_dual:
+                    this_m = get_ledger_metrics("current")
+                    voice_msg = f"Mapla, Previous month total tax Rs.{metrics['total_gst']:,.0f}, and this month running tax Rs.{this_m['total_gst']:,.0f}."
+                elif is_tax_specific:
+                    voice_msg = f"Mapla, {p_name} total 5% tax amount Rs.{metrics['total_gst']:,.0f} across {metrics['period_bills_count']} bills."
                 else:
                     voice_msg = f"Mapla, database-la irundhu live report pull panniten. Total {metrics['period_bills_count']} bills irukku. Total amount Rs.{metrics['total_gross']:,.0f}."
                 voice_path = await generate_voice_audio(voice_msg)
@@ -1474,6 +1489,35 @@ async def _send_reply_safely(update: Update, text: str):
             except Exception as ex:
                 logger.error(f"Error delivering Telegram message: {ex}")
 
+async def send_voice_reply_guaranteed(update: Update, text: str, caption: str = "🔊 JARVIS Spoken Voice"):
+    """Guarantees a high-quality Neural Voice Note reply back to Telegram."""
+    if not text or not update.message:
+        return
+    try:
+        await update.effective_chat.send_action("record_voice")
+        # Clean text for speech: remove code blocks, tables, URLs, markdown symbols
+        clean = re.sub(r'```[\s\S]*?```', 'Code snippet attached.', text)
+        clean = re.sub(r'`[^`]*`', '', clean)
+        clean = re.sub(r'\|[^\n]+\|', '', clean)  # remove markdown tables
+        clean = re.sub(r'[\*\#\_\[\]\(\)\~\>\-]', '', clean)
+        clean = re.sub(r'http\S+', '', clean)
+        clean = re.sub(r'[\U00010000-\U0010ffff]', '', clean)
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        spoken_text = clean[:320]
+        if not spoken_text:
+            spoken_text = "Task executed successfully Boss!"
+        audio_path = await generate_voice_audio(spoken_text)
+        if audio_path and os.path.exists(audio_path):
+            with open(audio_path, "rb") as voice_out:
+                await update.message.reply_voice(voice=voice_out, caption=caption)
+            try:
+                os.remove(audio_path)
+            except Exception:
+                pass
+            logger.info(f"✅ Guaranteed voice reply delivered: {spoken_text[:50]}")
+    except Exception as e:
+        logger.error(f"❌ Failed to deliver guaranteed voice reply: {e}")
+
 async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
     """
     Executes prompt through the Cloud Antigravity Cognitive Brain (ServerRouter + Groq/Gemini).
@@ -1547,6 +1591,7 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 1. Check direct shortcuts first (Bill, Overdue, Reminders, Notes, Resume)
         shortcut_handled = await handle_direct_shortcuts(transcribed_text, update, context)
         if shortcut_handled:
+            await send_voice_reply_guaranteed(update, f"Boss, unga shortcut task execute aayiduchu!", caption="🔊 JARVIS Spoken Voice")
             return
 
         # 2. Execute directly on Google Antigravity
@@ -1557,17 +1602,8 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _send_screenshot_if_present(update, reply)
         await _send_pdf_if_present(update, reply)
 
-        # Generate and send Voice Note back to User
-        try:
-            await update.effective_chat.send_action("record_voice")
-            voice_summary = reply[:300]
-            reply_audio_path = await generate_voice_audio(voice_summary)
-            with open(reply_audio_path, "rb") as voice_out:
-                await update.message.reply_voice(voice=voice_out, caption="🔊 Antigravity Voice")
-            if os.path.exists(reply_audio_path):
-                os.remove(reply_audio_path)
-        except Exception as tts_err:
-            logger.error(f"TTS audio reply error: {tts_err}")
+        # 3. Guaranteed Spoken Neural Voice Note Reply back to Mukil
+        await send_voice_reply_guaranteed(update, reply, caption="🔊 JARVIS Spoken Voice")
 
     except Exception as e:
         logger.error(f"Voice processing error: {e}")
@@ -1612,17 +1648,9 @@ async def chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await _send_screenshot_if_present(update, reply)
     await _send_pdf_if_present(update, reply)
 
-    # 6. If always voice reply is on and reply is concise
-    if ALWAYS_VOICE_REPLY and len(reply) < 300:
-        try:
-            await update.effective_chat.send_action("record_voice")
-            reply_audio_path = await generate_voice_audio(reply)
-            with open(reply_audio_path, "rb") as voice_out:
-                await update.message.reply_voice(voice=voice_out, caption="🔊 Antigravity Voice")
-            if os.path.exists(reply_audio_path):
-                os.remove(reply_audio_path)
-        except Exception as tts_err:
-            logger.error(f"TTS audio reply error: {tts_err}")
+    # 6. Guaranteed Neural Voice reply back to Mukil
+    if ALWAYS_VOICE_REPLY:
+        await send_voice_reply_guaranteed(update, reply, caption="🔊 JARVIS Spoken Voice")
 
 def main():
     import time

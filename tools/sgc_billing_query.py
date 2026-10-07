@@ -50,33 +50,52 @@ def get_ledger_metrics(target_month: Optional[str] = None) -> Dict[str, Any]:
     now = datetime.now()
     curr_month_str = now.strftime("%Y-%m")
     curr_month_name = now.strftime("%B %Y")
+    first_day_curr = now.replace(day=1)
+    prev_end = first_day_curr - timedelta(days=1)
+    prev_month_str = prev_end.strftime("%Y-%m")
+    prev_month_name = prev_end.strftime("%B %Y")
 
-    if not target_month or target_month in ["current", "this", "now", "september", "sep"]:
-        # If September requested without year, use current year September
+    month_lookup = {
+        "january": 1, "jan": 1,
+        "february": 2, "feb": 2,
+        "march": 3, "mar": 3,
+        "april": 4, "apr": 4,
+        "may": 5,
+        "june": 6, "jun": 6,
+        "july": 7, "jul": 7,
+        "august": 8, "aug": 8,
+        "september": 9, "sep": 9,
+        "october": 10, "oct": 10,
+        "november": 11, "nov": 11,
+        "december": 12, "dec": 12,
+    }
+
+    t_clean = (target_month or "").strip().lower()
+
+    if not t_clean or t_clean in ["current", "this", "now", "this month", "current month"]:
         m_filter = curr_month_str
         m_name = curr_month_name
-    elif target_month.lower() in ["all", "overall", "total"]:
+    elif t_clean in ["all", "overall", "total", "all time"]:
         m_filter = "ALL"
         m_name = "All Time"
-    elif target_month.lower() in ["prev", "previous", "last"]:
-        first_day_curr = now.replace(day=1)
-        prev_end = first_day_curr - timedelta(days=1)
-        m_filter = prev_end.strftime("%Y-%m")
-        m_name = prev_end.strftime("%B %Y")
+    elif t_clean in ["prev", "previous", "last", "before", "last month", "prev month", "previous month"]:
+        m_filter = prev_month_str
+        m_name = prev_month_name
+    elif t_clean in month_lookup:
+        target_m_num = month_lookup[t_clean]
+        target_year = now.year if target_m_num <= now.month else now.year - 1
+        m_filter = f"{target_year}-{target_m_num:02d}"
+        m_name = datetime(target_year, target_m_num, 1).strftime("%B %Y")
+    elif len(t_clean) == 7 and t_clean[4] == "-":
+        m_filter = t_clean
+        try:
+            dt = datetime.strptime(m_filter + "-01", "%Y-%m-%d")
+            m_name = dt.strftime("%B %Y")
+        except Exception:
+            m_name = m_filter
     else:
-        # Check if year-month format or month name
-        clean_m = target_month.strip()
-        if len(clean_m) == 7 and clean_m[4] == "-":
-            m_filter = clean_m
-            try:
-                dt = datetime.strptime(m_filter + "-01", "%Y-%m-%d")
-                m_name = dt.strftime("%B %Y")
-            except Exception:
-                m_name = m_filter
-        else:
-            # Fallback to current
-            m_filter = curr_month_str
-            m_name = curr_month_name
+        m_filter = curr_month_str
+        m_name = curr_month_name
 
     if m_filter == "ALL":
         filtered_bills = bills
@@ -196,6 +215,29 @@ def format_verified_tax_report(target_month: Optional[str] = None) -> str:
         f"💰 **Gross Invoiced (Turnover + Tax):** `₹{metrics['total_gross']:,.2f}`\n\n"
         f"📋 **Bill-wise Tax Breakdown:**\n"
         f"{breakdown_str}\n"
+    )
+
+def format_dual_month_tax_report() -> str:
+    """Returns exact GST tax calculations for both This Month and Previous Month side-by-side."""
+    this_m = get_ledger_metrics("current")
+    prev_m = get_ledger_metrics("prev")
+
+    return (
+        f"🏛️ **Sri Ganapathi Colours (SGC) — Monthly GST Tax Radar**\n"
+        f"*(Autonomous Dynamic Tax Math — Zero Hardcoding)*\n\n"
+        f"⚡ **PREVIOUS MONTH AUDIT FILING ({prev_m['period_name']}):**\n"
+        f"• **TOTAL 5% GST ONLY:** **`₹{prev_m['total_gst']:,.2f}`**\n"
+        f"• **Tax Split:** CGST (2.5%) `₹{prev_m['total_cgst']:,.2f}` | SGST (2.5%) `₹{prev_m['total_sgst']:,.2f}`\n"
+        f"• **Taxable Turnover:** ₹{prev_m['total_subtotal']:,.2f}\n"
+        f"• **Total Invoices:** {prev_m['period_bills_count']} Bills (Gross ₹{prev_m['total_gross']:,.2f})\n"
+        f"• **Status:** 🔔 *Due for GSTR-1 & 3B Filing*\n\n"
+        f"────────────────────────\n\n"
+        f"📅 **THIS MONTH RUNNING LIABILITY ({this_m['period_name']}):**\n"
+        f"• **TOTAL 5% GST ONLY:** **`₹{this_m['total_gst']:,.2f}`**\n"
+        f"• **Tax Split:** CGST (2.5%) `₹{this_m['total_cgst']:,.2f}` | SGST (2.5%) `₹{this_m['total_sgst']:,.2f}`\n"
+        f"• **Taxable Turnover:** ₹{this_m['total_subtotal']:,.2f}\n"
+        f"• **Total Invoices:** {this_m['period_bills_count']} Bills (Gross ₹{this_m['total_gross']:,.2f})\n"
+        f"• **Status:** 🟢 *Active Running Month*\n"
     )
 
 def mark_bill_paid(bill_no_input: Any, payment_mode: str = "Online / Bank Transfer") -> Dict[str, Any]:
