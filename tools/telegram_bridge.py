@@ -117,7 +117,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/bill <details>` - 🧾 Instant SGC Tax Invoice (A4 Xerox ready) to Telegram\n"
         "• `/drill` - ⚡ Placement Daily MNC Coding Problem & Solution\n"
         "• `/radar` - 🎯 Live Fresher/Junior AI & SDE Openings\n"
-        "• `/resume` - 📄 Official Master ATS Resume Document\n"
+        "• `/call` - 📞 Incoming AI Voice Call to Phone (Wireless Anywhere)\n"
         "• `/antigravity <prompt>` or `/code <prompt>` - 🦾 Autonomous DeepMind Engineer (Direct CLI)\n"
         "• `/cmd <powershell command>` - 💻 Direct PC Terminal Command Execution\n"
         "• `/status` - 📊 Check PC, GPU & Memory Live Status\n"
@@ -170,7 +170,66 @@ async def diagnose_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(full_msg, parse_mode="Markdown")
     except Exception as e:
         logger.error(f"Diagnose error: {e}", exc_info=True)
-        await update.message.reply_text(f"❌ Diagnosis error: {e}")
+async def call_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Triggers an incoming AI voice call to Mukil's Android phone over Cloud Uplink."""
+    user_msg = " ".join(context.args) if context.args else ""
+    custom_msg = user_msg if user_msg else "வணக்கம் முகில் மாப்ள! நான் ஜார்விஸ் பேசுறேன். என்ன விஷயம் மாப்ள?"
+    
+    await update.effective_message.reply_text(
+        "📞 <b>JARVIS Cloud Calling initiated...</b>\n"
+        "Transmitting signal to Mukil's Redmi Note 14 Pro+ 5G over Cloud Uplink! 🚀",
+        parse_mode="HTML"
+    )
+    
+    triggered = False
+    # 1. Try local in-memory call_hub_manager if available and device connected
+    try:
+        from app.api.v1.routes.call_hub import call_hub_manager
+        if call_hub_manager and call_hub_manager.active_devices:
+            triggered = await call_hub_manager.trigger_call(
+                caller_name="JARVIS",
+                reason="telegram_trigger",
+                custom_message=custom_msg
+            )
+    except Exception as e:
+        logger.debug(f"Direct call hub check failed: {e}")
+
+    # 2. If not triggered directly, trigger via Cloud Render REST endpoint
+    if not triggered:
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                res = await client.post(
+                    "https://aura-os-jarvis.onrender.com/api/v1/call/trigger",
+                    json={
+                        "caller_name": "JARVIS",
+                        "reason": "telegram_trigger",
+                        "custom_message": custom_msg
+                    }
+                )
+                if res.status_code == 200:
+                    data = res.json()
+                    if data.get("status") == "success":
+                        triggered = True
+                        await update.effective_message.reply_text(
+                            "📲 <b>Phone Ringing!</b>\nIncoming AI Voice Call transmitted over Cloud Uplink. Pick up mapla! ✨",
+                            parse_mode="HTML"
+                        )
+                    else:
+                        await update.effective_message.reply_text(
+                            f"📡 <b>Signal Queued on Render:</b>\n{data.get('message', 'Phone is currently connecting or on standby.')}\nEnsure VoiceAssistantApp is opened or running on phone.",
+                            parse_mode="HTML"
+                        )
+                else:
+                    await update.effective_message.reply_text(f"⚠️ Render server returned status {res.status_code}", parse_mode="HTML")
+        except Exception as ex:
+            logger.error(f"Cloud trigger call failed: {ex}")
+            await update.effective_message.reply_text(f"❌ Could not reach Render Calling Hub: {ex}", parse_mode="HTML")
+    else:
+        await update.effective_message.reply_text(
+            "📲 <b>Phone Ringing!</b>\nDirect Uplink connection dispatched. Pick up mapla! ✨",
+            parse_mode="HTML"
+        )
 
 
 async def apply_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1696,6 +1755,9 @@ def build_app():
         app.add_handler(CommandHandler(name, auth_guard(fn)))
 
     add_cmd("start", start)
+    add_cmd("call", call_cmd)
+    add_cmd("voicecall", call_cmd)
+    add_cmd("ring", call_cmd)
     add_cmd("status", status_cmd)
     add_cmd("diagnose", diagnose_cmd)
     add_cmd("vitals", diagnose_cmd)

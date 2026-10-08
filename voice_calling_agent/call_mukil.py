@@ -29,14 +29,24 @@ def call_mukil():
     adb_bin = find_adb()
 
     try:
+        # Attempt auto-connect over Wi-Fi if phone IP is known
+        phone_ip = "192.168.1.12:5555"
+        try:
+            subprocess.run([adb_bin, "connect", phone_ip], capture_output=True, text=True, timeout=3)
+        except Exception:
+            pass
+
         devices_out = subprocess.check_output([adb_bin, "devices"], text=True)
-        lines = [line.strip() for line in devices_out.strip().split("\n")[1:] if line.strip()]
+        lines = [line.strip() for line in devices_out.strip().split("\n")[1:] if line.strip() and "offline" not in line]
         if not lines:
-            print("[ERROR] No connected device found via ADB! Please connect phone via USB or Wi-Fi.")
+            print("[ERROR] No connected device found via ADB! Please ensure phone Wi-Fi or USB is connected.")
             return False
 
-        device_id = lines[0].split()[0]
-        print(f"[OK] Target Device Connected: {device_id} (Redmi Note 14 Pro+ 5G)")
+        # Prefer Wi-Fi device if available, otherwise USB
+        device_ids = [line.split()[0] for line in lines]
+        device_id = phone_ip if phone_ip in device_ids else device_ids[0]
+        conn_type = "Wireless Wi-Fi" if ":" in device_id else "High-Speed USB"
+        print(f"[OK] Target Device Connected: {device_id} ({conn_type} - Redmi Note 14 Pro+ 5G)")
 
         # Fire Incoming Call Intent (Natively turns on screen & wakes device)
         print("[SIGNAL] Transmitting Stark Quantum Voice Uplink Intent...")

@@ -3,5 +3,16 @@
     "value": "Note panniko: Next.js and FastAPI thaan enoda primary stack",
     "category": "user_knowledge",
     "updated_at": "2026-09-05T22:49:04.786749"
+  },
+  "mukil_pan_card": {
+    "value": "IQWPM4967A",
+    "description": "Mukil's official Government PAN Card Number for career applications, KYC, tax, and IT registrations",
+    "category": "personal_identification",
+    "updated_at": "2026-09-29T13:44:00+05:30"
+  },
+  "safe_process_directive": {
+    "rule": "ALWAYS suggest only 100% safe, reliable, official, zero-risk, and secure methods to Mukil. No sketchy hacks, no userbots risking account bans, and no surprise costs.",
+    "category": "user_command_directive",
+    "updated_at": "2026-10-07T19:17:00+05:30"
   }
 }

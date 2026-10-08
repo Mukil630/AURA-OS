@@ -28,8 +28,13 @@ def get_drive_service():
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                logger.warning(f"Token refresh failed: {e}. Falling back to client secret re-auth.")
+                creds = None
+                
+        if not creds or not creds.valid:
             # Check sgc-billing client secret
             appdata_p = os.path.join(os.environ.get('APPDATA', ''), 'sgc-billing', 'sgc-billing-data.json')
             client_secret_data = None
@@ -45,15 +50,18 @@ def get_drive_service():
                 logger.error("No Google Client Secret found.")
                 return None
 
-            temp_secret_file = os.path.join(VAULT_DIR, "temp_client_secret.json")
-            with open(temp_secret_file, 'w', encoding='utf-8') as f:
-                json.dump(client_secret_data, f)
+            config_data = dict(client_secret_data)
+            target_key = 'installed' if 'installed' in config_data else ('web' if 'web' in config_data else None)
+            if not target_key:
+                config_data = {'installed': config_data}
+                target_key = 'installed'
+            if 'auth_uri' not in config_data[target_key]:
+                config_data[target_key]['auth_uri'] = 'https://accounts.google.com/o/oauth2/auth'
+            if 'token_uri' not in config_data[target_key]:
+                config_data[target_key]['token_uri'] = 'https://oauth2.googleapis.com/token'
 
-            flow = InstalledAppFlow.from_client_secrets_file(temp_secret_file, SCOPES)
+            flow = InstalledAppFlow.from_client_config(config_data, SCOPES)
             creds = flow.run_local_server(port=0)
-
-            if os.path.exists(temp_secret_file):
-                os.remove(temp_secret_file)
 
         with open(TOKEN_FILE, 'w', encoding='utf-8') as token:
             token.write(creds.to_json())

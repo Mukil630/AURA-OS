@@ -4,32 +4,95 @@
   "sgc_bills_vault_id": "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
   "sgc_bills_vault_url": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link",
   "status": "100%_LIVE_SYNCHRONIZED",
-  "last_synced": "2026-09-13T15:44:15+05:30",
+  "last_synced": "2026-10-02T19:15:00+05:30",
   "shared_with_primary": "mukilarasu55@gmail.com (Full Editor Access)",
   "authenticated_owner": "ganapathycolours1603@gmail.com",
+  "allocated_pool_gb": 250,
+  "nodes": {
+    "node_01_core_memory": {
+      "id": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+      "name": "01_Core_Memory_Task_Logs",
+      "url": "https://drive.google.com/drive/folders/14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+      "role": "Core Memory & Task Logs"
+    },
+    "node_02_project_codebases": {
+      "id": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "name": "02_Project_Codebases_Git_Repos",
+      "url": "https://drive.google.com/drive/folders/1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "role": "Project Codebases & Git Repos"
+    },
+    "node_03_placement_resumes": {
+      "id": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+      "name": "03_Placement_ATS_Resumes",
+      "url": "https://drive.google.com/drive/folders/1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+      "role": "Placement ATS Resumes & Portfolios"
+    },
+    "node_04_b2b_scraped_data": {
+      "id": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+      "name": "04_B2B_Scraped_Data_Mill_CSVs",
+      "url": "https://drive.google.com/drive/folders/1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+      "role": "B2B Scraped Data & Mill CSVs"
+    },
+    "node_05_sgc_invoices": {
+      "id": "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
+      "name": "05_SGC_Main_Invoices_Ledgers",
+      "url": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
+      "role": "SGC Main Invoices & Ledgers"
+    },
+    "node_06_media_proofs": {
+      "id": "1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+      "name": "06_Visual_Verification_Screenshots",
+      "url": "https://drive.google.com/drive/folders/1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+      "role": "Visual Verification Screenshots"
+    },
+    "node_07_ai_model_weights": {
+      "id": "1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+      "name": "07_AI_Model_Weights_Audio_Cache",
+      "url": "https://drive.google.com/drive/folders/1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+      "role": "AI Model Weights & Audio Cache"
+    },
+    "node_08_learning_materials": {
+      "id": "18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+      "name": "08_Learning_Materials_Java_DSA",
+      "url": "https://drive.google.com/drive/folders/18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+      "role": "Learning Materials, Java DSA & Apti"
+    },
+    "node_09_cloud_backups": {
+      "id": "1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+      "name": "09_Cloud_Database_Snapshots",
+      "url": "https://drive.google.com/drive/folders/1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+      "role": "Cloud Database Snapshots & Recovery"
+    },
+    "node_10_shared_overflow": {
+      "id": "1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+      "name": "10_Multi_Agent_Shared_Overflow",
+      "url": "https://drive.google.com/drive/folders/1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+      "role": "Multi-Agent Shared Overflow"
+    }
+  },
   "subfolders": {
     "node_01_core_memory": {
-      "id": "1gh8zeZiCTGlggSBYrOyCx8vPesrx0bm1",
+      "id": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
       "name": "01_Conversations_Transcripts",
-      "url": "https://drive.google.com/drive/folders/1gh8zeZiCTGlggSBYrOyCx8vPesrx0bm1",
+      "url": "https://drive.google.com/drive/folders/14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
       "role": "Daily Chat Transcripts, Task Logs, Brain Context, Reminders & Profile JSONs"
     },
     "node_02_project_codebases": {
-      "id": "1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
+      "id": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
       "name": "02_Projects_Codebases",
-      "url": "https://drive.google.com/drive/folders/1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
+      "url": "https://drive.google.com/drive/folders/1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
       "role": "Zipped Codebases & Git Mirrored Project Repositories (Zero Local Disk Accumulation)"
     },
     "node_03_placement_resumes": {
-      "id": "1crALd2118MYUPoEKokufVog_FgXrexks",
+      "id": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
       "name": "03_Placement_Resumes",
-      "url": "https://drive.google.com/drive/folders/1crALd2118MYUPoEKokufVog_FgXrexks",
+      "url": "https://drive.google.com/drive/folders/1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
       "role": "ATS Tailored Resumes, Portfolios, Cover Letters & Solved Java DSA Drills"
     },
     "node_04_b2b_scraped_data": {
-      "id": "1RBj3i2QBdEAoquUN6uTQvO2QmYMKWoqi",
+      "id": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
       "name": "04_B2B_Textile_Leads",
-      "url": "https://drive.google.com/drive/folders/1RBj3i2QBdEAoquUN6uTQvO2QmYMKWoqi",
+      "url": "https://drive.google.com/drive/folders/1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
       "role": "B2B Spinning Mill Scraped Leads, Textile Exporter CSVs & Business Datasets"
     },
     "node_05_sgc_invoices": {
@@ -39,10 +102,34 @@
       "role": "Sri Ganapathi Colours Main Bills Storage Vault (Mukil Designated Primary)"
     },
     "node_06_media_proofs": {
-      "id": "1v17kqsJvTdiI3XNT0SvybwyxwoZ6mIvX",
+      "id": "1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
       "name": "05_Media_Proofs",
-      "url": "https://drive.google.com/drive/folders/1v17kqsJvTdiI3XNT0SvybwyxwoZ6mIvX",
+      "url": "https://drive.google.com/drive/folders/1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
       "role": "Verification Screenshots, Audio Notes, Telemetry & Disaster Recovery Snapshots"
+    },
+    "node_07_ai_model_weights": {
+      "id": "1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+      "name": "07_AI_Model_Weights",
+      "url": "https://drive.google.com/drive/folders/1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
+      "role": "AI Model Weights & Audio Cache"
+    },
+    "node_08_learning_materials": {
+      "id": "18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+      "name": "08_Learning_Materials",
+      "url": "https://drive.google.com/drive/folders/18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
+      "role": "Learning Materials, Java DSA & Apti"
+    },
+    "node_09_cloud_backups": {
+      "id": "1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+      "name": "09_Cloud_Database_Snapshots",
+      "url": "https://drive.google.com/drive/folders/1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",
+      "role": "Cloud Database Snapshots & Recovery"
+    },
+    "node_10_shared_overflow": {
+      "id": "1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+      "name": "10_Multi_Agent_Shared_Overflow",
+      "url": "https://drive.google.com/drive/folders/1Qdf3ac_4NEK5id-5ww9V7QgpD5eMxLYC",
+      "role": "Multi-Agent Shared Overflow"
     }
   }
 }

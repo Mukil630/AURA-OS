@@ -63,6 +63,7 @@ storage/browser_session/
 *.session
 storage/*session*.json
 *_session.json
+storage/memory/sgc-billing-data.json
 
 # Database & Local Runtime Data
 *.db

@@ -141,7 +141,7 @@ class MemoryVaultAgent(BaseSwarmAgent):
             try:
                 with open(self.mesh_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    return data.get("nodes", {})
+                    return data.get("nodes") or data.get("subfolders", {})
             except Exception as e:
                 logger.warning(f"Could not read mesh file: {e}")
         return {}
