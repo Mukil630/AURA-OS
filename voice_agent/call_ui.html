@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JARVIS Autonomous Voice Link</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070b12;
+            --accent-cyan: #00e5ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            --glass-bg: rgba(15, 23, 42, 0.75);
+            --border-glow: rgba(0, 229, 255, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 50% 80%, rgba(0, 255, 136, 0.08) 0%, transparent 60%);
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 860px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 24px 48px;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 229, 255, 0.15);
+        }
+
+        /* HUD Hologram Ring */
+        .hud-orb {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .orb-core {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #00e5ff 0%, #0055ff 70%);
+            box-shadow: 0 0 35px #00e5ff, inset 0 0 15px #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .orb-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px dashed rgba(0, 229, 255, 0.4);
+            animation: spin 12s linear infinite;
+        }
+
+        .ring-1 { width: 130px; height: 130px; }
+        .ring-2 { width: 160px; height: 160px; border-style: solid; border-width: 1px; border-color: rgba(0, 229, 255, 0.2); animation-direction: reverse; animation-duration: 20s; }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .ringing .orb-core {
+            animation: pulse-ring 1.2s infinite ease-in-out;
+            background: radial-gradient(circle, #00ff88 0%, #008855 70%);
+            box-shadow: 0 0 40px #00ff88;
+        }
+
+        .caller-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .caller-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .caller-status {
+            font-size: 13px;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        /* Waveform */
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 36px;
+            margin-top: 15px;
+        }
+
+        .bar {
+            width: 4px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .active-call .bar {
+            animation: wave 1s infinite ease-in-out;
+        }
+
+        .bar:nth-child(2) { animation-delay: 0.15s; }
+        .bar:nth-child(3) { animation-delay: 0.3s; }
+        .bar:nth-child(4) { animation-delay: 0.45s; }
+        .bar:nth-child(5) { animation-delay: 0.6s; }
+        .bar:nth-child(6) { animation-delay: 0.75s; }
+        .bar:nth-child(7) { animation-delay: 0.9s; }
+
+        @keyframes wave {
+            0%, 100% { height: 6px; background: var(--accent-cyan); }
+            50% { height: 32px; background: var(--accent-green); }
+        }
+
+        /* Live Dialogue Transcript */
+        .transcript-box {
+            width: 100%;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 16px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg-bubble {
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+
+        .msg-jarvis {
+            align-self: flex-start;
+            background: rgba(0, 229, 255, 0.12);
+            border-left: 3px solid var(--accent-cyan);
+            color: #e2e8f0;
+        }
+
+        .msg-mukil {
+            align-self: flex-end;
+            background: rgba(0, 255, 136, 0.12);
+            border-right: 3px solid var(--accent-green);
+            color: #f1f5f9;
+        }
+
+        /* Action Buttons */
+        .call-controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .btn-round {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-round:active {
+            transform: scale(0.92);
+        }
+
+        .btn-accept {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            color: #000;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            animation: pulse-green 1.5s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { box-shadow: 0 0 0 18px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        .btn-decline {
+            background: linear-gradient(135deg, #ff3366, #b30033);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
+        }
+
+        .btn-mic {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 52px;
+            height: 52px;
+            font-size: 18px;
+        }
+
+        .btn-mic.listening {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .label-btn {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame" id="phoneContainer">
+        <!-- Top Status -->
+        <div style="width: 100%; display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-family: 'Orbitron';">
+            <span>JARVIS • LIVE SECURE LINK</span>
+            <span id="callClock">00:00</span>
+        </div>
+
+        <!-- Center Hologram Orb -->
+        <div class="hud-orb ringing" id="hudOrb">
+            <div class="orb-ring ring-1"></div>
+            <div class="orb-ring ring-2"></div>
+            <div class="orb-core" id="orbCore">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Caller Info -->
+        <div class="caller-info">
+            <div class="caller-title" id="callerTitle">JARVIS PRIME</div>
+            <div class="caller-status" id="callStatus">INCOMING AUTONOMOUS CALL...</div>
+            <div class="waveform" id="waveform">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+
+        <!-- Transcript Screen -->
+        <div class="transcript-box" id="transcriptBox">
+            <div class="msg-bubble msg-jarvis" id="firstMsg">
+                ⚡ Tap 'Accept' to start real-time two-way Tanglish voice call with JARVIS.
+            </div>
+        </div>
+
+        <!-- Incoming Call UI Controls -->
+        <div class="call-controls" id="incomingControls">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn-round btn-decline" onclick="declineCall()">✕</button>
+                <span class="label-btn">Decline</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn-round btn-accept" onclick="acceptCall()">📞</button>
+                <span class="label-btn">Accept</span>
+            </div>
+        </div>
+
+        <!-- Active Call UI Controls -->
+        <div class="call-controls hidden" id="activeControls">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn-round btn-mic" id="muteBtn" onclick="toggleMute()">🎙️</button>
+                <span class="label-btn" id="micLabel">Mute</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn-round btn-decline" onclick="endCall()">☎</button>
+                <span class="label-btn">End Call</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn-round btn-mic" onclick="triggerManualListen()">🗣️</button>
+                <span class="label-btn">Speak</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isCallActive = false;
+        let callSeconds = 0;
+        let timerInterval = null;
+        let recognition = null;
+        let audioContext = null;
+        let ringtoneOscillator = null;
+        let isSpeaking = false;
+        let isMuted = false;
+
+        // Realistic Phone Ringtone Generator using Web Audio API
+        function startRingtone() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                playRingPulse();
+            } catch(e) {
+                console.log("AudioContext blocked until user gesture:", e);
+            }
+        }
+
+        function playRingPulse() {
+            if (isCallActive || !audioContext) return;
+            const now = audioContext.currentTime;
+            
+            // Standard dual-tone telephone frequencies (440Hz + 480Hz)
+            const osc1 = audioContext.createOscillator();
+            const osc2 = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc1.frequency.value = 440;
+            osc2.frequency.value = 480;
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.setValueAtTime(0, now + 1.2);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 1.2);
+            osc2.stop(now + 1.2);
+
+            // Vibrate phone if supported
+            if (navigator.vibrate) {
+                navigator.vibrate([400, 200, 400]);
+            }
+
+            // Loop every 3 seconds
+            if (!isCallActive) {
+                setTimeout(playRingPulse, 3000);
+            }
+        }
+
+        // Auto start ringtone on initial page load / click
+        window.addEventListener('load', () => {
+            startRingtone();
+        });
+
+        // Initialize Speech Recognition (Chrome, Android, Edge, Safari)
+        function setupSpeechRecognition() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                appendTranscript("JARVIS", "Browser Web Speech API not supported. Use Google Chrome or Edge.");
+                return;
+            }
+
+            recognition = new SpeechRec();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-IN'; // Indian English / Tanglish
+
+            recognition.onstart = () => {
+                document.getElementById('callStatus').innerText = "LISTENING TO BOSS...";
+                document.getElementById('muteBtn').classList.add('listening');
+            };
+
+            recognition.onresult = (event) => {
+                const speechText = event.results[0][0].transcript;
+                appendTranscript("Mukil", speechText);
+                sendTurnToJARVIS(speechText);
+            };
+
+            recognition.onerror = (event) => {
+                console.log("Speech Recognition Error:", event.error);
+                if (isCallActive && !isSpeaking && !isMuted) {
+                    setTimeout(listenAgain, 1000);
+                }
+            };
+
+            recognition.onend = () => {
+                document.getElementById('muteBtn').classList.remove('listening');
+                if (isCallActive && !isSpeaking && !isMuted) {
+                    // Automatically listen again
+                    setTimeout(listenAgain, 600);
+                }
+            };
+        }
+
+        function listenAgain() {
+            if (isCallActive && !isSpeaking && !isMuted && recognition) {
+                try {
+                    recognition.start();
+                } catch(e) {
+                    // Already started
+                }
+            }
+        }
+
+        function appendTranscript(sender, text) {
+            const box = document.getElementById('transcriptBox');
+            const bubble = document.createElement('div');
+            bubble.className = `msg-bubble ${sender === 'Mukil' ? 'msg-mukil' : 'msg-jarvis'}`;
+            bubble.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            box.appendChild(bubble);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function acceptCall() {
+            isCallActive = true;
+            document.getElementById('hudOrb').classList.remove('ringing');
+            document.getElementById('phoneContainer').classList.add('active-call');
+            document.getElementById('incomingControls').classList.add('hidden');
+            document.getElementById('activeControls').classList.remove('hidden');
+            document.getElementById('callStatus').innerText = "CALL CONNECTED";
+
+            // Start Call Timer
+            timerInterval = setInterval(() => {
+                callSeconds++;
+                const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const secs = String(callSeconds % 60).padStart(2, '0');
+                document.getElementById('callClock').innerText = `${mins}:${secs}`;
+            }, 1000);
+
+            setupSpeechRecognition();
+
+            // Request Initial Greeting from JARVIS
+            try {
+                const res = await fetch('/api/reset', { method: 'POST' });
+                const data = await res.json();
+                appendTranscript("JARVIS", data.greeting);
+                await playAudioBase64(data.audio_b64);
+            } catch(e) {
+                appendTranscript("JARVIS", "Vanakkam Boss! JARVIS is live. Sollinga Boss!");
+            }
+
+            listenAgain();
+        }
+
+        async function sendTurnToJARVIS(text) {
+            document.getElementById('callStatus').innerText = "JARVIS THINKING...";
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+                appendTranscript("JARVIS", data.reply);
+                if (data.audio_b64) {
+                    await playAudioBase64(data.audio_b64);
+                }
+            } catch(e) {
+                appendTranscript("JARVIS", "Boss, connection check pannunga, repeat panlama?");
+            }
+
+            listenAgain();
+        }
+
+        function playAudioBase64(b64) {
+            return new Promise((resolve) => {
+                isSpeaking = true;
+                document.getElementById('callStatus').innerText = "JARVIS SPEAKING...";
+                if (recognition) {
+                    try { recognition.stop(); } catch(e) {}
+                }
+
+                const audio = new Audio("data:audio/mp3;base64," + b64);
+                audio.onended = () => {
+                    isSpeaking = false;
+                    document.getElementById('callStatus').innerText = "LISTENING TO BOSS...";
+                    resolve();
+                };
+                audio.onerror = () => {
+                    isSpeaking = false;
+                    resolve();
+                };
+                audio.play().catch(e => {
+                    console.log("Audio play error:", e);
+                    isSpeaking = false;
+                    resolve();
+                });
+            });
+        }
+
+        function declineCall() {
+            endCall();
+        }
+
+        function endCall() {
+            isCallActive = false;
+            clearInterval(timerInterval);
+            if (recognition) {
+                try { recognition.stop(); } catch(e) {}
+            }
+            document.getElementById('callStatus').innerText = "CALL ENDED";
+            document.getElementById('phoneContainer').classList.remove('active-call');
+            document.getElementById('activeControls').classList.add('hidden');
+            document.getElementById('incomingControls').classList.remove('hidden');
+            appendTranscript("JARVIS", "Call terminated. Ready for next mission Boss! 🫡");
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('micLabel').innerText = isMuted ? "Unmute" : "Mute";
+            if (isMuted && recognition) {
+                try { recognition.stop(); } catch(e) {}
+            } else if (!isMuted) {
+                listenAgain();
+            }
+        }
+
+        function triggerManualListen() {
+            if (isCallActive && recognition) {
+                try {
+                    recognition.start();
+                } catch(e) {}
+            }
+        }
+    </script>
+</body>
+</html>

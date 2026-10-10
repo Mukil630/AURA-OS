@@ -144,6 +144,21 @@ def create_app() -> FastAPI:
         sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sw.js")
         return FileResponse(sw_path, media_type="application/javascript")
 
+    @app.get("/call", tags=["Voice Agent"], response_class=HTMLResponse)
+    async def call_page():
+        call_ui = os.path.join(os.path.dirname(os.path.dirname(__file__)), "voice_agent", "call_ui.html")
+        if os.path.exists(call_ui):
+            with open(call_ui, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+        return HTMLResponse("<h1>JARVIS Voice Call UI Not Found</h1>")
+
+    try:
+        from voice_agent.server import chat_turn as voice_chat_turn, reset_call as voice_reset_call
+        app.add_api_route("/api/chat", voice_chat_turn, methods=["POST"], tags=["Voice Agent"])
+        app.add_api_route("/api/reset", voice_reset_call, methods=["POST"], tags=["Voice Agent"])
+    except Exception as e:
+        logger.warning(f"Voice agent endpoints mount warning: {e}")
+
     # Mount API v1 Routes
     app.include_router(api_v1_router)
 
