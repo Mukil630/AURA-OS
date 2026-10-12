@@ -1,7 +1,14 @@
 {
   "system_name": "MUKIL MASTER AGENT - Autonomous Agent Operating Plane",
   "user": "Mukil",
-  "last_updated": "2026-10-12T11:29:00+05:30",
+  "last_updated": "2026-10-12T19:57:00+05:30",
+  "drive_ground_truth_policy": {
+    "status": "ENFORCED_PERMANENT",
+    "updated_at": "2026-10-12T19:57:00+05:30",
+    "directive": "ALL-TIME GOOGLE DRIVE VERIFICATION FIRST. Whenever Mukil asks any question regarding SGC bills, invoices, ledgers, supplier receipts, or business documents, the agent MUST ALWAYS query Google Drive (Node 05: 11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9, backup vaults, or drive_mesh_index) and confirm actual files and numbers before answering. Zero guessing, zero hallucination.",
+    "main_bills_vault": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link",
+    "master_vault": "https://drive.google.com/drive/folders/1iaHzDzC7KiJk2FlMdS7eNW7vkYxDeaXZ?usp=drive_link"
+  },
   "master_blueprint_active": {
     "status": "LOCKED_AND_EXECUTING",
     "blueprint_file": "C:\\Users\\mukil\\jarvis-core\\MASTER_BLUEPRINT.md",
