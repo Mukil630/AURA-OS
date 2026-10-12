@@ -50,6 +50,8 @@ Analyze the user's request and respond strictly in valid JSON format:
   "entities": {
     "vendor": "Vendor name if mentioned or null",
     "customer": "Customer mill name if mentioned or null",
+    "bill_no": "Integer bill number if mentioned (e.g. 1, 2, 3) or null",
+    "target_month": "e.g. 'september', 'october', 'current', 'prev', 'all' or null",
     "amount": null,
     "action_verb": "e.g. follow_up, pay, check, create"
   },
@@ -238,26 +240,116 @@ class CentralOrchestrator:
             # -------------------------------------------------------------
             elif intent == "SGC_BILLING_QUERY":
                 from tools import sgc_billing_query
-                m = sgc_billing_query.get_ledger_metrics("all")
-                if m.get("success"):
-                    durable_task_manager.update_task_status(
-                        task_id, status="COMPLETED",
-                        result_summary=f"Fetched SGC ledger: {m['total_bills_in_db']} bills, ₹{m['total_gross']:,.2f} gross",
-                        result_data=m
-                    )
-                    final_reply = (
-                        f"📊 **Sri Ganapathi Colours (SGC) - Ground Truth Ledger**\n\n"
-                        f"🧾 **Total Verified Bills:** **{m['total_bills_in_db']} Bills**\n"
-                        f"💵 **Taxable Turnover:** `₹{m['total_subtotal']:,.2f}`\n"
-                        f"🏛️ **Total 5% GST:** `₹{m['total_gst']:,.2f}`\n"
-                        f"💰 **Gross Invoiced:** `₹{m['total_gross']:,.2f}`\n"
-                        f"⏳ **Pending Collections:** `₹{m['pending_amount']:,.2f}` ({m['pending_bills_count']} bills)\n\n"
-                        f"☁️ **Vault Link:** [Google Drive Master Bills](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
-                    )
-                    speech_reply = f"Boss, SGC record-la total {m['total_bills_in_db']} bills iruku, gross turnover ₹{m['total_gross']:,.0f}."
+                import re
+
+                entities = plan.get("entities") or {}
+                raw_lower = clean_input.lower()
+
+                # Extract Bill Number if specified
+                bill_no = entities.get("bill_no")
+                if not bill_no:
+                    m_b = re.search(r'\b(?:bill|inv|invoice)\s*(?:#|no\.?|num\.?)?\s*(\d+)\b', raw_lower)
+                    if m_b:
+                        try:
+                            bill_no = int(m_b.group(1))
+                        except Exception:
+                            pass
+
+                # Extract Customer Name if specified
+                customer = entities.get("customer")
+                if not customer:
+                    for known in ["gaia", "sowbhagiya", "laxmi", "sri ganapathi"]:
+                        if known in raw_lower:
+                            customer = known
+                            break
+
+                # 1. Action: Mark Specific Bill as Paid
+                if ("paid" in raw_lower or "cleared" in raw_lower) and bill_no:
+                    p_res = sgc_billing_query.mark_bill_paid(bill_no)
+                    if p_res.get("success"):
+                        final_reply = (
+                            f"✅ **Bill #{bill_no} Marked as PAID!**\n\n"
+                            f"👤 **Customer:** {p_res['customer']}\n"
+                            f"💰 **Amount Cleared:** `₹{p_res['amount']:,.2f}`\n"
+                            f"💳 **Payment Mode:** {p_res['paymentMode']}\n\n"
+                            f"📁 Database updated in AppData & Google Drive backup!"
+                        )
+                        speech_reply = f"Bill #{bill_no} cleared Boss! Ledger update panniten."
+                        durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=speech_reply, result_data=p_res)
+                    else:
+                        final_reply = f"⚠️ Could not mark bill #{bill_no} paid: {p_res.get('error')}"
+                        speech_reply = f"Bill #{bill_no} update panna mudiyala Boss."
+                        durable_task_manager.update_task_status(task_id, status="FAILED", error_message=p_res.get('error'))
+
+                # 2. Query Specific Bill Details
+                elif bill_no:
+                    b_rep = sgc_billing_query.format_bill_download_reply(int(bill_no))
+                    b_data = sgc_billing_query.get_bill_by_no(int(bill_no))
+                    final_reply = b_rep
+                    if b_data:
+                        speech_reply = f"Bill #{bill_no} {b_data.get('customer')}-ku ₹{float(b_data.get('netAmount', 0)):,.0f} net amount-la iruku Boss."
+                        durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bill #{bill_no} details fetched", result_data=b_data)
+                    else:
+                        speech_reply = f"Bill #{bill_no} database-la kedaikala Boss."
+                        durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bill #{bill_no} not found")
+
+                # 3. Query Specific Customer Ledger
+                elif customer:
+                    cust_ledger = sgc_billing_query.format_customer_ledger(customer)
+                    final_reply = cust_ledger
+                    speech_reply = f"{customer.capitalize()} customer ledger ready Boss!"
+                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Customer ledger for {customer}")
+
+                # 4. Query GST / Tax Report
+                elif any(w in raw_lower for w in ["tax", "gst", "cgst", "sgst", "gstr"]):
+                    target_m = entities.get("target_month")
+                    if target_m:
+                        final_reply = sgc_billing_query.format_verified_tax_report(target_m)
+                    else:
+                        final_reply = sgc_billing_query.format_dual_month_tax_report()
+                    speech_reply = "SGC 5% GST tax calculation report ready Boss!"
+                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary="SGC GST Tax report generated")
+
+                # 5. Query Overdue Debtors Recovery Radar
+                elif any(w in raw_lower for w in ["overdue", "debtor", "recovery", "who owes"]):
+                    try:
+                        from tools import sgc_overdue_radar
+                        final_reply = sgc_overdue_radar.generate_executive_radar_report()
+                    except Exception:
+                        final_reply = sgc_billing_query.format_verified_bills_report("all")
+                    speech_reply = "SGC overdue recovery radar ready Boss!"
+                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary="Overdue radar generated")
+
+                # 6. Query Specific Month
+                elif entities.get("target_month") or any(m in raw_lower for m in ["september", "sep", "october", "oct", "last month", "this month"]):
+                    m_term = entities.get("target_month") or ("september" if "sep" in raw_lower else "current")
+                    final_reply = sgc_billing_query.format_verified_bills_report(m_term)
+                    speech_reply = f"{m_term.capitalize()} month bills breakdown ready Boss!"
+                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bills for {m_term}")
+
+                # 7. Default: Ground Truth Full Ledger Overview
                 else:
-                    durable_task_manager.update_task_status(task_id, status="FAILED", error_message=m.get("error"))
-                    final_reply = f"⚠️ SGC Billing data fetch error: {m.get('error')}"
+                    m = sgc_billing_query.get_ledger_metrics("all")
+                    if m.get("success"):
+                        final_reply = (
+                            f"📊 **Sri Ganapathi Colours (SGC) - Ground Truth Ledger**\n\n"
+                            f"🧾 **Total Verified Bills:** **{m['total_bills_in_db']} Bills**\n"
+                            f"💵 **Taxable Turnover:** `₹{m['total_subtotal']:,.2f}`\n"
+                            f"🏛️ **Total 5% GST:** `₹{m['total_gst']:,.2f}`\n"
+                            f"💰 **Gross Invoiced:** `₹{m['total_gross']:,.2f}`\n"
+                            f"⏳ **Pending Collections:** `₹{m['pending_amount']:,.2f}` ({m['pending_bills_count']} bills)\n\n"
+                            f"☁️ **Vault Link:** [Google Drive Master Bills](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
+                        )
+                        speech_reply = f"Boss, SGC record-la total {m['total_bills_in_db']} bills iruku, gross turnover ₹{m['total_gross']:,.0f}."
+                        durable_task_manager.update_task_status(
+                            task_id, status="COMPLETED",
+                            result_summary=f"Fetched SGC ledger: {m['total_bills_in_db']} bills, ₹{m['total_gross']:,.2f} gross",
+                            result_data=m
+                        )
+                    else:
+                        durable_task_manager.update_task_status(task_id, status="FAILED", error_message=m.get("error"))
+                        final_reply = f"⚠️ SGC Billing data fetch error: {m.get('error')}"
+                        speech_reply = "SGC billing database access error Boss."
 
             # -------------------------------------------------------------
             # DOMAIN C: BUSINESS PAYABLES & CASHFLOW RADAR
