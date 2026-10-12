@@ -19,6 +19,15 @@ VAULT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "storage", 
 TOKEN_FILE = os.path.join(VAULT_DIR, "google_drive_token.json")
 
 def get_drive_service():
+    sa_file = os.path.join(VAULT_DIR, "sgc_service_account.json")
+    if os.path.exists(sa_file):
+        try:
+            from google.oauth2.service_account import Credentials as SACredentials
+            sa_creds = SACredentials.from_service_account_file(sa_file, scopes=SCOPES)
+            return build('drive', 'v3', credentials=sa_creds)
+        except Exception as e:
+            logger.warning(f"Service account auth failed: {e}")
+
     creds = None
     if os.path.exists(TOKEN_FILE):
         try:
