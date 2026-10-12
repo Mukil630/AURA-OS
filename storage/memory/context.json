@@ -57,6 +57,26 @@
       "AURA Mobile Hub PWA quick-action business pills on Phone and PC"
     ]
   },
+  "turso_cloud_database_core": {
+    "status": "OPERATIONAL_ACTIVE",
+    "updated_at": "2026-10-12T19:25:00+05:30",
+    "database_url": "libsql://aura-db-mukil.aws-ap-south-1.turso.io",
+    "region": "AWS Mumbai (ap-south-1) Free 5 GB Tier",
+    "tables": ["reminders", "aura_vault"],
+    "components": {
+      "aura_agent_core": "aura_agent_core/",
+      "nlp_parser": "aura_agent_core/nlp_parser.py",
+      "services": "aura_agent_core/services.py",
+      "scheduler_daemon": "aura_agent_core/scheduler_daemon.py",
+      "api_router": "aura_agent_core/api_router.py",
+      "cli": "aura_agent_core/cli.py"
+    },
+    "features": [
+      "Limitless Self-Cleaning Reminders with 0 MB storage bloat",
+      "Universal Second Brain Memory Vault with Google Drive integration",
+      "Tanglish + English NLP temporal parsing"
+    ]
+  },
   "placement_exam_safe_mode": {
     "status": "ACTIVE_ENFORCED",
     "reason": "Mukil placement exams & proctoring system verification protection",

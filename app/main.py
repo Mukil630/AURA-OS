@@ -64,7 +64,28 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             except Exception as e:
                 logger.error(f"Failed to launch Telegram Bridge Daemon: {e}")
     
+    # Initialize Turso Cloud Database Tables and Schemas
+    aura_scheduler = None
+    aura_scheduler_task = None
+    try:
+        import asyncio
+        from aura_agent_core.database import init_database as init_turso_db
+        from aura_agent_core.scheduler_daemon import AuraSchedulerDaemon
+        logger.info("Initializing Turso LibSQL Cloud Database Schemas...")
+        await init_turso_db()
+        logger.info("✅ Turso Cloud Database ready.")
+        aura_scheduler = AuraSchedulerDaemon()
+        aura_scheduler_task = asyncio.create_task(aura_scheduler.start())
+        logger.info("✅ AURA Scheduler Daemon running in background.")
+    except Exception as e:
+        logger.warning(f"Turso Cloud / Aura Scheduler startup notice: {e}")
+
     yield
+
+    if aura_scheduler:
+        aura_scheduler.stop()
+    if aura_scheduler_task:
+        aura_scheduler_task.cancel()
 
     if telegram_process and telegram_process.poll() is None:
         logger.info("Terminating Telegram Bridge background process...")
@@ -166,6 +187,14 @@ def create_app() -> FastAPI:
 
     # Mount API v1 Routes
     app.include_router(api_v1_router)
+
+    # Mount AURA-OS Core Engine Router (Turso Cloud Reminders & Universal Vault)
+    try:
+        from aura_agent_core.api_router import router as core_router
+        app.include_router(core_router)
+        logger.info("✅ AURA-OS Core Engine Router mounted at /api/reminders and /api/vault")
+    except Exception as e:
+        logger.warning(f"AURA-OS Core Engine Router mount notice: {e}")
 
     # Global Exception Handlers
     @app.exception_handler(Exception)
