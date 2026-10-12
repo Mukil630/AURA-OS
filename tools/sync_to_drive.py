@@ -90,6 +90,18 @@ def upload_file_to_vault(service, file_path, folder_id=DRIVE_FOLDER_ID):
     logger.info(f"✅ Uploaded '{file_name}' to Google Drive Master Vault! Link: {file.get('webViewLink')}")
     return file
 
+def sync_file_to_drive(file_path: str, folder_id: str = DRIVE_FOLDER_ID):
+    """Convenience helper to sync a single file to Drive."""
+    try:
+        service = get_drive_service()
+        if not service:
+            return {"success": False, "error": "No drive service"}
+        res = upload_file_to_vault(service, file_path, folder_id)
+        return {"success": True, "file_id": res.get("id"), "url": res.get("webViewLink")}
+    except Exception as e:
+        logger.warning(f"Failed to sync {file_path} to Drive: {e}")
+        return {"success": False, "error": str(e)}
+
 def sync_all_memory_to_drive():
     service = get_drive_service()
     if not service:

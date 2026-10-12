@@ -551,6 +551,51 @@ TOOLS_DEFINITION = [
     {
         "type": "function",
         "function": {
+            "name": "manage_business_payables",
+            "description": "Manage Outgoing Supplier Payables, Company Vault, Proactive Due Date Alerts (e.g. Lakshmi Chemicals, Spinning Mills, EB Bills, GST Deadlines), and Payment Reconciliation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["check_alerts", "add_payable", "mark_paid", "cashflow_radar", "list_payables"],
+                        "description": "Action: 'check_alerts' for upcoming due dates, 'add_payable' to log new supplier bill, 'mark_paid' to reconcile payment, 'cashflow_radar' for 360 overview, or 'list_payables'."
+                    },
+                    "vendor_name": {"type": "string", "description": "Supplier / Vendor / Bill name (e.g. 'Lakshmi Chemicals', 'Sakthi Firewood', 'TNEB')."},
+                    "amount": {"type": "number", "description": "Amount in INR to pay or paid."},
+                    "due_date": {"type": "string", "description": "Optional due date (YYYY-MM-DD). If omitted, auto-calculated from vendor credit terms."},
+                    "description": {"type": "string", "description": "Item description or purchase note."},
+                    "payment_mode": {"type": "string", "description": "Payment mode used (NEFT, UPI, Cheque, RTGS)."}
+                },
+                "required": ["action"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "manage_washing_hub",
+            "description": "Manage Sri Ganapathi Industrial Washing & Salavai Hub: chemical recipes for Bio-Polish enzyme, Silicon soft-touch finish, and Bleaching (Salavai); lot weight and production queue tracking.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["formulate_recipe", "add_lot", "status"],
+                        "description": "Action: 'formulate_recipe' for exact chemicals, 'add_lot' to inward new garment lot, or 'status' for machine queue."
+                    },
+                    "wash_type": {"type": "string", "description": "Type of wash: 'bio_polish' (Acid Enzyme), 'silicon_finish', 'salavai_bleach', or 'soft_wash'."},
+                    "weight_kg": {"type": "number", "description": "Fabric or garment weight in Kg."},
+                    "customer": {"type": "string", "description": "Customer mill or garment exporter name."},
+                    "pieces": {"type": "integer", "description": "Total garment pieces count."}
+                },
+                "required": ["action"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "manage_memory",
             "description": "Store or recall persistent user facts/notes, allocate project workspaces, or view all active memory allocations.",
             "parameters": {
@@ -755,6 +800,46 @@ class AgentBrain:
             )
             res = _run_async_safely(agent.process_task(msg))
             return res.result.get("summary", "No billing data found.") if res.result else "No billing data found."
+        elif name == "manage_business_payables":
+            from app.agents.swarm.business_vault_finance_agent import BusinessVaultFinanceAgent
+            from app.agents.swarm.base_swarm_agent import SwarmTaskMessage
+            agent = BusinessVaultFinanceAgent()
+            action_map = {
+                "check_alerts": "GET_PROACTIVE_ALERTS",
+                "add_payable": "ADD_PAYABLE",
+                "mark_paid": "MARK_PAID",
+                "cashflow_radar": "CASHFLOW_RADAR",
+                "list_payables": "LIST_PAYABLES"
+            }
+            chosen_action = action_map.get(args.get("action", "check_alerts"), "GET_PROACTIVE_ALERTS")
+            msg = SwarmTaskMessage(
+                task_id="tool_payables",
+                sender="AgentBrain",
+                recipient="BusinessVaultFinance",
+                action=chosen_action,
+                payload=args
+            )
+            res = _run_async_safely(agent.process_task(msg))
+            return res.result.get("summary", "Payables updated.") if res.result else "Payables updated."
+        elif name == "manage_washing_hub":
+            from app.agents.swarm.washing_hub_agent import WashingHubAgent
+            from app.agents.swarm.base_swarm_agent import SwarmTaskMessage
+            agent = WashingHubAgent()
+            action_map = {
+                "formulate_recipe": "FORMULATE_RECIPE",
+                "add_lot": "ADD_LOT",
+                "status": "STATUS"
+            }
+            chosen_action = action_map.get(args.get("action", "status"), "STATUS")
+            msg = SwarmTaskMessage(
+                task_id="tool_washing",
+                sender="AgentBrain",
+                recipient="WashingHub",
+                action=chosen_action,
+                payload=args
+            )
+            res = _run_async_safely(agent.process_task(msg))
+            return res.result.get("summary", "Washing hub status checked.") if res.result else "Washing hub status checked."
         elif name == "manage_memory":
             from app.agents.swarm.memory_vault_agent import MemoryVaultAgent
             from app.agents.swarm.base_swarm_agent import SwarmTaskMessage

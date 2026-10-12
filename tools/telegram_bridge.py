@@ -1582,6 +1582,21 @@ async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
     Executes prompt through the Cloud Antigravity Cognitive Brain (ServerRouter + Groq/Gemini).
     Zero physical PC access, zero local disk blocking, pure online cloud execution.
     """
+    # 1. Primary Cognitive & Task Plane: Central Orchestrator (Gemini + SQLite Durability)
+    try:
+        from app.orchestrator.central_orchestrator import central_orchestrator
+        orch_res = await asyncio.to_thread(
+            central_orchestrator.process_request,
+            raw_message=prompt,
+            user_id="mukil",
+            channel="TELEGRAM"
+        )
+        if orch_res and orch_res.get("reply"):
+            return orch_res["reply"]
+    except Exception as orch_err:
+        logger.warning(f"Central Orchestrator execution notice: {orch_err}. Falling back to ServerRouter...")
+
+    # 2. Fallback: ServerRouter (Groq function declarations)
     try:
         history = mem.get_recent_conversations(limit=6)
         history_formatted = [

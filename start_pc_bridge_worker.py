@@ -31,7 +31,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("PCWorkerClient")
 
-CLOUD_SERVER_URL = os.getenv("CLOUD_SERVER_URL", "wss://aura-os-n6n3.onrender.com/api/v1/bridge/ws")
+CLOUD_SERVER_URL = os.getenv("CLOUD_SERVER_URL", "wss://aura-os-jarvis.onrender.com/api/v1/bridge/ws")
 BRIDGE_SECRET = os.getenv("PC_BRIDGE_SECRET", "mukil-aura-pc-bridge-secret-2026")
 WORKER_ID = os.getenv("WORKER_ID", "mukil_primary_pc")
 

@@ -1,0 +1,102 @@
+{
+  "last_updated": "2026-10-12T11:48:00+05:30",
+  "payables": [
+    {
+      "payable_id": "PAY-202610-001",
+      "vendor_name": "Lakshmi Chemicals",
+      "category": "Chemicals & Enzymes",
+      "invoice_ref": "LC-8842",
+      "amount": 25000.00,
+      "description": "Bio-Polish Acid Enzyme (50L) & Silicon Softener for Washing Hub",
+      "bill_date": "2026-09-28",
+      "due_date": "2026-10-13",
+      "status": "PENDING",
+      "payment_details": {
+        "bank_name": "HDFC Bank",
+        "account_number": "50200078129043",
+        "ifsc": "HDFC0001234",
+        "upi_id": "lakshmichem@hdfcbank"
+      },
+      "reminders_sent": {
+        "3_days": true,
+        "1_day": false,
+        "due_day": false
+      },
+      "paid_at": null,
+      "payment_mode": null,
+      "transaction_ref": null
+    },
+    {
+      "payable_id": "PAY-202610-002",
+      "vendor_name": "TNEB Commercial Electricity (03-245-004-1290)",
+      "category": "Commercial Power (EB)",
+      "invoice_ref": "EB-OCT2026",
+      "amount": 18500.00,
+      "description": "Monthly Factory & Boiler Unit Commercial Power Bill",
+      "bill_date": "2026-10-01",
+      "due_date": "2026-10-15",
+      "status": "PENDING",
+      "payment_details": {
+        "consumer_number": "03-245-004-1290",
+        "portal": "https://www.tnebnet.org",
+        "payment_method": "TNEB NetBanking / TNeGA Portal"
+      },
+      "reminders_sent": {
+        "3_days": false,
+        "1_day": false,
+        "due_day": false
+      },
+      "paid_at": null,
+      "payment_mode": null,
+      "transaction_ref": null
+    },
+    {
+      "payable_id": "PAY-202610-003",
+      "vendor_name": "Sakthi Firewood & Boiler Fuel",
+      "category": "Boiler Biomass Fuel",
+      "invoice_ref": "SF-4410",
+      "amount": 12400.00,
+      "description": "Casuarina Steam Wood Load (3.5 Tons)",
+      "bill_date": "2026-10-08",
+      "due_date": "2026-10-18",
+      "status": "PENDING",
+      "payment_details": {
+        "bank_name": "Canara Bank",
+        "account_number": "1290101034567",
+        "ifsc": "CNRB0001290",
+        "upi_id": "sakthifuel@upi"
+      },
+      "reminders_sent": {
+        "3_days": false,
+        "1_day": false,
+        "due_day": false
+      },
+      "paid_at": null,
+      "payment_mode": null,
+      "transaction_ref": null
+    },
+    {
+      "payable_id": "PAY-202610-004",
+      "vendor_name": "GST Commercial Tax Department",
+      "category": "Statutory GST Filing",
+      "invoice_ref": "GSTR-3B-SEP2026",
+      "amount": 2068.51,
+      "description": "September 2026 Net GST Output Liability (CGST ₹1,034.25 + SGST ₹1,034.25)",
+      "bill_date": "2026-10-01",
+      "due_date": "2026-10-20",
+      "status": "SCHEDULED",
+      "payment_details": {
+        "portal": "https://www.gst.gov.in",
+        "challan_pmt_06": "PMT-06 Net Tax Balance"
+      },
+      "reminders_sent": {
+        "3_days": false,
+        "1_day": false,
+        "due_day": false
+      },
+      "paid_at": null,
+      "payment_mode": null,
+      "transaction_ref": null
+    }
+  ]
+}
