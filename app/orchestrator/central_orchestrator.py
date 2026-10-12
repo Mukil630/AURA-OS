@@ -92,7 +92,7 @@ class CentralOrchestrator:
         """Invokes Gemini (or Groq fallback) with structured JSON prompt."""
         # 1. Try Gemini
         if self.gemini_client:
-            models = ["gemini-2.5-flash", "gemini-1.5-flash"]
+            models = ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-3.6-flash", "gemini-flash-latest"]
             for m in models:
                 try:
                     res = self.gemini_client.models.generate_content(

@@ -1095,13 +1095,23 @@
         let headers = { 'Content-Type': 'application/json' };
 
         if (attached) {
-          endpoint = '/api/v1/hub/upload';
-          const formData = new FormData();
-          formData.append('file', attached.file);
-          formData.append('file_type', attached.fileType);
-          formData.append('note', msg);
-          bodyPayload = formData;
-          headers = {};
+          if (attached.fileType === 'image') {
+            endpoint = '/api/v1/vision/analyze';
+            const formData = new FormData();
+            formData.append('file', attached.file);
+            formData.append('query', msg || 'Analyze this image and identify shades, details, or errors.');
+            formData.append('channel', 'WEB_HUB_CAMERA');
+            bodyPayload = formData;
+            headers = {};
+          } else {
+            endpoint = '/api/v1/hub/upload';
+            const formData = new FormData();
+            formData.append('file', attached.file);
+            formData.append('file_type', attached.fileType);
+            formData.append('note', msg);
+            bodyPayload = formData;
+            headers = {};
+          }
         }
 
         const res = await fetch(endpoint, {
@@ -1114,13 +1124,14 @@
 
         if (res.ok) {
           const data = await res.json();
-          const replyText = data.reply || data.summary || "Completed task, Boss!";
+          const replyText = data.analysis || data.reply || data.summary || "Completed task, Boss!";
+          const spokenText = data.speech_reply || replyText;
           const mediaObj = data.screenshot_url ? { type: 'image', url: data.screenshot_url } : null;
           appendMessage(replyText, 'bot', mediaObj);
 
           // Auto-speak in hands-free mode
           if (isHandsFreeActive) {
-            speakText(replyText, () => {
+            speakText(spokenText, () => {
               // Restart listening after speech finishes
               if (isHandsFreeActive && handsFreeRecognizer) {
                 try { handsFreeRecognizer.start(); } catch(e){}

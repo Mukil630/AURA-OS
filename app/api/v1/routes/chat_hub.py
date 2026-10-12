@@ -74,8 +74,31 @@ async def get_system_telemetry() -> Dict[str, Any]:
 
 @router.post("/chat")
 async def send_chat_message(payload: ChatMessageRequest) -> Dict[str, Any]:
-    """Processes user chat, voice transcript, or quick action through AgentBrain."""
+    """Processes user chat, voice transcript, or quick action through Central Orchestrator & AgentBrain."""
     try:
+        from app.orchestrator.central_orchestrator import central_orchestrator
+        
+        # 1. Process via Central Cognitive Orchestrator
+        orch_res = central_orchestrator.process_request(
+            raw_message=payload.message,
+            user_id=payload.user_name or "mukil",
+            channel=payload.channel or "WebHub"
+        )
+        intent = orch_res.get("intent")
+
+        # If it's a domain task (billing, payables, reminders, washing ops, tasks), return orchestrator's verified output
+        if intent in ["SCHEDULE_REMINDER", "SGC_BILLING_QUERY", "BUSINESS_PAYABLES", "WASHING_HUB_OPS", "TASK_MANAGEMENT"]:
+            return {
+                "reply": orch_res.get("reply"),
+                "speech_reply": orch_res.get("speech_reply"),
+                "task_id": orch_res.get("task_id"),
+                "intent": intent,
+                "sender": "JARVIS",
+                "screenshot_url": None,
+                "timestamp": time.strftime("%H:%M")
+            }
+
+        # 2. For general conversation or PC tool execution, run through AgentBrain
         from brain.agent_brain import AgentBrain
         brain = AgentBrain()
         reply = brain.process_message(payload.message, user_name=payload.user_name)
@@ -102,6 +125,9 @@ async def send_chat_message(payload: ChatMessageRequest) -> Dict[str, Any]:
 
         return {
             "reply": reply,
+            "speech_reply": orch_res.get("speech_reply") or reply,
+            "task_id": orch_res.get("task_id"),
+            "intent": intent,
             "sender": "JARVIS",
             "screenshot_url": screenshot_url,
             "timestamp": time.strftime("%H:%M")
@@ -109,6 +135,7 @@ async def send_chat_message(payload: ChatMessageRequest) -> Dict[str, Any]:
     except Exception as e:
         return {
             "reply": f"Maapla, error: {str(e)}",
+            "speech_reply": "Error in processing, please retry.",
             "sender": "JARVIS",
             "screenshot_url": None,
             "timestamp": time.strftime("%H:%M")
