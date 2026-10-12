@@ -9,6 +9,12 @@
     "main_bills_vault": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link",
     "master_vault": "https://drive.google.com/drive/folders/1iaHzDzC7KiJk2FlMdS7eNW7vkYxDeaXZ?usp=drive_link"
   },
+  "turso_storage_preservation_policy": {
+    "status": "ENFORCED_PERMANENT",
+    "updated_at": "2026-10-12T20:17:00+05:30",
+    "free_tier_limit": "5 GB AWS Mumbai",
+    "directive": "Zero waste policy. Do not pollute Turso Cloud with trivial, ephemeral, or throwaway scratch notes. Scheduled reminders are allowed (auto-purge maintains 0 MB bloat). Long-term vault items (aura_vault) must be strictly filtered for high-importance SGC financials, supplier records, career milestones, or verified personal facts. For non-critical/borderline items, keep in local ephemeral storage or ask Mukil for confirmation before saving to cloud."
+  },
   "master_blueprint_active": {
     "status": "LOCKED_AND_EXECUTING",
     "blueprint_file": "C:\\Users\\mukil\\jarvis-core\\MASTER_BLUEPRINT.md",

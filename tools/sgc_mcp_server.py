@@ -1045,6 +1045,92 @@ def sgc_delete_invoice(bill_no: int, confirm_token: str = "") -> str:
 
 
 # ==============================================================================
+# TURSO CLOUD DATABASE & LIMITLESS SCHEDULER TOOLS
+# ==============================================================================
+from aura_agent_core.nlp_parser import parse_natural_time
+from aura_agent_core.services import (
+    create_reminder, list_active_reminders, cancel_reminder,
+    save_to_vault, search_vault
+)
+
+
+@mcp.tool()
+def sgc_add_turso_reminder(task: str, when: str) -> str:
+    """
+    Saves an NLP/Tanglish reminder into Turso Cloud DB (AWS Mumbai) with limitless auto-clean.
+
+    Args:
+        task: Task or reminder description (e.g. 'Pay Lakshmi Chemicals 25000').
+        when: Natural or Tanglish date/time (e.g. 'tomorrow 6pm', 'naalaiki kaalaila 9am', '10s').
+    """
+    import asyncio
+    parsed = parse_natural_time(when)
+    if not parsed["success"]:
+        return f"❌ Error: {parsed['error']}"
+    rem_id = asyncio.run(create_reminder(task, parsed["scheduled_iso"]))
+    return (
+        f"✅ **Reminder Saved in Turso Cloud DB (AWS Mumbai)!**\n"
+        f"• **Task ID:** #{rem_id}\n"
+        f"• **Task:** {task}\n"
+        f"• **Scheduled:** {parsed['scheduled_iso']} IST ({parsed['display']})\n"
+        f"• **Auto-Clean:** Dispatches wakeup alert & purges to keep 0 MB bloat!"
+    )
+
+
+@mcp.tool()
+def sgc_list_turso_reminders() -> str:
+    """
+    Lists all active pending reminders in Turso Cloud DB.
+    """
+    import asyncio
+    items = asyncio.run(list_active_reminders())
+    if not items:
+        return "ℹ️ No pending reminders in Turso Cloud DB (0 MB storage maintained)."
+    out = [f"📋 **Active Turso Cloud Reminders ({len(items)} Tasks):**"]
+    for r in items:
+        out.append(f"• **#{r['id']}**: `{r['title']}` | ⏰ `{r['remind_at']} IST`")
+    return "\n".join(out)
+
+
+@mcp.tool()
+def sgc_cancel_turso_reminder(reminder_id: int) -> str:
+    """
+    Cancels and immediately purges a reminder from Turso Cloud DB.
+    """
+    import asyncio
+    success = asyncio.run(cancel_reminder(reminder_id))
+    if success:
+        return f"✅ Reminder #{reminder_id} cancelled & purged from Turso Cloud DB."
+    return f"❌ Reminder #{reminder_id} not found in Turso Cloud."
+
+
+@mcp.tool()
+def sgc_save_memory_vault(category: str, title: str, content: str, drive_link: str = "", tags: str = "") -> str:
+    """
+    Saves personal memories, notes, or Google Drive links into Turso Universal Vault.
+    """
+    import asyncio
+    v_id = asyncio.run(save_to_vault(category, title, content, drive_link, tags))
+    return f"✅ Saved in Turso Vault with ID #{v_id} (Category: {category.upper()})!"
+
+
+@mcp.tool()
+def sgc_search_memory_vault(keyword: str = "", category: str = "", limit: int = 10) -> str:
+    """
+    Searches Turso Universal Memory Vault across keywords, categories, and tags.
+    """
+    import asyncio
+    results = asyncio.run(search_vault(keyword=keyword, category=category, limit=limit))
+    if not results:
+        return f"ℹ️ No memories found matching '{keyword}'."
+    out = [f"🧠 **Found {len(results)} Memories in Turso Universal Vault:**"]
+    for m in results:
+        drive_link = f" | 🔗 [Drive]({m['drive_link']})" if m.get('drive_link') else ""
+        out.append(f"• **[#{m['id']}] [{m['category']}] {m['title']}**\n  {m['content']}{drive_link}")
+    return "\n".join(out)
+
+
+# ==============================================================================
 # MAIN RUNNER
 # ==============================================================================
 if __name__ == "__main__":
