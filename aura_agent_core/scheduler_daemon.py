@@ -8,7 +8,7 @@ from aura_agent_core.services import get_due_reminders, purge_completed_reminder
 async def default_agent_wakeup_handler(reminder_id: int, title: str, scheduled_time: str):
     """
     Default callback when a reminder is triggered.
-    Dispatches to console, and notifies Telegram if credentials/bridge available.
+    Dispatches to console, triggers cloud calling uplink to phone, and notifies Telegram.
     """
     print(f"\n" + "=" * 60)
     print(f"[ALARM TRIGGERED] Waking up Main Agent!")
@@ -18,7 +18,20 @@ async def default_agent_wakeup_handler(reminder_id: int, title: str, scheduled_t
     print(f" Action      : Dispatched to Main Agent. Auto-deleting from Turso...")
     print("=" * 60 + "\n")
 
-    # Optional Telegram dispatch if configured
+    # 1. Trigger incoming phone call / alarm over Cloud WebSocket to Mukil's Phone!
+    try:
+        from app.api.v1.routes.call_hub import call_hub_manager
+        reminder_msg = f"வணக்கம் முகில் மாப்ள! உங்களுக்கு ஒரு ரிமைண்டர் இருக்கு: {title}"
+        await call_hub_manager.trigger_call(
+            caller_name="JARVIS",
+            reason=f"reminder_{reminder_id}",
+            custom_message=reminder_msg
+        )
+        print(f"[DAEMON] ⚡ Dispatched Cloud Call alert for reminder #{reminder_id} to phone.")
+    except Exception as call_err:
+        print(f"[DAEMON] CallHub trigger notice: {call_err}")
+
+    # 2. Optional Telegram dispatch if configured
     try:
         from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
         bot_token = os.getenv("TELEGRAM_BOT_TOKEN") or TELEGRAM_BOT_TOKEN

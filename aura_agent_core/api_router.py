@@ -32,6 +32,7 @@ class VaultSaveRequest(BaseModel):
 # ====================
 
 @router.post("/reminders/add")
+@router.post("/reminders/create")
 async def add_reminder_endpoint(req: ReminderCreateRequest):
     """
     Parses NLP time input, saves to Turso Cloud, and schedules agent wakeup.
