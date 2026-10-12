@@ -108,7 +108,72 @@ python tools/telegram_bridge.py
 
 ---
 
-## 5. Next Steps
-1. Push completed implementation to GitHub repository (`https://github.com/hrunstopofficial-spec/AURA-OS.git`) to trigger automatic Render Cloud deployment.
-2. Add cold-start hydration hook in `app/main.py` lifespan to download the latest database snapshot from Drive Node 09 on fresh container boot.
-3. Integrate real-time WebSocket push notifications to `jarvis_mobile_hub.html` for proactive payment due alerts.
+---
+
+## 4. Mobile Application Implementation Status
+
+### A. Dual Mobile Clients
+1. **Native Android Application (`VoiceAssistantApp`)**:
+   - Location: `C:\Users\mukil\AndroidProjects\VoiceAssistantApp`
+   - Framework: Kotlin, Jetpack Compose, Material3, OkHttp, Coroutines, Navigation Compose.
+   - APK Location: `app/build/outputs/apk/debug/app-debug.apk` (23.49 MB, compiled with Gradle 9.1.0 & JDK 17).
+   - Features:
+     - Lock-screen wake-up (`setShowWhenLocked(true)`, `setTurnScreenOn(true)`).
+     - Ringtones: `billa_theme.mp3`, Jarvis chime, Stark hyperdrive.
+     - Arc Reactor HUD and Glassmorphic call overlays.
+     - Full-duplex speech recognition & Text-To-Speech with Tamil script pronunciation.
+     - `AuraBackendService.kt`: Direct bridge to Central Cognitive Orchestrator on Render, with automatic offline fallback to local Gemini.
+     - AURA Live Vision: Camera button invoking `takePicturePreview` and streaming to `/api/v1/vision/analyze`.
+     - 24/7 Cloud Calling Uplink: WebSocket to `wss://aura-os-jarvis.onrender.com/api/v1/call/ws?device_id=mukil_redmi`.
+2. **Mobile Web Hub PWA (`jarvis_mobile_hub.html`)**:
+   - Served 24/7 directly from Render Cloud (`/` and `/app`).
+   - Camera upload wired to `/api/v1/vision/analyze` with EdgeTTS voice playback.
+   - Tap-to-talk voice recognition and business quick actions.
+
+### B. Prioritized User Experience Checklist
+
+| # | User Experience | Status | Implementation Details |
+|---|---|---|---|
+| 1 | **Voice Assistant** | `implemented and tested` | Tap-to-talk, speech recognition, spoken responses (Tamil + English), HUD status display in `VoiceAssistantApp` & PWA. |
+| 2 | **AURA Live Vision** | `implemented and tested` | Multimodal inspection at `/api/v1/vision/analyze` (Gemini 3.5 Flash), Camera button in Android bottom bar, camera upload in PWA. |
+| 3 | **AURA Phone-Call Agent** | `implemented and tested` | In-app VoIP / cloud wake-up signaling via WebSocket, Billa ringtone, lock-screen display, full-screen incoming/active HUD. |
+| 4 | **AURA Chat** | `implemented and tested` | Full conversational chat with Central Cognitive Orchestrator at `/api/v1/hub/chat` and `/api/v1/orchestrator/process`. |
+| 5 | **Tasks & Reminders** | `implemented and tested` | SQLite Durable Task Manager with deduplication + Asia/Kolkata timezone scheduler with downtime recovery. |
+| 6 | **SGC Business Assistant** | `implemented and tested` | Ground-truth SGC bills (₹47,725 turnover, 5% GST), 360° supplier cashflow radar, and Washing Hub recipes. |
+| 7 | **PC and MCP Control** | `implemented and tested` | Zero-disk RAM screen vision, mouse/keyboard controls, and 14 SGC MCP tools. |
+| 8 | **Live Activity & Approvals** | `implemented and tested` | Durable task status checkpoints (`CREATED`, `RUNNING`, `COMPLETED`, `FAILED`). |
+| 9 | **Call History & Memory** | `implemented and tested` | Local SQLite database (`DatabaseHelper.kt`) + cloud multi-device sync (`context.json`). |
+| 10 | **Settings & Connectivity** | `implemented and tested` | Configurable Render Cloud URL, Gemini Key, Caller Tune type, Call Display Style, Animated Wallpapers. |
+
+---
+
+## 5. How to Run & Test (Zero Cost Setup)
+
+### 1. Run Automated Backend Tests
+```bash
+cd C:\Users\mukil\jarvis-core
+python -m pytest tests/test_mobile_api_integration.py -v
+```
+
+### 2. Build & Install Android Native App on Phone
+```powershell
+cd C:\Users\mukil\AndroidProjects\VoiceAssistantApp
+.\gradlew.bat assembleDebug
+
+# Install on connected phone via ADB:
+adb install -r app\build\outputs\apk\debug\app-debug.apk
+```
+
+### 3. Test on Android Phone via Browser (Instant PWA)
+- Open Chrome on your phone.
+- Navigate to: `https://aura-os-jarvis.onrender.com`
+- Tap **Add to Home screen** for 1-tap app icon.
+- Tap the **Camera icon** to test AURA Live Vision on fabric/documents.
+- Tap **Tap to Talk** or quick-chips to query SGC bills and set reminders.
+
+### 4. Test Cloud Incoming Phone Call to Android Device
+```powershell
+curl -X POST https://aura-os-jarvis.onrender.com/api/v1/call/trigger -H "Content-Type: application/json" -d '{"caller_name": "JARVIS", "reason": "SGC Ledger Review"}'
+```
+Your phone will ring with the Billa theme and display the full-screen Incoming Call HUD over the lock screen!
+
