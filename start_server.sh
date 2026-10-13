@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 # AURA-OS Cloud Server Startup Script
-# Automatically launches 24/7 Telegram Bridge Daemon alongside Uvicorn Web Engine
-
-echo "========================================================"
-echo "🚀 AURA-OS: Starting 24/7 Telegram Bridge Daemon in BG..."
-echo "========================================================"
-python -u tools/telegram_bridge.py &
-TELEGRAM_PID=$!
-echo "✅ Telegram Bridge Daemon active with PID: $TELEGRAM_PID"
+# Telegram Bridge Daemon is managed cleanly via app.main lifespan with auto-shutdown
 
 echo "========================================================"
 echo "⚡ AURA-OS: Starting FastAPI Production Web Server..."
