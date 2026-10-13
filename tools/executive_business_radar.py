@@ -193,16 +193,16 @@ class ExecutiveBusinessRadar:
                         f"Pay pannitu sollunga Boss, ledger update pannidren!"
                     )
                     display_text = (
-                        f"🚨 <b>PROACTIVE PAYMENT RADAR ALERT!</b> ⏰\n\n"
-                        f"<b>Naalaiki {vendor}-ku ₹{amount:,.2f} payment release pannanum!</b>\n"
-                        f"📌 <b>Reason:</b> {p.get('description', 'Supplier Bill')}\n"
-                        f"📅 <b>Due Date:</b> <code>{due_str}</code> (Tomorrow)\n\n"
-                        f"🏦 <b>Payment Destination:</b>\n"
-                        f"• <b>Bank:</b> {b_name}\n"
-                        f"• <b>A/C No:</b> <code>{acc}</code>\n"
-                        f"• <b>IFSC:</b> <code>{ifsc}</code>\n"
-                        f"• <b>UPI ID:</b> <code>{upi}</code>\n\n"
-                        f"<i>Pay pannitu sollunga Boss, ledger update pannidren!</i>"
+                        f"🚨 **PROACTIVE PAYMENT RADAR ALERT!** ⏰\n\n"
+                        f"**Naalaiki {vendor}-ku ₹{amount:,.2f} payment release pannanum!**\n"
+                        f"📌 **Reason:** {p.get('description', 'Supplier Bill')}\n"
+                        f"📅 **Due Date:** `{due_str}` (Tomorrow)\n\n"
+                        f"🏦 **Payment Destination:**\n"
+                        f"• **Bank:** {b_name}\n"
+                        f"• **A/C No:** `{acc}`\n"
+                        f"• **IFSC:** `{ifsc}`\n"
+                        f"• **UPI ID:** `{upi}`\n\n"
+                        f"*Pay pannitu sollunga Boss, ledger update pannidren!*"
                     )
                     alerts.append({
                         "payable_id": p.get("payable_id"),
@@ -224,11 +224,11 @@ class ExecutiveBusinessRadar:
                         f"A/C: {acc}, IFSC: {ifsc}. Immediate-aa pay pannidunga!"
                     )
                     display_text = (
-                        f"🔥 <b>TODAY'S PAYMENT DEADLINE ALERT!</b> 🔥\n\n"
-                        f"<b>Inniki {vendor}-ku ₹{amount:,.2f} due date!</b>\n"
-                        f"📌 <b>Item:</b> {p.get('description')}\n"
-                        f"🏦 <b>Bank A/C:</b> <code>{acc}</code> ({ifsc})\n\n"
-                        f"<i>Immediate-aa NEFT/UPI release pannitu sollunga Boss!</i>"
+                        f"🔥 **TODAY'S PAYMENT DEADLINE ALERT!** 🔥\n\n"
+                        f"**Inniki {vendor}-ku ₹{amount:,.2f} due date!**\n"
+                        f"📌 **Item:** {p.get('description')}\n"
+                        f"🏦 **Bank A/C:** `{acc}` ({ifsc})\n\n"
+                        f"*Immediate-aa NEFT/UPI release pannitu sollunga Boss!*"
                     )
                     alerts.append({
                         "payable_id": p.get("payable_id"),
@@ -251,7 +251,7 @@ class ExecutiveBusinessRadar:
                     "days_remaining": days_remaining,
                     "level": "OVERDUE",
                     "speech_text": f"Boss, {vendor} payment ₹{amount:,.0f} already {abs(days_remaining)} days overdue aayiduchu!",
-                    "display_text": f"⚠️ <b>OVERDUE WARNING:</b> {vendor} (₹{amount:,.2f}, {abs(days_remaining)} days overdue)"
+                    "display_text": f"⚠️ **OVERDUE WARNING:** {vendor} (`₹{amount:,.2f}`, {abs(days_remaining)} days overdue)"
                 })
 
         if updated and not force_all_urgent:

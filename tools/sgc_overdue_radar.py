@@ -10,20 +10,13 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-SGC_DATA_PATH = Path(os.environ.get("APPDATA", "")) / "sgc-billing" / "sgc-billing-data.json"
+from tools.sgc_billing_query import load_all_bills
 
 def get_overdue_report() -> dict:
     """Analyzes pending bills in SGC Billing and returns overdue analysis & follow-up messages."""
-    if not SGC_DATA_PATH.exists():
-        return {"error": "SGC Billing database not found."}
-
-    try:
-        with open(SGC_DATA_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception as e:
-        return {"error": f"Failed to read database: {e}"}
-
-    bills = data.get("sgc-bills", [])
+    bills, err = load_all_bills()
+    if err:
+        return {"error": err}
     now = datetime.now()
 
     pending_bills = []
@@ -80,36 +73,37 @@ def get_overdue_report() -> dict:
         "as_of": now.strftime("%Y-%m-%d %I:%M %p")
     }
 
-def format_overdue_telegram() -> str:
+def generate_executive_radar_report() -> str:
     rep = get_overdue_report()
     if rep.get("error"):
-        return f"⚠️ {rep['error']}"
+        return f"⚠️ **SGC Overdue Radar:** {rep['error']}"
 
     total = rep["total_pending_amount"]
     count = rep["total_pending_count"]
     bills = rep["bills"]
 
     if count == 0:
-        return "🎉 *All SGC bills are 100% cleared! Zero pending payments.*"
+        return "🎉 **All SGC bills are 100% cleared! Zero pending payments.**"
 
-    text = (
-        f"📊 <b>SGC PAYMENT OVERDUE & COLLECTION RADAR</b>\n\n"
-        f"• <b>Total Outstanding</b>: <b>₹{total:,.2f}</b> across <b>{count} Bills</b>\n"
-        f"• <b>As of</b>: <code>{rep['as_of']}</code>\n\n"
-        f"<b>Pending Bills Breakdown:</b>\n"
-    )
+    lines = [
+        f"📊 **Sri Ganapathi Colours — Overdue & Collection Radar**\n",
+        f"• **Total Outstanding:** **`₹{total:,.2f}`** across **{count} Pending Bills**",
+        f"• **As of:** `{rep['as_of']}`\n",
+        f"📋 **Pending Bills Breakdown:**"
+    ]
 
     for b in bills:
-        text += (
-            f"{b['badge']} <b>Bill #{b['bill_no']}</b>: <b>{b['customer']}</b>\n"
-            f"   💰 Amount: <b>₹{b['net_amount']:,.0f}</b> | ⏳ Age: <b>{b['days_overdue']} days ago</b> ({b['date']})\n"
+        lines.append(
+            f"• {b['badge']} **Bill #{b['bill_no']}** | **{b['customer']}** | `₹{b['net_amount']:,.2f}` | *{b['days_overdue']} days age* ({b['date']})"
         )
 
-    text += (
-        "\n💡 <b>Follow-up Action:</b>\n"
-        "Copy draft payment reminder for any client to send on WhatsApp with CSB Bank details!"
+    lines.append(
+        f"\n☁️ **Master Vault:** [Google Drive Bills Folder](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
     )
-    return text
+    return "\n".join(lines)
+
+def format_overdue_telegram() -> str:
+    return generate_executive_radar_report()
 
 if __name__ == "__main__":
-    print(format_overdue_telegram())
+    print(generate_executive_radar_report())

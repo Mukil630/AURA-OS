@@ -224,18 +224,20 @@ def format_month_wise_bills_dossier() -> Tuple[str, str]:
 
         month_summaries_speech.append(f"{m_name.split()[0]}-la {len(m_bills)} bills (₹{m_gross:,.0f})")
 
-        b_lines = []
+        t_rows = [
+            f"| Bill # | Date | Party Name | Amount | Status |",
+            f"| :---: | :---: | :--- | :---: | :---: |"
+        ]
         for b in sorted(m_bills, key=lambda x: int(x.get("billNo", 0))):
             b_no = b.get("billNo", "?")
             cust = b.get("customer", "Party")
             dt = b.get("date", "")
             amt = float(b.get("netAmount") or 0)
             st = (b.get("status") or "pending").upper()
-            icon = "🟢" if st == "PAID" else "🔴"
-            b_lines.append(f"• {icon} **Bill #{b_no}** | {dt} | **{cust}** | `₹{amt:,.2f}` | *{st}*")
+            t_rows.append(f"| #{b_no} | {dt} | {cust} | ₹{amt:,.2f} | {st} |")
 
         month_blocks.append(
-            f"📅 **{m_name.upper()} ({len(m_bills)} Bills — Gross: `₹{m_gross:,.2f}`):**\n" + "\n".join(b_lines)
+            f"📅 **{m_name.upper()} ({len(m_bills)} Bills — Subtotal: `₹{m_gross:,.2f}`):**\n" + "\n".join(t_rows)
         )
 
     all_blocks_str = "\n\n".join(month_blocks)

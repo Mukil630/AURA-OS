@@ -502,6 +502,86 @@
       border-bottom-left-radius: 3px;
     }
 
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .chat-md-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      text-align: left;
+    }
+
+    .chat-md-table th {
+      background: var(--surface-elevated);
+      color: var(--text-secondary);
+      font-weight: 600;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--surface-border);
+      white-space: nowrap;
+    }
+
+    .chat-md-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .chat-md-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .chat-link {
+      color: var(--primary);
+      text-decoration: underline;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .chat-code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      color: #93c5fd;
+    }
+
+    .chat-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 10px 0 4px 0;
+    }
+
+    .pill-status {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .pill-pending {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .pill-paid {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
     .chat-bottom-dock {
       padding: 10px 14px;
       padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
@@ -1004,11 +1084,81 @@
       }
     }
 
+    function formatInline(str) {
+      if (!str) return '';
+      return str
+        .replace(/###\s*(.*?)(?:<br>|$)/g, '<div class="chat-header">$1</div>')
+        .replace(/##\s*(.*?)(?:<br>|$)/g, '<div class="chat-header">$1</div>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code class="chat-code">$1</code>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a class="chat-link" href="$2" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function formatChatMessage(txt) {
+      if (!txt) return '';
+      const lines = txt.split('\n');
+      let inTable = false;
+      let tableRows = [];
+      let processedLines = [];
+
+      function flushTable() {
+        if (tableRows.length < 2) {
+          processedLines.push(...tableRows.map(r => formatInline(r)));
+          tableRows = [];
+          inTable = false;
+          return;
+        }
+        const headerCols = tableRows[0].split('|').map(c => c.trim()).filter(c => c.length > 0);
+        let html = '<div class="table-container"><table class="chat-md-table"><thead><tr>';
+        headerCols.forEach(h => {
+          html += `<th>${formatInline(h)}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        for (let i = 2; i < tableRows.length; i++) {
+          const cols = tableRows[i].split('|').map(c => c.trim()).filter(c => c.length > 0);
+          if (cols.length > 0) {
+            html += '<tr>';
+            cols.forEach(c => {
+              let cellContent = formatInline(c);
+              const upper = c.toUpperCase().trim();
+              if (upper.includes('PENDING')) {
+                cellContent = '<span class="pill-status pill-pending">PENDING</span>';
+              } else if (upper.includes('PAID')) {
+                cellContent = '<span class="pill-status pill-paid">PAID</span>';
+              }
+              html += `<td>${cellContent}</td>`;
+            });
+            html += '</tr>';
+          }
+        }
+        html += '</tbody></table></div>';
+        processedLines.push(html);
+        tableRows = [];
+        inTable = false;
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('|') && line.endsWith('|')) {
+          inTable = true;
+          tableRows.push(line);
+        } else {
+          if (inTable) flushTable();
+          processedLines.push(formatInline(line));
+        }
+      }
+      if (inTable) flushTable();
+
+      return processedLines.join('<br>').replace(/(<\/div>)<br>/g, '$1');
+    }
+
     function appendBubble(txt, sender) {
       const container = document.getElementById('chat-messages-list');
       const row = document.createElement('div');
       row.className = `message-bubble-row ${sender}`;
-      row.innerHTML = `<div class="bubble-content">${txt.replace(/\n/g, '<br>')}</div>`;
+      row.innerHTML = `<div class="bubble-content">${sender === 'assistant' ? formatChatMessage(txt) : txt.replace(/\n/g, '<br>')}</div>`;
       container.appendChild(row);
       container.scrollTop = container.scrollHeight;
     }

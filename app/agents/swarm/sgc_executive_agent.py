@@ -25,32 +25,29 @@ class SGCExecutiveAgent(BaseSwarmAgent):
         self.active_vault_id = "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9"
 
     def _get_live_sgc_bills(self) -> Dict[str, Any]:
-        """Reads real SGC billing database from local Electron app data."""
-        data_path = os.path.expanduser(r"~\AppData\Roaming\sgc-billing\sgc-billing-data.json")
-        if os.path.exists(data_path):
-            try:
-                with open(data_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                bills = data.get("sgc-bills", [])
-                if bills:
-                    latest = bills[-1]
-                    pending_bills = [b for b in bills if b.get("status") == "pending"]
-                    total_pending = sum(float(b.get("netAmount", 0)) for b in pending_bills)
-                    return {
-                        "total_bills": len(bills),
-                        "latest_bill": latest,
-                        "latest_bill_no": latest.get("billNo"),
-                        "latest_customer": latest.get("customer"),
-                        "latest_amount": latest.get("netAmount"),
-                        "latest_date": latest.get("date"),
-                        "latest_status": latest.get("status"),
-                        "pending_bills_count": len(pending_bills),
-                        "total_pending_inr": total_pending,
-                        "drive_folder_id": data.get("drive-folder-id", self.active_vault_id),
-                        "bills": bills
-                    }
-            except Exception as e:
-                logger.error(f"Error reading live SGC billing data: {e}")
+        """Reads real SGC billing database from local Electron app data or bundled repo store."""
+        try:
+            from tools.sgc_billing_query import load_all_bills
+            bills, err = load_all_bills()
+            if not err and bills:
+                latest = bills[-1]
+                pending_bills = [b for b in bills if (b.get("status") or "").lower() == "pending"]
+                total_pending = sum(float(b.get("netAmount", 0)) for b in pending_bills)
+                return {
+                    "total_bills": len(bills),
+                    "latest_bill": latest,
+                    "latest_bill_no": latest.get("billNo"),
+                    "latest_customer": latest.get("customer"),
+                    "latest_amount": latest.get("netAmount"),
+                    "latest_date": latest.get("date"),
+                    "latest_status": latest.get("status"),
+                    "pending_bills_count": len(pending_bills),
+                    "total_pending_inr": total_pending,
+                    "drive_folder_id": self.active_vault_id,
+                    "bills": bills
+                }
+        except Exception as e:
+            logger.error(f"Error reading live SGC billing data: {e}")
         return {}
 
     async def process_task(self, message: SwarmTaskMessage) -> SwarmTaskMessage:
@@ -178,11 +175,18 @@ class SGCExecutiveAgent(BaseSwarmAgent):
             return message
 
     def _get_overdue_parties(self) -> List[Dict[str, Any]]:
-        return [
-            {"customer": "M.S.K Fabrics", "invoice_no": "Bill #2", "amount": 5488, "days_overdue": 42, "phone": "+91 98422 11001"},
-            {"customer": "Sowbhagiya Home Textiles", "invoice_no": "Bill #4 & #5", "amount": 1969, "days_overdue": 37, "phone": "+91 94433 22002"},
-            {"customer": "GAIA SUSTAINABLE SOLUTION", "invoice_no": "Bill #6", "amount": 956, "days_overdue": 29, "phone": "+91 99944 33003"}
-        ]
+        live_data = self._get_live_sgc_bills()
+        if live_data and live_data.get("bills"):
+            return [
+                {
+                    "customer": b.get("customer"),
+                    "invoice_no": f"Bill #{b.get('billNo')}",
+                    "amount": float(b.get("netAmount", 0)),
+                    "date": b.get("date", "")
+                }
+                for b in live_data.get("bills", []) if (b.get("status") or "").lower() == "pending"
+            ]
+        return []
 
     def _generate_bilingual_reminder(self, customer: str, amount: int) -> str:
         return (
