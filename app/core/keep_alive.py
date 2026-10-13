@@ -10,7 +10,7 @@ import httpx
 logger = logging.getLogger("KeepAliveEngine")
 
 class RenderKeepAlive:
-    def __init__(self, interval_seconds: int = 120):
+    def __init__(self, interval_seconds: int = 60):
         self.interval = interval_seconds
         self.is_running = False
         self.task = None
@@ -20,12 +20,11 @@ class RenderKeepAlive:
         # Give server 10s to fully bind on startup
         await asyncio.sleep(10)
         
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             while self.is_running:
                 try:
-                    # Self ping localhost:$PORT/health or public Render URL if configured
-                    port = os.environ.get("PORT", "8000")
-                    render_url = os.environ.get("RENDER_EXTERNAL_URL", f"http://127.0.0.1:{port}")
+                    # Ping public Render URL through external Cloudflare router so Render NEVER sleeps
+                    render_url = os.environ.get("RENDER_EXTERNAL_URL") or "https://aura-os-jarvis.onrender.com"
                     target = f"{render_url.rstrip('/')}/health"
                     
                     resp = await client.get(target)
