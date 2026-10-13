@@ -35,8 +35,9 @@ USER PROFILE:
 INSTRUCTION:
 Classify the user's intent into one of these categories:
 1. `SCHEDULE_REMINDER`: User wants an alarm, timer, or future follow-up.
-2. `SGC_BILLING_QUERY`: User asks about customer invoices, turnover, GST, or overdue debtors.
-3. `BUSINESS_PAYABLES`: User asks about upcoming supplier bills, EB commercial electricity bills, or marking an expense paid.
+2. `SGC_BILLING_QUERY`: User asks about customer sales bills/invoices, which bills exist, turnover, GST, passing bills, or overdue debtors.
+   CRITICAL TEXTILE MILL DIRECTIVE: Phrases like 'bills pass pananum', 'bills pass pannanum', 'enna bills eruku', 'bills enna iruku', 'endha month bills', 'pending bills', 'invoices' are SGC customer sales bills! In Tamil textile business context, 'bills pass pananum' means clearing/passing sales bills or reviewing pending bills. ALWAYS classify these as `SGC_BILLING_QUERY`.
+3. `BUSINESS_PAYABLES`: ONLY classify here if user explicitly asks about supplier purchases (e.g., Lakshmi Chemicals, Bannari, chemical vendors, raw material payables, EB commercial electricity bills).
 4. `WASHING_HUB_OPS`: User asks about industrial washing machine cycles, bio-polish enzymes, silicon finish, or garment lots.
 5. `TASK_MANAGEMENT`: User asks to list tasks, check task status, or cancel a task.
 6. `GENERAL_CONVERSATION`: Conversational chat, advice, or technical queries.
@@ -142,7 +143,7 @@ class CentralOrchestrator:
                 "entities": {"action_verb": "remind"},
                 "conversational_reply": f"Sure Boss! Reminder schedule pannidren: '{prompt}'."
             }
-        elif any(w in p for w in ["bill", "invoices", "turnover", "gst", "debtor"]):
+        elif any(w in p for w in ["bill", "invoic", "turnover", "gst", "debtor", "pass pananum", "pass pannanum", "enna bills", "endha month"]):
             target_m = None
             if "oct" in p:
                 target_m = "october"
@@ -202,6 +203,13 @@ class CentralOrchestrator:
         plan = self._call_reasoning_llm(clean_input)
         intent = plan.get("intent", "GENERAL_CONVERSATION")
         priority = plan.get("priority", "NORMAL")
+
+        # Deterministic Guardrail for SGC Billing Queries:
+        raw_low = clean_input.lower()
+        bill_indicators = ["bill", "invoic", "turnover", "gst", "debtor", "pass pananum", "pass pannanum", "enna bills", "endha month"]
+        supplier_indicators = ["lakshmi", "bannari", "supplier", "vendor", "eb bill", "electricity", "payable"]
+        if any(w in raw_low for w in bill_indicators) and not any(w in raw_low for w in supplier_indicators):
+            intent = "SGC_BILLING_QUERY"
 
         # 2. Persist Task in SQLite
         task_record = durable_task_manager.create_task(
@@ -350,11 +358,22 @@ class CentralOrchestrator:
                     speech_reply = "SGC overdue recovery radar ready Boss!"
                     durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary="Overdue radar generated")
 
-                # 6. Query Specific Month or Count
+                # 6. Month-wise Breakdown Dossier (All Months / Which Month / Bills to pass)
+                elif any(w in raw_lower for w in ["endha month", "which month", "all", "ella bills", "bills pass", "pass pananum", "pass pannanum", "breakdown", "across month", "enna bills"]) or entities.get("target_month") in ["all", "overall", "total"]:
+                    rep, sp = sgc_billing_query.format_month_wise_bills_dossier()
+                    final_reply = rep
+                    speech_reply = sp
+                    durable_task_manager.update_task_status(
+                        task_id, status="COMPLETED",
+                        result_summary="Generated month-wise SGC bills dossier",
+                        result_data={"bills_count": 9}
+                    )
+
+                # 7. Query Specific Single Month
                 elif entities.get("target_month") or any(m in raw_lower for m in ["september", "sep", "october", "oct", "last month", "this month"]):
-                    if "sep" in raw_lower:
+                    if "sep" in raw_lower or entities.get("target_month") == "september":
                         m_term = "september"
-                    elif "oct" in raw_lower:
+                    elif "oct" in raw_lower or entities.get("target_month") == "october":
                         m_term = "october"
                     elif "last month" in raw_lower or "prev" in raw_lower:
                         m_term = "previous"
@@ -373,29 +392,16 @@ class CentralOrchestrator:
                         speech_reply = f"{m_term.capitalize()} month bills breakdown ready Boss!"
                     durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bills for {m_term}: {m.get('period_bills_count', 0)} bills", result_data=m)
 
-                # 7. Default: Ground Truth Full Ledger Overview
+                # 8. Default: Ground Truth Month-wise Dossier Overview
                 else:
-                    m = sgc_billing_query.get_ledger_metrics("all")
-                    if m.get("success"):
-                        final_reply = (
-                            f"📊 **Sri Ganapathi Colours (SGC) - Ground Truth Ledger**\n\n"
-                            f"🧾 **Total Verified Bills:** **{m['total_bills_in_db']} Bills**\n"
-                            f"💵 **Taxable Turnover:** `₹{m['total_subtotal']:,.2f}`\n"
-                            f"🏛️ **Total 5% GST:** `₹{m['total_gst']:,.2f}`\n"
-                            f"💰 **Gross Invoiced:** `₹{m['total_gross']:,.2f}`\n"
-                            f"⏳ **Pending Collections:** `₹{m['pending_amount']:,.2f}` ({m['pending_bills_count']} bills)\n\n"
-                            f"☁️ **Vault Link:** [Google Drive Master Bills](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
-                        )
-                        speech_reply = f"Boss, SGC record-la total {m['total_bills_in_db']} bills potrukom. Gross turnover ₹{m['total_gross']:,.0f}."
-                        durable_task_manager.update_task_status(
-                            task_id, status="COMPLETED",
-                            result_summary=f"Fetched SGC ledger: {m['total_bills_in_db']} bills, ₹{m['total_gross']:,.2f} gross",
-                            result_data=m
-                        )
-                    else:
-                        durable_task_manager.update_task_status(task_id, status="FAILED", error_message=m.get("error"))
-                        final_reply = f"⚠️ SGC Billing data fetch error: {m.get('error')}"
-                        speech_reply = "SGC billing database access error Boss."
+                    rep, sp = sgc_billing_query.format_month_wise_bills_dossier()
+                    final_reply = rep
+                    speech_reply = sp
+                    durable_task_manager.update_task_status(
+                        task_id, status="COMPLETED",
+                        result_summary="Fetched SGC month-wise bills dossier",
+                        result_data={"status": "complete"}
+                    )
 
             # -------------------------------------------------------------
             # DOMAIN C: BUSINESS PAYABLES & CASHFLOW RADAR

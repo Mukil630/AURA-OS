@@ -17,6 +17,7 @@ def get_sgc_db_path() -> Optional[Path]:
     candidates = [
         Path(os.environ.get("APPDATA", "")) / "sgc-billing" / "sgc-billing-data.json",
         Path.home() / "AppData" / "Roaming" / "sgc-billing" / "sgc-billing-data.json",
+        Path(__file__).parent.parent / "data" / "sgc-billing-data.json",
         Path(__file__).parent.parent / "storage" / "bills" / "sgc-billing-data.json",
         Path(__file__).parent.parent / "storage" / "memory" / "sgc-billing-data.json",
     ]
@@ -179,6 +180,81 @@ def format_verified_bills_report(target_month: Optional[str] = None) -> str:
         f"{bills_str}\n"
     )
     return report
+
+def format_month_wise_bills_dossier() -> Tuple[str, str]:
+    """
+    Groups all bills by month in reverse chronological order,
+    providing itemized bill details, monthly subtotals, and overall grand totals.
+    Returns (markdown_report, speech_summary).
+    """
+    bills, err = load_all_bills()
+    if err:
+        return f"⚠️ **SGC Billing Error:** {err}", "SGC database access error Boss."
+
+    if not bills:
+        return "📊 **SGC Bills Dossier:** No bills found in database.", "Bills edhum database-la illai Boss."
+
+    from collections import defaultdict
+    months_dict = defaultdict(list)
+    for b in sorted(bills, key=lambda x: int(x.get("billNo", 0)), reverse=True):
+        d_str = b.get("date", "")
+        m_key = d_str[:7] if len(d_str) >= 7 else "Unknown"
+        months_dict[m_key].append(b)
+
+    month_blocks = []
+    total_gross_all = 0.0
+    pending_gross_all = 0.0
+    pending_count_all = 0
+    month_summaries_speech = []
+
+    for m_key in sorted(months_dict.keys(), reverse=True):
+        m_bills = months_dict[m_key]
+        try:
+            m_name = datetime.strptime(m_key + "-01", "%Y-%m-%d").strftime("%B %Y")
+        except Exception:
+            m_name = m_key
+
+        m_subtotal = sum(float(b.get("subtotal") or 0) for b in m_bills)
+        m_gross = sum(float(b.get("netAmount") or 0) for b in m_bills)
+        m_pending = sum(float(b.get("netAmount") or 0) for b in m_bills if (b.get("status") or "").lower() == "pending")
+
+        total_gross_all += m_gross
+        pending_gross_all += m_pending
+        pending_count_all += sum(1 for b in m_bills if (b.get("status") or "").lower() == "pending")
+
+        month_summaries_speech.append(f"{m_name.split()[0]}-la {len(m_bills)} bills (₹{m_gross:,.0f})")
+
+        b_lines = []
+        for b in sorted(m_bills, key=lambda x: int(x.get("billNo", 0))):
+            b_no = b.get("billNo", "?")
+            cust = b.get("customer", "Party")
+            dt = b.get("date", "")
+            amt = float(b.get("netAmount") or 0)
+            st = (b.get("status") or "pending").upper()
+            icon = "🟢" if st == "PAID" else "🔴"
+            b_lines.append(f"• {icon} **Bill #{b_no}** | {dt} | **{cust}** | `₹{amt:,.2f}` | *{st}*")
+
+        month_blocks.append(
+            f"📅 **{m_name.upper()} ({len(m_bills)} Bills — Gross: `₹{m_gross:,.2f}`):**\n" + "\n".join(b_lines)
+        )
+
+    all_blocks_str = "\n\n".join(month_blocks)
+    report = (
+        f"📊 **Sri Ganapathi Colours (SGC) — Ground Truth Month-wise Bills Dossier**\n"
+        f"*(Verified Live Database • {len(bills)} Total Invoices)*\n\n"
+        f"{all_blocks_str}\n\n"
+        f"────────────────────────────────────────\n"
+        f"💰 **Total Invoiced Across All Months:** **`₹{total_gross_all:,.2f}`**\n"
+        f"⏳ **Pending Collections / Pass Target:** **`₹{pending_gross_all:,.2f}`** ({pending_count_all} Bills Pending)\n\n"
+        f"☁️ **Vault Link:** [Google Drive Master Bills (Node 05)](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
+    )
+
+    speech = (
+        f"Boss, SGC record-la total {len(bills)} bills irukku: " +
+        ", ".join(month_summaries_speech) +
+        f". Total pending clearance ₹{pending_gross_all:,.0f}."
+    )
+    return report, speech
 
 def format_verified_tax_report(target_month: Optional[str] = None) -> str:
     """Returns exact 5% GST tax calculation across all verified bills."""
