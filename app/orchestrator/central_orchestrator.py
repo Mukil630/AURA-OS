@@ -110,20 +110,23 @@ class CentralOrchestrator:
 
         # 2. Try Groq Fallback
         if self.groq_client:
-            try:
-                chat_res = self.groq_client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[
-                        {"role": "system", "content": ORCHESTRATOR_SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    response_format={"type": "json_object"},
-                    temperature=0.2
-                )
-                raw_json = chat_res.choices[0].message.content
-                return json.loads(raw_json)
-            except Exception as ge:
-                logger.warning(f"Groq fallback planning error: {ge}")
+            groq_models = ["qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "openai/gpt-oss-20b"]
+            for gm in groq_models:
+                try:
+                    chat_res = self.groq_client.chat.completions.create(
+                        model=gm,
+                        messages=[
+                            {"role": "system", "content": ORCHESTRATOR_SYSTEM_PROMPT},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        response_format={"type": "json_object"},
+                        temperature=0.2
+                    )
+                    raw_json = chat_res.choices[0].message.content
+                    if raw_json:
+                        return json.loads(raw_json)
+                except Exception as ge:
+                    logger.warning(f"Groq {gm} fallback planning error: {ge}")
 
         # Deterministic Rule-Based Fallback
         return self._heuristic_fallback(user_prompt)
@@ -140,12 +143,21 @@ class CentralOrchestrator:
                 "conversational_reply": f"Sure Boss! Reminder schedule pannidren: '{prompt}'."
             }
         elif any(w in p for w in ["bill", "invoices", "turnover", "gst", "debtor"]):
+            target_m = None
+            if "oct" in p:
+                target_m = "october"
+            elif "sep" in p:
+                target_m = "september"
+            elif "this month" in p or "current" in p:
+                target_m = "current"
+            elif "last month" in p or "prev" in p:
+                target_m = "previous"
             return {
                 "intent": "SGC_BILLING_QUERY",
                 "task_description": "Query SGC billing database",
                 "priority": "NORMAL",
                 "reminder_time_expr": None,
-                "entities": {"action_verb": "query_billing"},
+                "entities": {"action_verb": "query_billing", "target_month": target_m},
                 "conversational_reply": "Checking live SGC billing database now..."
             }
         elif any(w in p for w in ["payable", "supplier", "lakshmi", "bannari", "eb", "cashflow"]):
@@ -320,12 +332,28 @@ class CentralOrchestrator:
                     speech_reply = "SGC overdue recovery radar ready Boss!"
                     durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary="Overdue radar generated")
 
-                # 6. Query Specific Month
+                # 6. Query Specific Month or Count
                 elif entities.get("target_month") or any(m in raw_lower for m in ["september", "sep", "october", "oct", "last month", "this month"]):
-                    m_term = entities.get("target_month") or ("september" if "sep" in raw_lower else "current")
+                    if "sep" in raw_lower:
+                        m_term = "september"
+                    elif "oct" in raw_lower:
+                        m_term = "october"
+                    elif "last month" in raw_lower or "prev" in raw_lower:
+                        m_term = "previous"
+                    else:
+                        m_term = entities.get("target_month") or "current"
+
                     final_reply = sgc_billing_query.format_verified_bills_report(m_term)
-                    speech_reply = f"{m_term.capitalize()} month bills breakdown ready Boss!"
-                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bills for {m_term}")
+                    m = sgc_billing_query.get_ledger_metrics(m_term)
+                    if m.get("success"):
+                        p_name = m.get("period_name", m_term.capitalize())
+                        p_count = m.get("period_bills_count", 0)
+                        p_gross = m.get("total_gross", 0)
+                        p_gst = m.get("total_gst", 0)
+                        speech_reply = f"Boss, {p_name}-la exactly {p_count} bills potrukom. Total turnover ₹{p_gross:,.0f}, GST ₹{p_gst:,.0f}."
+                    else:
+                        speech_reply = f"{m_term.capitalize()} month bills breakdown ready Boss!"
+                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bills for {m_term}: {m.get('period_bills_count', 0)} bills", result_data=m)
 
                 # 7. Default: Ground Truth Full Ledger Overview
                 else:
@@ -340,7 +368,7 @@ class CentralOrchestrator:
                             f"⏳ **Pending Collections:** `₹{m['pending_amount']:,.2f}` ({m['pending_bills_count']} bills)\n\n"
                             f"☁️ **Vault Link:** [Google Drive Master Bills](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)"
                         )
-                        speech_reply = f"Boss, SGC record-la total {m['total_bills_in_db']} bills iruku, gross turnover ₹{m['total_gross']:,.0f}."
+                        speech_reply = f"Boss, SGC record-la total {m['total_bills_in_db']} bills potrukom. Gross turnover ₹{m['total_gross']:,.0f}."
                         durable_task_manager.update_task_status(
                             task_id, status="COMPLETED",
                             result_summary=f"Fetched SGC ledger: {m['total_bills_in_db']} bills, ₹{m['total_gross']:,.2f} gross",

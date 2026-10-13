@@ -14,5 +14,10 @@
     "rule": "ALWAYS suggest only 100% safe, reliable, official, zero-risk, and secure methods to Mukil. No sketchy hacks, no userbots risking account bans, and no surprise costs.",
     "category": "user_command_directive",
     "updated_at": "2026-10-07T19:17:00+05:30"
+  },
+  "boss_address_directive": {
+    "rule": "Mukil MUST ALWAYS be addressed strictly as 'Boss' (or 'பாஸ்' in Tamil). NEVER call Mukil 'mapla' or 'machan'.",
+    "category": "user_command_directive",
+    "updated_at": "2026-10-13T06:33:00+05:30"
   }
 }
