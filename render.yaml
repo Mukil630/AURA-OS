@@ -14,7 +14,7 @@ services:
       - key: APP_NAME
         value: AURA-OS | Autonomous JARVIS Hub
       - key: RUN_TELEGRAM_BOT
-        value: "true"
+        value: "false"
       - key: TELEGRAM_AUTHORIZED_USER_ID
         value: "6233907249"
       - key: CORS_ORIGINS
