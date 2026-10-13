@@ -52,23 +52,41 @@ async def get_system_telemetry() -> Dict[str, Any]:
         except Exception:
             pass
 
+    sgc_data = ctx.get("sgc_billing", {})
+    career_data = ctx.get("active_career_strategy", {})
+
     return {
         "status": "ONLINE",
         "user": "Mukil",
-        "agent": "JARVIS / AURA-OS",
+        "agent": "AURA Executive OS",
         "battery": {
             "percentage": battery_level,
             "status": battery_status
         },
+        "sgc_financials": {
+            "receivables": 47725.0,
+            "payables": 32450.0,
+            "total_bills": sgc_data.get("total_bills", 7),
+            "gst_sep": 2079.45,
+            "gst_oct": 118.13,
+            "latest_bill": sgc_data.get("latest_bill", {})
+        },
+        "placement": {
+            "target": career_data.get("active_drive", {}).get("company", "Infinite Computer Solutions"),
+            "stage": career_data.get("active_drive", {}).get("stage", "Final Media Call Interview"),
+            "status": career_data.get("active_drive", {}).get("status", "SLOT_PENDING"),
+            "ats_match": "98%"
+        },
         "drive_vault": {
             "name": "5TB Google Drive Master Vault",
-            "url": "https://drive.google.com/drive/folders/1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1?usp=sharing"
+            "url": "https://drive.google.com/drive/folders/1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1?usp=sharing",
+            "bills_vault": "https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link"
         },
         "resume": {
-            "filename": "MK.PDF.RESUME.pdf",
+            "filename": "Mukil_Master_Resume.pdf",
             "url": "https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link"
         },
-        "active_phase": ctx.get("active_phase", "Placement & Operating Plane Active"),
+        "active_phase": ctx.get("active_phase", "AURA-OS Universal Execution Plane Active"),
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     }
 

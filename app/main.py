@@ -38,37 +38,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from app.services.durable_scheduler import durable_scheduler
     await durable_scheduler.start()
 
-    # Start 24/7 Telegram Bridge Daemon when deployed to Cloud / Production
+    # Telegram Bridge is retired per Mukil's directive (all operations migrated to native AURA Mobile App)
     telegram_process = None
-    from config import TELEGRAM_BOT_TOKEN
-    token = os.getenv("TELEGRAM_BOT_TOKEN") or TELEGRAM_BOT_TOKEN
-    is_cloud = bool(os.getenv("RUN_TELEGRAM_BOT", "false").lower() == "true")
-    if is_cloud and token:
-        bridge_script = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tools", "telegram_bridge.py")
-        # Check if already active (e.g. launched via start_server.sh)
-        import psutil
-        already_running = False
-        try:
-            for p in psutil.process_iter(["cmdline"]):
-                cmd = p.info.get("cmdline") or []
-                if any("telegram_bridge.py" in str(arg) for arg in cmd) and p.pid != os.getpid():
-                    already_running = True
-                    logger.info(f"✅ Telegram Bridge is already active in background with PID: {p.pid}")
-                    break
-        except Exception:
-            pass
-
-        if not already_running and os.path.exists(bridge_script):
-            logger.info("🚀 Starting 24/7 Telegram Bridge Daemon on Cloud Container...")
-            try:
-                import subprocess
-                import sys
-                sub_env = os.environ.copy()
-                sub_env["TELEGRAM_BOT_TOKEN"] = token
-                telegram_process = subprocess.Popen([sys.executable, "-u", bridge_script], env=sub_env)
-                logger.info(f"✅ Telegram Bridge Daemon running with PID: {telegram_process.pid}")
-            except Exception as e:
-                logger.error(f"Failed to launch Telegram Bridge Daemon: {e}")
+    logger.info("📱 Telegram Bridge disabled. Native AURA App active.")
     
     # Initialize Turso Cloud Database Tables and Schemas
     aura_scheduler = None
@@ -175,6 +147,12 @@ def create_app() -> FastAPI:
     async def get_service_worker():
         sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sw.js")
         return FileResponse(sw_path, media_type="application/javascript")
+
+    @app.get("/aura_icon.svg", tags=["PWA"])
+    @app.get("/favicon.ico", tags=["PWA"])
+    async def get_aura_icon():
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "aura_icon.svg")
+        return FileResponse(icon_path, media_type="image/svg+xml")
 
     @app.get("/apk", tags=["APK"])
     @app.get("/download-apk", tags=["APK"])

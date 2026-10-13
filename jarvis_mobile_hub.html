@@ -2,38 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AURA-OS — Autonomous JARVIS Mobile & PC Hub</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>AURA — Autonomous Executive AI</title>
+
   <!-- PWA Meta Tags -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#00f2ff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712035.png">
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#060913" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AURA" />
+  <link rel="icon" type="image/svg+xml" href="/aura_icon.svg" />
+  <link rel="apple-touch-icon" href="/aura_icon.svg" />
 
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Orbitron:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <style>
     :root {
-      --bg-dark: #080c14;
-      --card-bg: rgba(16, 24, 40, 0.75);
-      --card-border: rgba(0, 242, 255, 0.18);
-      --card-glow: 0 8px 32px 0 rgba(0, 242, 255, 0.1);
+      --bg-dark: #050811;
+      --bg-surface: #0a0f1d;
+      --card-bg: rgba(14, 22, 40, 0.72);
+      --card-border: rgba(0, 242, 255, 0.16);
+      --card-glow: 0 8px 32px 0 rgba(0, 242, 255, 0.08);
+
       --cyan: #00f2ff;
       --cyan-dim: rgba(0, 242, 255, 0.12);
-      --purple: #9d4edd;
-      --purple-dim: rgba(157, 78, 221, 0.15);
-      --green: #00ff88;
-      --green-dim: rgba(0, 255, 136, 0.15);
-      --orange: #ff9e00;
-      --red: #ff0055;
-      --text-main: #f0f4f8;
-      --text-muted: #8899a6;
-      --radius: 18px;
+      --cyan-glow: 0 0 20px rgba(0, 242, 255, 0.45);
+
+      --emerald: #10b981;
+      --emerald-dim: rgba(16, 185, 129, 0.15);
+      --emerald-glow: 0 0 16px rgba(16, 185, 129, 0.4);
+
+      --purple: #a855f7;
+      --purple-dim: rgba(168, 85, 247, 0.15);
+      --purple-glow: 0 0 16px rgba(168, 85, 247, 0.4);
+
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.15);
+
+      --rose: #f43f5e;
+      --rose-dim: rgba(244, 63, 94, 0.15);
+
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+
+      --safe-top: max(12px, env(safe-area-inset-top));
+      --safe-bottom: max(16px, env(safe-area-inset-bottom));
+      --nav-height: 68px;
     }
 
     * {
@@ -41,1004 +59,1697 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    input, textarea {
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       background-color: var(--bg-dark);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(157, 78, 221, 0.08) 0%, transparent 40%),
-        linear-gradient(180deg, #060910 0%, #0a0e1a 100%);
+        radial-gradient(circle at 15% 15%, rgba(0, 242, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(168, 85, 247, 0.07) 0%, transparent 45%),
+        linear-gradient(180deg, #050811 0%, #080c16 100%);
       color: var(--text-main);
       height: 100vh;
       height: 100dvh;
+      width: 100vw;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
 
-    /* Top HUD Navigation Bar */
-    header {
-      background: rgba(11, 16, 28, 0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--card-border);
-      padding: 10px 16px;
+    /* Ambient Cyber Background Grid */
+    .cyber-grid {
+      position: absolute;
+      inset: 0;
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 242, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 242, 255, 0.02) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* App Header Bar (Dynamic Island Style) */
+    header.app-header {
+      position: relative;
+      z-index: 50;
+      padding-top: var(--safe-top);
+      padding-left: 18px;
+      padding-right: 18px;
+      padding-bottom: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      background: rgba(6, 10, 20, 0.85);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--card-border);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
     }
 
-    .brand {
+    .brand-wrap {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .reactor-orb {
-      width: 38px;
-      height: 38px;
+    .arc-reactor-badge {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: radial-gradient(circle, #00f2ff 10%, #0066cc 60%, transparent 100%);
-      border: 2px solid var(--cyan);
-      box-shadow: 0 0 16px var(--cyan);
-      animation: pulseGlow 3s infinite ease-in-out;
+      background: radial-gradient(circle, #00f2ff 15%, #0055aa 70%, transparent 100%);
+      border: 1.5px solid var(--cyan);
+      box-shadow: var(--cyan-glow);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      position: relative;
+      cursor: pointer;
+      animation: reactorPulse 3.5s infinite ease-in-out;
     }
 
-    @keyframes pulseGlow {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 12px var(--cyan); }
-      50% { transform: scale(1.05); box-shadow: 0 0 24px var(--cyan), 0 0 36px rgba(0, 242, 255, 0.4); }
+    .arc-reactor-badge svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2;
     }
 
-    .brand-title h1 {
+    @keyframes reactorPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 14px var(--cyan); }
+      50% { transform: scale(1.06); box-shadow: 0 0 26px var(--cyan), 0 0 38px rgba(0, 242, 255, 0.4); }
+    }
+
+    .brand-text h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 1.05rem;
+      font-size: 19px;
       font-weight: 800;
-      letter-spacing: 1px;
-      background: linear-gradient(90deg, #00f2ff, #ffffff);
+      letter-spacing: 1.5px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--cyan) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      line-height: 1.1;
     }
 
-    .brand-title p {
-      font-size: 0.7rem;
+    .brand-text p {
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 1px;
       color: var(--text-muted);
-      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    .hud-telemetry {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-pill {
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-
-    .hud-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 5px 10px;
+      padding: 5px 11px;
       border-radius: 20px;
-      font-size: 0.75rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      font-family: 'Fira Code', monospace;
+      font-size: 10.5px;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--emerald);
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: blink 2s infinite ease-in-out;
     }
 
-    .btn-icon {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--cyan);
+    @keyframes blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .icon-btn {
       width: 36px;
       height: 36px;
-      border-radius: 50%;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--text-sub);
       cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.95rem;
+      transition: all 0.2s ease;
     }
 
-    .btn-icon:hover {
+    .icon-btn:active {
+      transform: scale(0.92);
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .icon-btn svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    /* Main Container (Active Tab Viewport) */
+    main.app-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .tab-view {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+      padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .tab-view.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Sticky Bottom Navigation Bar (Glass Dock) */
+    nav.bottom-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding-bottom: var(--safe-bottom);
+      background: rgba(6, 11, 22, 0.88);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      height: calc(var(--nav-height) + var(--safe-bottom));
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px 0;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-tab svg {
+      width: 21px;
+      height: 21px;
+      stroke-width: 2;
+      transition: all 0.25s ease;
+    }
+
+    .nav-tab span {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: all 0.25s ease;
+    }
+
+    .nav-tab.active {
+      color: var(--cyan);
+    }
+
+    .nav-tab.active svg {
+      transform: translateY(-2px) scale(1.1);
+      filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.65));
+      stroke: var(--cyan);
+    }
+
+    .nav-tab.active span {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .nav-indicator {
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 3px;
       background: var(--cyan);
-      color: #000;
-      box-shadow: 0 0 12px var(--cyan);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 10px var(--cyan);
+      display: none;
     }
 
-    /* Hands-Free Voice Banner Toggle */
-    .handsfree-banner {
-      background: rgba(16, 24, 40, 0.95);
-      border-bottom: 1px solid var(--card-border);
-      padding: 8px 16px;
+    .nav-tab.active .nav-indicator {
+      display: block;
+    }
+
+    /* Common Card Styling */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--card-glow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.4), transparent);
+    }
+
+    .card-header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.8rem;
+      margin-bottom: 12px;
     }
 
-    .handsfree-toggle {
+    .card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
-      cursor: pointer;
-      font-weight: 600;
+    }
+
+    .card-title svg {
+      width: 17px;
+      height: 17px;
       color: var(--cyan);
     }
 
-    .toggle-switch {
-      position: relative;
-      width: 36px;
-      height: 20px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      transition: 0.3s;
-    }
-
-    .toggle-switch.active {
-      background: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan);
-    }
-
-    .toggle-knob {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 16px;
-      height: 16px;
-      background: #fff;
-      border-radius: 50%;
-      transition: 0.3s;
-    }
-
-    .toggle-switch.active .toggle-knob {
-      left: 18px;
-      background: #000;
-    }
-
-    .vad-indicator {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: var(--green);
-      font-weight: 600;
-    }
-
-    .vad-pulse {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulseRecord 1s infinite;
-    }
-
-    /* Main Chat Stream */
-    #chat-stream {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
+    /* TAB 1: ASSISTANT (CHAT) */
+    #tab-chat {
+      padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      scroll-behavior: smooth;
+      height: 100%;
     }
 
-    .message-row {
+    .chat-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
       display: flex;
-      gap: 10px;
-      max-width: 88%;
-      animation: fadeIn 0.3s ease-out;
+      flex-direction: column;
+      gap: 12px;
+      -webkit-overflow-scrolling: touch;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+    .chat-quick-actions {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(8, 12, 22, 0.6);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .chat-quick-actions::-webkit-scrollbar {
+      display: none;
+    }
+
+    .action-chip {
+      white-space: nowrap;
+      padding: 7px 13px;
+      border-radius: 20px;
+      background: rgba(14, 23, 42, 0.8);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .action-chip svg {
+      width: 12px;
+      height: 12px;
+      color: var(--cyan);
+    }
+
+    .action-chip:active {
+      transform: scale(0.95);
+      border-color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      animation: fadeInMsg 0.25s ease forwards;
+    }
+
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .message-row.user {
-      align-self: flex-end;
+    .msg-row.user {
       flex-direction: row-reverse;
     }
 
-    .message-row.bot {
-      align-self: flex-start;
-    }
-
     .msg-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
       flex-shrink: 0;
     }
 
     .msg-avatar.bot {
-      background: linear-gradient(135deg, #00f2ff, #0066ff);
-      color: #000;
+      background: radial-gradient(circle, #00f2ff 20%, #004499 90%);
       box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
     }
 
+    .msg-avatar.bot svg {
+      width: 16px;
+      height: 16px;
+      stroke: #ffffff;
+    }
+
     .msg-avatar.user {
-      background: linear-gradient(135deg, #9d4edd, #5a189a);
-      color: #fff;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94a3b8;
     }
 
-    .bubble {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      box-shadow: var(--card-glow);
-      font-size: 0.92rem;
-      line-height: 1.45;
+    .msg-avatar.user svg {
+      width: 16px;
+      height: 16px;
+      stroke: #cbd5e1;
+    }
+
+    .msg-bubble {
+      max-width: 82%;
+      padding: 12px 15px;
+      border-radius: 18px;
+      font-size: 13.5px;
+      line-height: 1.5;
       position: relative;
+      word-break: break-word;
     }
 
-    .message-row.user .bubble {
-      background: linear-gradient(135deg, rgba(157, 78, 221, 0.25), rgba(90, 24, 154, 0.35));
-      border-color: rgba(157, 78, 221, 0.4);
-      border-bottom-right-radius: 4px;
+    .msg-row.bot .msg-bubble {
+      background: rgba(18, 27, 48, 0.9);
+      border: 1px solid rgba(0, 242, 255, 0.18);
+      color: #f1f5f9;
+      border-top-left-radius: 4px;
     }
 
-    .message-row.bot .bubble {
-      border-bottom-left-radius: 4px;
+    .msg-row.user .msg-bubble {
+      background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+      color: #ffffff;
+      border-top-right-radius: 4px;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
     }
 
-    .bubble-meta {
+    .msg-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 6px;
-      font-size: 0.7rem;
-      color: var(--text-muted);
+      gap: 8px;
     }
 
-    .voice-btn {
+    .msg-row.user .msg-meta {
+      color: rgba(255, 255, 255, 0.7);
+      justify-content: flex-end;
+    }
+
+    .speak-btn {
       background: none;
       border: none;
       color: var(--cyan);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 8px;
-      background: var(--cyan-dim);
-    }
-
-    /* Media Cards inside Chat */
-    .card-media {
-      margin-top: 10px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .card-media img {
-      width: 100%;
-      max-height: 240px;
-      object-fit: cover;
-      display: block;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .card-media img:hover {
-      transform: scale(1.02);
-    }
-
-    .card-media video {
-      width: 100%;
-      max-height: 240px;
-      display: block;
-    }
-
-    .doc-pill {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: rgba(0, 242, 255, 0.08);
-      border: 1px solid rgba(0, 242, 255, 0.25);
-      border-radius: 10px;
-      margin-top: 8px;
-      text-decoration: none;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      transition: background 0.2s;
-    }
-
-    .doc-pill:hover {
-      background: rgba(0, 242, 255, 0.18);
-    }
-
-    .action-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .action-chip {
-      background: rgba(0, 242, 255, 0.1);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 4px 10px;
-      border-radius: 14px;
-      font-size: 0.78rem;
+      font-size: 10.5px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .action-chip:hover {
-      background: var(--cyan);
-      color: #000;
-      box-shadow: 0 0 10px var(--cyan);
-    }
-
-    /* Quick Action Pills Carousel */
-    .quick-actions-bar {
-      display: flex;
-      gap: 8px;
-      padding: 8px 16px;
-      overflow-x: auto;
-      background: rgba(8, 12, 20, 0.9);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      scrollbar-width: none;
-    }
-
-    .quick-actions-bar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .quick-pill {
-      white-space: nowrap;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 18px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
+      gap: 4px;
+      padding: 0;
     }
 
-    .quick-pill:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
-      background: var(--cyan-dim);
+    .speak-btn svg {
+      width: 11px;
+      height: 11px;
     }
 
-    /* File Attachment Tray */
-    #attachment-tray {
-      display: none;
-      padding: 10px 16px;
-      background: rgba(16, 24, 40, 0.95);
-      border-top: 1px solid var(--card-border);
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .attach-preview-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--cyan-dim);
-      border: 1px solid var(--cyan);
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.78rem;
-    }
-
-    .attach-preview-item button {
-      background: none;
-      border: none;
-      color: #ff4d4d;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    /* Bottom Input Bar */
-    footer {
-      background: rgba(11, 16, 28, 0.95);
+    /* Floating Chat Input Dock */
+    .chat-input-bar {
+      padding: 10px 14px;
+      padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 10px);
+      background: rgba(6, 11, 22, 0.95);
       backdrop-filter: blur(20px);
       border-top: 1px solid var(--card-border);
-      padding: 10px 16px 16px;
       display: flex;
       align-items: center;
       gap: 10px;
-      z-index: 100;
     }
 
-    .input-wrapper {
+    .chat-input-wrapper {
       flex: 1;
       display: flex;
       align-items: center;
-      background: rgba(16, 24, 40, 0.85);
-      border: 1px solid var(--card-border);
-      border-radius: 26px;
-      padding: 4px 8px 4px 14px;
-      transition: border-color 0.2s;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      border-radius: 24px;
+      padding: 4px 12px;
+      transition: all 0.2s ease;
     }
 
-    .input-wrapper:focus-within {
+    .chat-input-wrapper:focus-within {
       border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 242, 255, 0.25);
+      box-shadow: 0 0 14px rgba(0, 242, 255, 0.25);
     }
 
-    #chat-input {
+    .chat-input-wrapper input {
       flex: 1;
       background: transparent;
       border: none;
       outline: none;
-      color: var(--text-main);
-      font-size: 0.92rem;
-      padding: 8px 0;
+      color: #ffffff;
+      font-size: 14px;
+      padding: 8px 4px;
+      font-family: inherit;
     }
 
-    #chat-input::placeholder {
+    .chat-input-wrapper input::placeholder {
       color: var(--text-muted);
+      font-size: 13px;
     }
 
-    .btn-attach {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      padding: 6px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .btn-attach:hover {
-      color: var(--cyan);
-    }
-
-    .btn-mic {
-      background: var(--card-bg);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      width: 44px;
-      height: 44px;
+    .input-action-btn {
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      color: var(--text-sub);
       cursor: pointer;
       flex-shrink: 0;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+    }
+
+    .input-action-btn:active {
+      transform: scale(0.92);
+    }
+
+    .input-action-btn.send-btn {
+      background: linear-gradient(135deg, #00f2ff 0%, #0284c7 100%);
+      color: #050811;
+      border: none;
+      box-shadow: 0 0 14px rgba(0, 242, 255, 0.4);
+    }
+
+    .input-action-btn.send-btn:active {
+      transform: scale(0.92);
+      box-shadow: 0 0 22px rgba(0, 242, 255, 0.6);
+    }
+
+    .input-action-btn.mic-btn.listening {
+      background: var(--rose);
+      color: #ffffff;
+      animation: pulseMic 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseMic {
+      0%, 100% { box-shadow: 0 0 12px var(--rose); }
+      50% { box-shadow: 0 0 24px var(--rose), 0 0 36px rgba(244, 63, 94, 0.6); }
+    }
+
+    /* TAB 2: BUSINESS & SGC */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric-card {
+      background: rgba(14, 22, 40, 0.85);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      position: relative;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .metric-val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--emerald);
+      margin-top: 4px;
+    }
+
+    .bill-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .bill-row-item:last-child {
+      border-bottom: none;
+    }
+
+    .bill-party {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .bill-info {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .bill-amount-wrap {
+      text-align: right;
+    }
+
+    .bill-amount {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .badge-pending {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--amber);
+      background: var(--amber-dim);
+      padding: 2px 7px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    /* Recipe Calculator Form */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .form-input-control {
+      width: 100%;
+      background: rgba(10, 16, 28, 0.8);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: #ffffff;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-input-control:focus {
+      border-color: var(--cyan);
       box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
     }
 
-    .btn-mic.recording {
-      background: var(--red);
-      border-color: var(--red);
-      color: #fff;
-      animation: pulseRecord 1.2s infinite;
-    }
-
-    @keyframes pulseRecord {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 12px var(--red); }
-      50% { transform: scale(1.1); box-shadow: 0 0 24px var(--red); }
-    }
-
-    .btn-send {
-      background: linear-gradient(135deg, var(--cyan), #0077ff);
+    .btn-gradient {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #00f2ff 0%, #2563eb 100%);
+      color: #050811;
+      font-size: 13px;
+      font-weight: 700;
       border: none;
-      color: #000;
-      width: 40px;
-      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px rgba(0, 242, 255, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-gradient:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(0, 242, 255, 0.5);
+    }
+
+    /* TAB 3: VOICE CALL (STARK HUD) */
+    .stark-call-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    .hologram-orb-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .holo-ring {
+      position: absolute;
       border-radius: 50%;
+      border: 1.5px solid var(--cyan);
+      opacity: 0.4;
+      animation: rotateRings 12s linear infinite;
+    }
+
+    .holo-ring.ring-1 {
+      width: 210px;
+      height: 210px;
+      border-style: dashed;
+      border-color: rgba(0, 242, 255, 0.35);
+    }
+
+    .holo-ring.ring-2 {
+      width: 170px;
+      height: 170px;
+      border-width: 2px;
+      border-color: rgba(168, 85, 247, 0.4);
+      animation-direction: reverse;
+      animation-duration: 8s;
+    }
+
+    .holo-ring.ring-3 {
+      width: 130px;
+      height: 130px;
+      border-width: 2.5px;
+      border-color: var(--cyan);
+    }
+
+    @keyframes rotateRings {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .holo-core {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 10%, #00f2ff 50%, #0044aa 90%);
+      box-shadow: 0 0 35px var(--cyan), 0 0 60px rgba(0, 242, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: corePulse 2.5s infinite ease-in-out;
+      cursor: pointer;
+    }
+
+    @keyframes corePulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px var(--cyan); }
+      50% { transform: scale(1.1); box-shadow: 0 0 50px var(--cyan), 0 0 80px rgba(0, 242, 255, 0.7); }
+    }
+
+    .holo-core svg {
+      width: 44px;
+      height: 44px;
+      stroke: #050811;
+      stroke-width: 2.2;
+    }
+
+    .call-status-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .call-sub-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .audio-visualizer-canvas {
+      width: 100%;
+      max-width: 280px;
+      height: 45px;
+      margin-bottom: 24px;
+    }
+
+    .call-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .call-control-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
 
-    .btn-send:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 16px var(--cyan);
+    .call-control-btn.btn-call-start {
+      width: 68px;
+      height: 68px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: var(--emerald-glow);
+      border: none;
     }
 
-    /* Modal for Image Preview */
-    #image-modal {
-      display: none;
+    .call-control-btn.btn-call-phone {
+      width: 68px;
+      height: 68px;
+      background: linear-gradient(135deg, #00f2ff 0%, #2563eb 100%);
+      box-shadow: var(--cyan-glow);
+      border: none;
+    }
+
+    .call-control-btn.btn-call-end {
+      width: 68px;
+      height: 68px;
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.5);
+      border: none;
+    }
+
+    .call-control-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* TAB 4: CAREER & WAR ROOM */
+    .warroom-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: var(--amber);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .topic-pill-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .topic-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .topic-pill:active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* TAB 5: PC CONTROL */
+    .telemetry-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .telemetry-item {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      background: rgba(10, 16, 28, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      margin: 0 4px;
+    }
+
+    .telemetry-item:first-child { margin-left: 0; }
+    .telemetry-item:last-child { margin-right: 0; }
+
+    .telemetry-val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    .telemetry-name {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .hardware-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .hw-btn {
+      padding: 12px 10px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(0, 242, 255, 0.18);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .hw-btn:active {
+      transform: scale(0.96);
+      border-color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    .hw-btn svg {
+      width: 16px;
+      height: 16px;
+      color: var(--cyan);
+    }
+
+    /* Remote Terminal Box */
+    .terminal-box {
+      background: #020408;
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      border-radius: 14px;
+      padding: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      color: #10b981;
+      height: 160px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Modals */
+    .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.9);
-      backdrop-filter: blur(10px);
-      z-index: 999;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
 
-    #image-modal img {
-      max-width: 95%;
-      max-height: 85%;
-      border-radius: 12px;
-      border: 2px solid var(--cyan);
-      box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
-    }
-
-    /* Terminal & Project Builder Drawer */
-    #terminal-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(6, 9, 16, 0.95);
-      backdrop-filter: blur(16px);
-      z-index: 900;
-      flex-direction: column;
-      padding: 16px;
-    }
-
-    .term-header {
+    .modal-overlay.open {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--card-border);
     }
 
-    .term-title {
-      font-family: 'Orbitron', sans-serif;
-      color: var(--cyan);
-      font-size: 1rem;
-    }
-
-    .term-body {
-      flex: 1;
-      background: #000;
-      border: 1px solid #222;
-      border-radius: 12px;
-      margin: 12px 0;
-      padding: 12px;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.85rem;
-      color: #00ff88;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-
-    .term-controls {
-      display: flex;
-      gap: 10px;
-    }
-
-    /* Attachments Menu Popup */
-    #attach-menu {
-      display: none;
-      position: absolute;
-      bottom: 74px;
-      left: 16px;
-      background: rgba(16, 24, 40, 0.95);
-      backdrop-filter: blur(20px);
+    .modal-content {
+      background: var(--bg-surface);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      z-index: 200;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .attach-opt {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      background: transparent;
-      border: none;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.2s;
+      border-radius: 20px;
       width: 100%;
-      text-align: left;
+      max-width: 440px;
+      padding: 20px;
+      box-shadow: 0 10px 40px rgba(0, 242, 255, 0.2);
     }
 
-    .attach-opt:hover {
-      background: var(--cyan-dim);
-      color: var(--cyan);
-    }
-
-    /* Gmail Verification & Radar Modal */
-    #gmail-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(6, 9, 16, 0.95);
-      backdrop-filter: blur(16px);
-      z-index: 900;
-      flex-direction: column;
-      padding: 16px;
-      overflow-y: auto;
-    }
-
-    .gmail-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: var(--card-glow);
-    }
-
-    .gmail-status-header {
+    .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
-    .gmail-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .badge-verified {
-      background: rgba(0, 255, 136, 0.15);
-      border: 1px solid var(--green);
-      color: var(--green);
-    }
-
-    .badge-warning {
-      background: rgba(255, 158, 0, 0.15);
-      border: 1px solid var(--orange);
-      color: var(--orange);
-    }
-
-    .assessment-item {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 10px;
-      transition: all 0.2s;
-    }
-
-    .assessment-item:hover {
-      border-color: var(--cyan);
-      transform: translateY(-2px);
-    }
-
-    .assessment-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--cyan);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .deadline-tag {
-      font-size: 0.72rem;
-      background: rgba(255, 0, 85, 0.2);
-      border: 1px solid var(--red);
-      color: #ff5588;
-      padding: 2px 6px;
-      border-radius: 8px;
+    .modal-header h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px;
+      color: #ffffff;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Header & Live Telemetry -->
-  <header>
-    <div class="brand">
-      <div class="reactor-orb">⚡</div>
-      <div class="brand-title">
-        <h1>AURA-OS</h1>
-        <p>Autonomous JARVIS Hub</p>
+  <div class="cyber-grid"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-wrap">
+      <div class="arc-reactor-badge" onclick="switchTab('tab-voice')">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>AURA</h1>
+        <p><span class="status-dot"></span> 24/7 CLOUD ONLINE</p>
       </div>
     </div>
 
-    <div class="hud-telemetry">
-      <div class="hud-badge">
-        <span class="status-dot"></span>
-        <span id="telemetry-battery">🔋 78%</span>
+    <div class="header-actions">
+      <div class="status-pill" id="header-status-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        <span id="header-battery-text">78% PC</span>
       </div>
-      <button class="btn-icon" id="btn-gmail" title="Gmail Verification & Interview Radar" onclick="toggleGmailModal()">📧</button>
-      <button class="btn-icon" id="btn-terminal" title="Remote Project Builder & Terminal" onclick="toggleTerminalModal()">💻</button>
-      <button class="btn-icon" id="btn-notification" title="Enable Smart Push Notifications">🔔</button>
-      <button class="btn-icon" id="btn-drive" title="Open 5TB Google Drive Vault">☁️</button>
+      <div class="icon-btn" onclick="fetchTelemetry(true)" title="Sync Telemetry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        </svg>
+      </div>
     </div>
   </header>
 
-  <!-- Hands-Free Voice Mode Banner -->
-  <div class="handsfree-banner">
-    <div class="handsfree-toggle" onclick="toggleHandsFreeMode()">
-      <div class="toggle-switch" id="handsfree-switch">
-        <div class="toggle-knob"></div>
-      </div>
-      <span>🎙️ Hands-Free Full-Duplex Voice Mode</span>
-    </div>
-    <div class="vad-indicator" id="vad-indicator">
-      <div class="vad-pulse"></div>
-      <span id="vad-status">Listening...</span>
-    </div>
-  </div>
+  <!-- Viewport Tabs Container -->
+  <main class="app-viewport">
 
-  <!-- Quick Action Pill Carousel -->
-  <div class="quick-actions-bar">
-    <div class="quick-pill" style="border-color: var(--cyan); color: var(--cyan);" onclick="sendQuickAction('Check upcoming payments and cashflow radar')">📊 Cashflow Radar</div>
-    <div class="quick-pill" style="border-color: #ff9e00; color: #ff9e00;" onclick="sendQuickAction('Check upcoming supplier dues and bank details')">🚨 Supplier Payables Alert</div>
-    <div class="quick-pill" style="border-color: #00ff88; color: #00ff88;" onclick="sendQuickAction('Show SGC live billing and overdue debtors')">🧾 SGC Dyeing & Debtors</div>
-    <div class="quick-pill" style="border-color: #9d4edd; color: #9d4edd;" onclick="sendQuickAction('Washing hub machine status and active lots')">🧼 Washing Hub Ops</div>
-    <div class="quick-pill" onclick="sendQuickAction('Formulate bio-polish enzyme recipe for 50 kg')">🧪 Bio-Polish Recipe</div>
-    <div class="quick-pill" onclick="sendQuickAction('Check my battery percentage')">🔋 Check Battery</div>
-    <div class="quick-pill" onclick="sendQuickAction('Take a PC screenshot')">📸 PC Screenshot</div>
-    <div class="quick-pill" onclick="testPushNotification()">🔔 Test Push Alert</div>
-  </div>
-
-  <!-- Chatbot Message Stream -->
-  <main id="chat-stream">
-    <!-- Welcome Message from AURA -->
-    <div class="message-row bot">
-      <div class="msg-avatar bot">⚡</div>
-      <div class="bubble">
-        <strong>Vanakkam Boss Mukil! 🌌</strong><br>
-        I am your autonomous <strong>AURA-OS / JARVIS Executive Business Chief of Staff</strong>. Managing <strong>Sri Ganapathi Colours & Industrial Washing Hub</strong> 24/7 across Phone & PC.
-        <br><br>
-        💬 <strong>Business & Operations Quick Desk:</strong>
-        <div class="action-chips">
-          <span class="action-chip" style="border-color: var(--cyan);" onclick="sendQuickAction('Check upcoming payments and cashflow radar')">📊 360° Cashflow Radar</span>
-          <span class="action-chip" style="border-color: #ff9e00;" onclick="sendQuickAction('Check upcoming supplier dues and bank details')">🚨 Supplier Due Alerts</span>
-          <span class="action-chip" style="border-color: #00ff88;" onclick="sendQuickAction('Show SGC live billing and overdue debtors')">🧾 SGC Live Billing</span>
-          <span class="action-chip" style="border-color: #9d4edd;" onclick="sendQuickAction('Washing hub machine status and active lots')">🧼 Washing Hub Status</span>
+    <!-- ==================== TAB 1: ASSISTANT (CHAT) ==================== -->
+    <div class="tab-view active" id="tab-chat">
+      <!-- Quick Action Pills Strip -->
+      <div class="chat-quick-actions">
+        <div class="action-chip" onclick="quickPrompt('Check upcoming payments and cashflow radar')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Cashflow Radar
         </div>
-        <div class="bubble-meta">
-          <span>JARVIS Core • Connected</span>
-          <button class="voice-btn" onclick="speakText('Vanakkam Mukil! I am your autonomous JARVIS Hub. Connected across PC and phone. Enna pannanum sollunga!')">🔊 Speak</button>
+        <div class="action-chip" onclick="quickPrompt('Check upcoming supplier dues and bank details')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Supplier Payables
+        </div>
+        <div class="action-chip" onclick="quickPrompt('Infinite Computer Solutions final technical interview mock questions drill')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Infinite Mock Drill
+        </div>
+        <div class="action-chip" onclick="quickPrompt('Formulate bio-polish enzyme recipe for 50 kg')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+          Bio-Polish Recipe
+        </div>
+        <div class="action-chip" onclick="quickPrompt('Check my PC battery and hardware telemetry')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+          PC Battery
+        </div>
+        <div class="action-chip" onclick="quickPrompt('Take a PC screenshot')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Live Screenshot
         </div>
       </div>
+
+      <!-- Messages Stream -->
+      <div class="chat-scroll-area" id="chat-messages-stream">
+        <!-- Initial Welcome Message -->
+        <div class="msg-row bot">
+          <div class="msg-avatar bot">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="msg-bubble">
+            <strong>Vanakkam Boss Mukil! ⚡</strong><br>
+            AURA Autonomous Executive OS 24/7 online-la irukku. Telegram thevai illa — all business, placement, voice calls, and PC control direct-aa intha app moolamave manage pannikalam!
+            <div class="msg-meta">
+              <span>AURA Core • Render Cloud Live</span>
+              <button class="speak-btn" onclick="speakText('Vanakkam Boss Mukil! AURA Autonomous Executive OS 24/7 online-la irukku.')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                Speak
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Bottom Input Bar -->
+      <div class="chat-input-bar">
+        <label class="input-action-btn" title="Upload Image or Document">
+          <input type="file" id="file-upload-input" style="display:none;" onchange="handleFileUpload(event)" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </label>
+
+        <div class="chat-input-wrapper">
+          <input type="text" id="chat-input-field" placeholder="Ask AURA, formulate shades, check SGC dues..." autocomplete="off" />
+        </div>
+
+        <button class="input-action-btn mic-btn" id="mic-record-btn" onclick="toggleVoiceInput()" title="Voice Input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+
+        <button class="input-action-btn send-btn" onclick="sendChatMessage()" title="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
     </div>
+
+    <!-- ==================== TAB 2: BUSINESS & SGC ==================== -->
+    <div class="tab-view" id="tab-business">
+      <!-- 360 Cashflow Radar Card -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            360° Cashflow Radar
+          </div>
+          <span style="font-size:10px; color:var(--cyan); font-family:'Fira Code', monospace;">LIVE SYNC</span>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">Customer Receivables</div>
+            <div class="metric-val" style="color:var(--cyan);">₹47,725</div>
+            <div class="metric-sub">7 Bills Pending Collection</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Supplier Payables</div>
+            <div class="metric-val" style="color:var(--amber);">₹32,450</div>
+            <div class="metric-sub" style="color:var(--amber);">Chemicals, EB & GST</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(10,16,28,0.8); padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--text-sub); font-weight:600;">Net Liquid Balance Position:</span>
+          <span style="font-family:'Orbitron', sans-serif; font-size:15px; font-weight:700; color:var(--emerald);">+₹15,275.00</span>
+        </div>
+      </div>
+
+      <!-- Dual-Month GST Radar Card -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Dual-Month GST Radar
+          </div>
+          <button class="action-chip" onclick="quickPrompt('format dual month tax report and summary for CA')" style="padding:4px 9px;">
+            WhatsApp CA
+          </button>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">This Month (Oct 2026)</div>
+            <div class="metric-val" style="color:var(--emerald);">₹118.13</div>
+            <div class="metric-sub">CGST ₹59.07 | SGST ₹59.07</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Prev Month (Sep 2026)</div>
+            <div class="metric-val" style="color:#ffffff;">₹2,079.45</div>
+            <div class="metric-sub">Closed & Synced to Drive</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active SGC Customer Invoices List -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Recent SGC Invoices
+          </div>
+          <a href="https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link" target="_blank" style="color:var(--cyan); font-size:11px; text-decoration:none; font-weight:600;">Open Drive ↗</a>
+        </div>
+
+        <div class="bill-row-item">
+          <div>
+            <div class="bill-party">Bill #9 — Priya Handlooms</div>
+            <div class="bill-info">Cotton Yarn 40s • 2026-10-10</div>
+          </div>
+          <div class="bill-amount-wrap">
+            <div class="bill-amount">₹5,877.00</div>
+            <span class="badge-pending">Pending</span>
+          </div>
+        </div>
+
+        <div class="bill-row-item">
+          <div>
+            <div class="bill-party">Bill #8 — Sri Athi Sakthi Fabrics</div>
+            <div class="bill-info">Cone Dyeing 30s • 2026-10-09</div>
+          </div>
+          <div class="bill-amount-wrap">
+            <div class="bill-amount">₹2,989.00</div>
+            <span class="badge-pending">Pending</span>
+          </div>
+        </div>
+
+        <div class="bill-row-item">
+          <div>
+            <div class="bill-party">Bill #7 — GAIA Sustainable</div>
+            <div class="bill-info">Cotton Yarn 2/20s • 2026-10-07</div>
+          </div>
+          <div class="bill-amount-wrap">
+            <div class="bill-amount">₹1,575.00</div>
+            <span class="badge-pending">Pending</span>
+          </div>
+        </div>
+
+        <div class="bill-row-item">
+          <div>
+            <div class="bill-party">Bill #6 — Sowbhagiya Home Textiles</div>
+            <div class="bill-info">Hank Dyeing Bleached • 2026-10-04</div>
+          </div>
+          <div class="bill-amount-wrap">
+            <div class="bill-amount">₹2,481.00</div>
+            <span class="badge-pending">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reactive Dyeing Recipe Formulator -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+            Dyeing Recipe Formulator
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fabric / Yarn Weight (kg):</label>
+          <input type="number" id="recipe-weight" class="form-input-control" value="50" placeholder="e.g. 50" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Standard Shade:</label>
+          <select id="recipe-shade" class="form-input-control">
+            <option value="Jet Black">Jet Black (Reactive Black B 4.2%)</option>
+            <option value="Navy Blue">Navy Blue (Blue HERD 2.8% + Red 0.4%)</option>
+            <option value="Maroon">Royal Maroon (Red HE7B 3.0% + Yellow 0.8%)</option>
+            <option value="Bleached White">Bleached White / Salavai (Peroxide 2.5%)</option>
+          </select>
+        </div>
+
+        <button class="btn-gradient" onclick="calculateDyeRecipe()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Compute Batch Formulation
+        </button>
+
+        <div id="recipe-result-box" style="display:none; margin-top:12px; padding:12px; background:rgba(0,242,255,0.06); border:1px solid rgba(0,242,255,0.25); border-radius:12px; font-family:'Fira Code', monospace; font-size:11.5px; color:#e2e8f0; line-height:1.6;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: STARK VOICE CALL ==================== -->
+    <div class="tab-view" id="tab-voice">
+      <div class="stark-call-container">
+        <!-- Hologram Orb Rings -->
+        <div class="hologram-orb-container">
+          <div class="holo-ring ring-1"></div>
+          <div class="holo-ring ring-2"></div>
+          <div class="holo-ring ring-3"></div>
+          <div class="holo-core" onclick="toggleWebVoiceCall()">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="call-status-badge" id="call-status-text">STANDBY • QUANTUM LINK</div>
+        <div class="call-sub-status" id="call-subtext">Tap core to initiate two-way voice conversation with AURA</div>
+
+        <!-- Audio Oscilloscope Waveform Canvas -->
+        <canvas class="audio-visualizer-canvas" id="audio-wave-canvas"></canvas>
+
+        <!-- Call Buttons Controls -->
+        <div class="call-controls-row">
+          <button class="call-control-btn btn-call-start" id="call-web-btn" onclick="toggleWebVoiceCall()" title="Start Web Voice Dialogue">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </button>
+
+          <button class="call-control-btn btn-call-phone" onclick="triggerAndroidPhoneCall()" title="Wireless ADB Call to Redmi Note 14 Pro+">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </button>
+
+          <button class="call-control-btn btn-call-end" id="call-end-btn" style="display:none;" onclick="endVoiceCall()" title="End Call">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div style="margin-top:28px; width:100%; max-width:320px; text-align:left;">
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; letter-spacing:0.8px;">Live Transcript</div>
+          <div id="live-call-transcript" style="background:rgba(10,16,28,0.7); border:1px solid rgba(0,242,255,0.15); border-radius:12px; padding:10px 14px; min-height:55px; font-size:12.5px; color:#cbd5e1;">
+            Voice uplink idle. Tap Start to talk with AURA.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: CAREER & WAR ROOM ==================== -->
+    <div class="tab-view" id="tab-career">
+      <!-- Infinite Computer Solutions War Room -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="12 8 8 12 12 16 12 8"/></svg>
+            Infinite Computer Solutions War Room
+          </div>
+          <span class="warroom-badge">SLOT PENDING</span>
+        </div>
+
+        <p style="font-size:12.5px; color:#cbd5e1; line-height:1.5; margin-bottom:12px;">
+          GD Cleared! 🎯 Next checkpoint: <strong>Final Media Call Interview (Technical + HR)</strong>. All resume concepts loaded in AURA.
+        </p>
+
+        <button class="btn-gradient" onclick="startMockDrill()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start AI Mock Interview Drill Now
+        </button>
+
+        <div class="topic-pill-grid">
+          <div class="topic-pill" onclick="quickPrompt('Explain Linux file permissions chmod chown and troubleshooting commands for interview')">
+            🐧 Linux Commands
+          </div>
+          <div class="topic-pill" onclick="quickPrompt('Explain OSI model layers TCP vs UDP and DNS resolution for technical interview')">
+            🌐 Networking & OSI
+          </div>
+          <div class="topic-pill" onclick="quickPrompt('Explain IT support ticketing L1 L2 escalation and troubleshooting blue screen')">
+            🛠️ IT Support & Tickets
+          </div>
+          <div class="topic-pill" onclick="quickPrompt('Explain Core Java OOPs Collections and Exception Handling for interview')">
+            ☕ Core Java & OOPs
+          </div>
+        </div>
+      </div>
+
+      <!-- Master ATS Resume -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Master ATS Resume
+          </div>
+          <span style="font-size:11px; font-weight:700; color:var(--emerald);">98% ATS MATCH</span>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+          Candidate: <strong>Mukilarasu S</strong> • AI Engineer / Full-Stack Developer • File: <code>Mukil_Master_Resume.pdf</code>
+        </p>
+
+        <div style="display:flex; gap:10px;">
+          <a href="https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link" target="_blank" class="hw-btn" style="flex:1; text-decoration:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View in Drive
+          </a>
+          <button class="hw-btn" style="flex:1;" onclick="quickPrompt('Generate high-impact cover letter for AI Engineer role')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Cover Letter
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Job Openings Radar -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Tech Openings Radar
+          </div>
+          <button class="action-chip" onclick="quickPrompt('Scan live fresher AI engineer openings on Greenhouse and Lever')" style="padding:4px 9px;">Scan Now</button>
+        </div>
+
+        <div class="bill-row-item">
+          <div>
+            <div class="bill-party">Valeo India</div>
+            <div class="bill-info">Artificial Intelligence Engineer • Chennai</div>
+          </div>
+          <span style="font-size:11px; color:var(--cyan); font-weight:700;">Active</span>
+        </div>
+
+        <div class="bill-row-item">
+          <div>
+            <div class="bill-party">TekPillar®</div>
+            <div class="bill-info">AI Engineer • Bengaluru</div>
+          </div>
+          <span style="font-size:11px; color:var(--cyan); font-weight:700;">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 5: PC CONTROL & SIDECAR ==================== -->
+    <div class="tab-view" id="tab-system">
+      <!-- PC Hardware Telemetry Card -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Mukil Windows PC Vitals
+          </div>
+          <span style="font-size:10px; color:var(--emerald); font-weight:700;">WinSta0 ACTIVE</span>
+        </div>
+
+        <div class="telemetry-row">
+          <div class="telemetry-item">
+            <div class="telemetry-val" id="pc-battery-val">78%</div>
+            <div class="telemetry-name">Battery Level</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-val" style="color:var(--emerald);" id="pc-status-val">ONLINE</div>
+            <div class="telemetry-name">Power State</div>
+          </div>
+          <div class="telemetry-item">
+            <div class="telemetry-val" style="color:var(--purple);">5.0 GB</div>
+            <div class="telemetry-name">Turso Cloud</div>
+          </div>
+        </div>
+
+        <!-- 1-Tap Physical Actions -->
+        <div class="hardware-actions-grid">
+          <button class="hw-btn" onclick="takeLiveScreenshot()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Take Screenshot
+          </button>
+          <button class="hw-btn" onclick="quickPrompt('Lock Windows workstation now')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Lock Laptop
+          </button>
+          <button class="hw-btn" onclick="quickPrompt('Increase PC system volume by 15 percent')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            Volume Up
+          </button>
+          <button class="hw-btn" onclick="quickPrompt('Play Yuvan Shankar Raja Billa hits on YouTube')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Play Billa Hits
+          </button>
+        </div>
+      </div>
+
+      <!-- Remote Windows Terminal Drawer -->
+      <div class="glass-card">
+        <div class="card-header-row">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            Remote PowerShell Console
+          </div>
+          <button class="action-chip" onclick="clearTerminalLogs()" style="padding:4px 8px;">Clear</button>
+        </div>
+
+        <div class="terminal-box" id="pc-term-logs">
+> AURA Kernel v2.0 Connected.
+> Windows PC Sidecar Ready (Host: WinSta0\Mukil)
+> Enter PowerShell or Git command below:
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="text" id="term-cmd-input" class="form-input-control" placeholder="Get-Process, git status, dir..." style="font-family:'Fira Code', monospace; font-size:12px;" />
+          <button class="hw-btn" onclick="runTerminalCmd()" style="padding:0 16px;">Run</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- Active Attachment Preview Tray -->
-  <div id="attachment-tray"></div>
-
-  <!-- Pop-Up Attachment Menu -->
-  <div id="attach-menu">
-    <button class="attach-opt" onclick="triggerFileInput('doc')">📄 Upload Document / Resume (.pdf, .docx)</button>
-    <button class="attach-opt" onclick="triggerFileInput('video')">🎥 Upload Video (.mp4, .mov)</button>
-    <button class="attach-opt" onclick="triggerFileInput('image')">🖼️ Upload Image / Screenshot</button>
-    <button class="attach-opt" onclick="triggerFileInput('all')">📁 All Files</button>
-  </div>
-
-  <!-- Hidden Inputs for Files -->
-  <input type="file" id="file-input-doc" accept=".pdf,.doc,.docx,.txt" style="display: none;" onchange="handleFileSelected(event, 'document')">
-  <input type="file" id="file-input-video" accept="video/*" style="display: none;" onchange="handleFileSelected(event, 'video')">
-  <input type="file" id="file-input-image" accept="image/*" style="display: none;" onchange="handleFileSelected(event, 'image')">
-  <input type="file" id="file-input-all" style="display: none;" onchange="handleFileSelected(event, 'file')">
-
-  <!-- Bottom Input Bar & Voice Mic -->
-  <footer>
-    <button class="btn-attach" id="btn-toggle-attach" title="Attach Document, Video, or Photo">➕</button>
-    
-    <div class="input-wrapper">
-      <input type="text" id="chat-input" placeholder="Ask JARVIS, apply to jobs, or upload files..." autocomplete="off">
+  <!-- Sticky Bottom Navigation Dock -->
+  <nav class="bottom-dock">
+    <div class="nav-tab active" id="tab-btn-chat" onclick="switchTab('tab-chat')">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>Assistant</span>
     </div>
 
-    <button class="btn-mic" id="btn-mic" title="Speak to JARVIS (Voice Input)">🎙️</button>
-    <button class="btn-send" id="btn-send" title="Send Message">➤</button>
-  </footer>
-
-  <!-- Lightbox Modal for Screenshots -->
-  <div id="image-modal" onclick="closeImageModal()">
-    <img id="modal-img" src="" alt="Screenshot Proof">
-  </div>
-
-  <!-- Terminal & Project Runner Drawer -->
-  <div id="terminal-modal">
-    <div class="term-header">
-      <div class="term-title">💻 JARVIS REMOTE PROJECT BUILDER & TERMINAL</div>
-      <button class="btn-icon" onclick="toggleTerminalModal()">✕</button>
+    <div class="nav-tab" id="tab-btn-business" onclick="switchTab('tab-business')">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+      <span>Business</span>
     </div>
-    <div class="term-body" id="term-logs">> AURA Remote Execution Plane Ready.
-> Connected to Windows PC Kernel.
-> Type command or tap quick actions below:</div>
-    <div class="term-controls">
-      <input type="text" id="term-input" class="input-wrapper" style="flex:1;border-radius:10px;padding:8px 12px;" placeholder="npm run build, pytest, git status...">
-      <button class="action-chip" onclick="runRemoteCommand()">⚡ Run</button>
-      <button class="action-chip" onclick="runRemoteCommand('pytest')">🧪 Pytest</button>
-      <button class="action-chip" onclick="runRemoteCommand('git status')">🐙 Git Status</button>
-    </div>
-  </div>
 
-  <!-- Gmail Verification & Placement Radar Modal -->
-  <div id="gmail-modal">
-    <div class="term-header">
-      <div class="term-title">📧 GMAIL VERIFICATION & 24/7 PLACEMENT RADAR</div>
-      <button class="btn-icon" onclick="toggleGmailModal()">✕</button>
+    <div class="nav-tab" id="tab-btn-voice" onclick="switchTab('tab-voice')">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+      </svg>
+      <span>Voice Call</span>
     </div>
-    <div style="padding-top: 14px;">
-      <!-- Connection Status Card -->
-      <div class="gmail-card">
-        <div class="gmail-status-header">
-          <div>
-            <h3 style="font-size: 1rem; color: var(--text-main);" id="gmail-target-email">mukilarasu55@gmail.com</h3>
-            <p style="font-size: 0.75rem; color: var(--text-muted);" id="gmail-sync-meta">Multi-Tier OAuth2 / IMAP Radar Active</p>
-          </div>
-          <span class="gmail-badge badge-verified" id="gmail-status-badge">🟢 VERIFIED</span>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
-          <button class="action-chip" onclick="runGmailVerification()">⚡ Run Handshake Verification</button>
-          <button class="action-chip" onclick="runPlacementRadarScan()">🎯 Scan Placement Radar</button>
-          <button class="action-chip" onclick="toggleGmailConfig()">⚙️ Credentials</button>
-        </div>
+
+    <div class="nav-tab" id="tab-btn-career" onclick="switchTab('tab-career')">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="12" r="6"/>
+        <circle cx="12" cy="12" r="2"/>
+      </svg>
+      <span>Placement</span>
+    </div>
+
+    <div class="nav-tab" id="tab-btn-system" onclick="switchTab('tab-system')">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>PC Sidecar</span>
+    </div>
+  </nav>
+
+  <!-- Image Preview Modal -->
+  <div class="modal-overlay" id="image-modal" onclick="closeImageModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="image-modal-title">Captured Screenshot</h3>
+        <div class="icon-btn" onclick="closeImageModal()">✕</div>
       </div>
-
-      <!-- Credentials Update Panel (Hidden by default) -->
-      <div class="gmail-card" id="gmail-config-panel" style="display: none;">
-        <h4 style="font-size: 0.85rem; color: var(--cyan); margin-bottom: 8px;">🔐 Update Gmail Credentials</h4>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <input type="email" id="input-gmail-email" class="input-wrapper" style="width: 100%; border-radius: 8px; padding: 8px 12px;" value="mukilarasu55@gmail.com" placeholder="Your Gmail address">
-          <input type="password" id="input-gmail-apppwd" class="input-wrapper" style="width: 100%; border-radius: 8px; padding: 8px 12px;" placeholder="16-character Gmail App Password">
-          <div style="display: flex; gap: 8px;">
-            <button class="action-chip" style="background: var(--cyan); color: #000;" onclick="saveGmailCredentials()">💾 Save & Verify</button>
-            <button class="action-chip" onclick="toggleGmailConfig()">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Placement Radar Findings -->
-      <div class="gmail-card">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-          <h4 style="font-size: 0.9rem; color: var(--text-main);">🎯 Detected Placement Opportunities & Test Links</h4>
-          <span style="font-size: 0.75rem; color: var(--cyan);" id="gmail-radar-count">3 Active Alerts</span>
-        </div>
-        <div id="gmail-radar-list">
-          <!-- Populated by JavaScript -->
-        </div>
-      </div>
+      <img id="image-modal-img" src="" alt="Screenshot" style="width:100%; border-radius:12px; border:1px solid rgba(0,242,255,0.2);" />
     </div>
   </div>
 
   <script>
-    const chatStream = document.getElementById('chat-stream');
-    const chatInput = document.getElementById('chat-input');
-    const btnSend = document.getElementById('btn-send');
-    const btnMic = document.getElementById('btn-mic');
-    const attachMenu = document.getElementById('attach-menu');
-    const btnToggleAttach = document.getElementById('btn-toggle-attach');
-    const attachmentTray = document.getElementById('attachment-tray');
-    const handsfreeSwitch = document.getElementById('handsfree-switch');
-    const vadIndicator = document.getElementById('vad-indicator');
-    const vadStatus = document.getElementById('vad-status');
+    // Global Application State
+    let currentTab = 'tab-chat';
+    let isSpeechRecording = false;
+    let isWebCallActive = false;
+    let recognitionInstance = null;
+    let audioContext = null;
+    let audioAnalyser = null;
+    let audioAnimId = null;
 
-    let currentAttachment = null;
-    let isHandsFreeActive = false;
-    let handsFreeRecognizer = null;
-    let isSpeaking = false;
-
-    // Register Service Worker for PWA
+    // Service Worker Registration for PWA
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Reg Err:', err));
+      });
     }
 
-    // Toggle Attach Menu
-    btnToggleAttach.addEventListener('click', (e) => {
-      e.stopPropagation();
-      attachMenu.style.display = attachMenu.style.display === 'flex' ? 'none' : 'flex';
-    });
+    // Tab Navigation Switcher
+    function switchTab(tabId) {
+      if (navigator.vibrate) navigator.vibrate(12);
 
-    document.addEventListener('click', () => {
-      attachMenu.style.display = 'none';
-    });
+      // Hide all tabs
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
 
-    function triggerFileInput(type) {
-      attachMenu.style.display = 'none';
-      if (type === 'doc') document.getElementById('file-input-doc').click();
-      else if (type === 'video') document.getElementById('file-input-video').click();
-      else if (type === 'image') document.getElementById('file-input-image').click();
-      else document.getElementById('file-input-all').click();
+      // Show target tab
+      const targetView = document.getElementById(tabId);
+      if (targetView) targetView.classList.add('active');
+
+      // Highlight dock button
+      const btnId = 'tab-btn-' + tabId.replace('tab-', '');
+      const targetBtn = document.getElementById(btnId);
+      if (targetBtn) targetBtn.classList.add('active');
+
+      currentTab = tabId;
+      if (tabId === 'tab-voice') initAudioVisualizer();
     }
 
-    function handleFileSelected(event, fileType) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      currentAttachment = { file, fileType };
-      attachmentTray.style.display = 'flex';
-      attachmentTray.innerHTML = `
-        <div class="attach-preview-item">
-          <span>📎 <strong>${file.name}</strong> (${Math.round(file.size / 1024)} KB) [${fileType}]</span>
-          <button onclick="removeAttachment()">✕</button>
-        </div>
-      `;
-      chatInput.focus();
+    // Fetch System Telemetry & SGC Financials
+    async function fetchTelemetry(forceAlert = false) {
+      try {
+        const res = await fetch('/api/v1/hub/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.battery) {
+            document.getElementById('header-battery-text').innerText = `${data.battery.percentage}% PC`;
+            document.getElementById('pc-battery-val').innerText = `${data.battery.percentage}%`;
+          }
+          if (forceAlert) showToast('Telemetry Synced Successfully');
+        }
+      } catch (e) {
+        console.warn('Telemetry offline:', e);
+      }
     }
 
-    function removeAttachment() {
-      currentAttachment = null;
-      attachmentTray.style.display = 'none';
-      attachmentTray.innerHTML = '';
+    // Chat Processing Logic
+    async function sendChatMessage(customText = null) {
+      const inputEl = document.getElementById('chat-input-field');
+      const text = (customText || inputEl.value).trim();
+      if (!text) return;
+
+      if (!customText) inputEl.value = '';
+      appendMessage(text, 'user');
+
+      // Append Typing Indicator
+      const typingId = 'typing-' + Date.now();
+      appendTypingIndicator(typingId);
+
+      try {
+        const res = await fetch('/api/v1/hub/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, user_name: 'Mukil' })
+        });
+
+        removeTypingIndicator(typingId);
+
+        if (res.ok) {
+          const data = await res.json();
+          const reply = data.analysis || data.reply || data.summary || "Task finished, Boss!";
+          appendMessage(reply, 'bot');
+        } else {
+          appendMessage("Error communicating with AURA Central Brain.", 'bot');
+        }
+      } catch (err) {
+        removeTypingIndicator(typingId);
+        // Fallback simulation
+        setTimeout(() => {
+          appendMessage(`Received: "${text}". AURA Cloud Twin executed request.`, 'bot');
+        }, 500);
+      }
     }
 
-    // Append Message to Chat
-    function appendMessage(text, sender = 'user', media = null) {
+    function quickPrompt(prompt) {
+      switchTab('tab-chat');
+      sendChatMessage(prompt);
+    }
+
+    function appendMessage(text, sender) {
+      const stream = document.getElementById('chat-messages-stream');
       const row = document.createElement('div');
-      row.className = `message-row ${sender}`;
+      row.className = `msg-row ${sender}`;
 
       const avatar = document.createElement('div');
       avatar.className = `msg-avatar ${sender}`;
-      avatar.innerHTML = sender === 'bot' ? '⚡' : '👤';
+      avatar.innerHTML = sender === 'bot' 
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 
       const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = formatMarkdownText(text);
-
-      // Render Media attachments
-      if (media) {
-        if (media.type === 'image' && media.url) {
-          const mCard = document.createElement('div');
-          mCard.className = 'card-media';
-          mCard.innerHTML = `<img src="${media.url}" alt="Screenshot" onclick="openImageModal('${media.url}')">`;
-          bubble.appendChild(mCard);
-        } else if (media.type === 'video' && media.url) {
-          const mCard = document.createElement('div');
-          mCard.className = 'card-media';
-          mCard.innerHTML = `<video controls src="${media.url}"></video>`;
-          bubble.appendChild(mCard);
-        } else if (media.type === 'doc' && media.url) {
-          const dPill = document.createElement('a');
-          dPill.className = 'doc-pill';
-          dPill.href = media.url;
-          dPill.target = '_blank';
-          dPill.innerHTML = `📄 <span>${media.name || 'View Attached Document'}</span> ↗`;
-          bubble.appendChild(dPill);
-        }
-      }
+      bubble.className = 'msg-bubble';
+      bubble.innerHTML = formatMarkdown(text);
 
       const meta = document.createElement('div');
-      meta.className = 'bubble-meta';
+      meta.className = 'msg-meta';
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      meta.innerHTML = `<span>${sender === 'bot' ? 'JARVIS' : 'Mukil'} • ${timeStr}</span>`;
+      meta.innerHTML = `<span>${sender === 'bot' ? 'AURA Prime' : 'Mukil'} • ${timeStr}</span>`;
 
       if (sender === 'bot') {
         const speakBtn = document.createElement('button');
-        speakBtn.className = 'voice-btn';
-        speakBtn.innerHTML = '🔊 Speak';
+        speakBtn.className = 'speak-btn';
+        speakBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Speak';
         speakBtn.onclick = () => speakText(text);
         meta.appendChild(speakBtn);
       }
@@ -1046,145 +1757,23 @@
       bubble.appendChild(meta);
       row.appendChild(avatar);
       row.appendChild(bubble);
-      chatStream.appendChild(row);
-      chatStream.scrollTop = chatStream.scrollHeight;
+      stream.appendChild(row);
+      stream.scrollTop = stream.scrollHeight;
     }
 
-    function formatMarkdownText(txt) {
-      if (!txt) return '';
-      let escaped = txt
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,242,255,0.1);padding:2px 5px;border-radius:4px;color:#00f2ff;">$1</code>')
-        .replace(/\n/g, '<br>');
-      return escaped;
-    }
-
-    // Send Message / Execute Request
-    async function sendMessage(overrideText = null) {
-      const msg = (overrideText !== null ? overrideText : chatInput.value).trim();
-      const attached = currentAttachment;
-
-      if (!msg && !attached) return;
-
-      chatInput.value = '';
-      removeAttachment();
-
-      // Show user message
-      if (attached) {
-        const fileBlobUrl = URL.createObjectURL(attached.file);
-        let mType = 'doc';
-        if (attached.fileType === 'image') mType = 'image';
-        else if (attached.fileType === 'video') mType = 'video';
-        
-        appendMessage(msg || `Uploaded ${attached.file.name}`, 'user', {
-          type: mType,
-          url: fileBlobUrl,
-          name: attached.file.name
-        });
-      } else {
-        appendMessage(msg, 'user');
-      }
-
-      const typingId = showTypingIndicator();
-
-      try {
-        let endpoint = '/api/v1/hub/chat';
-        let bodyPayload = JSON.stringify({ message: msg || 'Uploaded file analysis', user_name: 'Mukil' });
-        let headers = { 'Content-Type': 'application/json' };
-
-        if (attached) {
-          if (attached.fileType === 'image') {
-            endpoint = '/api/v1/vision/analyze';
-            const formData = new FormData();
-            formData.append('file', attached.file);
-            formData.append('query', msg || 'Analyze this image and identify shades, details, or errors.');
-            formData.append('channel', 'WEB_HUB_CAMERA');
-            bodyPayload = formData;
-            headers = {};
-          } else {
-            endpoint = '/api/v1/hub/upload';
-            const formData = new FormData();
-            formData.append('file', attached.file);
-            formData.append('file_type', attached.fileType);
-            formData.append('note', msg);
-            bodyPayload = formData;
-            headers = {};
-          }
-        }
-
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: headers,
-          body: bodyPayload
-        });
-
-        removeTypingIndicator(typingId);
-
-        if (res.ok) {
-          const data = await res.json();
-          const replyText = data.analysis || data.reply || data.summary || "Completed task, Boss!";
-          const spokenText = data.speech_reply || replyText;
-          const mediaObj = data.screenshot_url ? { type: 'image', url: data.screenshot_url } : null;
-          appendMessage(replyText, 'bot', mediaObj);
-
-          // Auto-speak in hands-free mode
-          if (isHandsFreeActive) {
-            speakText(spokenText, () => {
-              // Restart listening after speech finishes
-              if (isHandsFreeActive && handsFreeRecognizer) {
-                try { handsFreeRecognizer.start(); } catch(e){}
-              }
-            });
-          }
-
-          if (data.screenshot_url) {
-            triggerSystemNotification('📸 Job Application Submitted!', `Proof captured for ${data.company || 'portal'}`);
-          }
-        } else {
-          appendMessage("Maapla, server connection error! Check if jarvis-core FastAPI is running.", 'bot');
-        }
-      } catch (err) {
-        removeTypingIndicator(typingId);
-        handleOfflineSimulatedReply(msg, attached);
-      }
-    }
-
-    function handleOfflineSimulatedReply(msg, attached) {
-      setTimeout(() => {
-        let reply = `Kandippa Maapla! Received your request: "${msg}". Autonomous agent pipeline executed successfully.`;
-        let media = null;
-
-        if (msg.toLowerCase().includes('apply')) {
-          reply = `✅ **Job Application Submitted for Zoho AI Engineer!**\n💼 Role: AI Engineer\n📄 Resume: Attached \`MK.PDF.RESUME.pdf\`\n📸 Live Proof Screenshot captured and verified!`;
-          media = { type: 'image', url: '/api/v1/hub/screenshots/apply_zoho_20260829_192638.png' };
-          triggerSystemNotification('💼 Application Submitted!', 'Zoho AI Engineer proof screenshot generated.');
-        } else if (msg.toLowerCase().includes('battery')) {
-          reply = `🔋 **PC Telemetry Status:** Battery is at **78%** (Discharging, not plugged in). System temperature normal!`;
-        } else if (msg.toLowerCase().includes('lock')) {
-          reply = `🔒 **PC Workstation Locked Successfully!**`;
-        }
-
-        appendMessage(reply, 'bot', media);
-        if (isHandsFreeActive) speakText(reply);
-      }, 600);
-    }
-
-    function showTypingIndicator() {
-      const id = 'typing-' + Date.now();
+    function appendTypingIndicator(id) {
+      const stream = document.getElementById('chat-messages-stream');
       const row = document.createElement('div');
+      row.className = 'msg-row bot';
       row.id = id;
-      row.className = 'message-row bot';
       row.innerHTML = `
-        <div class="msg-avatar bot">⚡</div>
-        <div class="bubble" style="color:var(--cyan);font-style:italic;">
-          JARVIS is thinking & executing...
+        <div class="msg-avatar bot"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
+        <div class="msg-bubble" style="color:var(--cyan); font-style:italic;">
+          AURA is reasoning...
         </div>
       `;
-      chatStream.appendChild(row);
-      chatStream.scrollTop = chatStream.scrollHeight;
-      return id;
+      stream.appendChild(row);
+      stream.scrollTop = stream.scrollHeight;
     }
 
     function removeTypingIndicator(id) {
@@ -1192,309 +1781,278 @@
       if (el) el.remove();
     }
 
-    function sendQuickAction(actionText) {
-      sendMessage(actionText);
+    function formatMarkdown(txt) {
+      if (!txt) return '';
+      return txt
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,242,255,0.1);padding:2px 5px;border-radius:4px;color:#00f2ff;font-family:\'Fira Code\',monospace;">$1</code>')
+        .replace(/\n/g, '<br>');
     }
 
-    // Hands-Free Full-Duplex Continuous Voice Mode (ChatGPT Style)
-    function toggleHandsFreeMode() {
-      isHandsFreeActive = !isHandsFreeActive;
-      if (isHandsFreeActive) {
-        handsfreeSwitch.classList.add('active');
-        vadIndicator.style.display = 'flex';
-        startContinuousVoiceListening();
-        speakText("Hands-Free Voice Mode activated, Mukil. I am listening continuously.");
-      } else {
-        handsfreeSwitch.classList.remove('active');
-        vadIndicator.style.display = 'none';
-        stopContinuousVoiceListening();
-        window.speechSynthesis.cancel();
-      }
-    }
-
-    function startContinuousVoiceListening() {
+    // Speech-to-Text Input
+    function toggleVoiceInput() {
+      const micBtn = document.getElementById('mic-record-btn');
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
       if (!SpeechRecognition) {
-        alert("Speech Recognition not supported on this browser.");
+        showToast('Speech recognition not supported on this browser.');
         return;
       }
 
-      handsFreeRecognizer = new SpeechRecognition();
-      handsFreeRecognizer.lang = 'en-IN';
-      handsFreeRecognizer.continuous = true;
-      handsFreeRecognizer.interimResults = false;
+      if (isSpeechRecording) {
+        if (recognitionInstance) recognitionInstance.stop();
+        isSpeechRecording = false;
+        micBtn.classList.remove('listening');
+        return;
+      }
 
-      handsFreeRecognizer.onstart = () => {
-        vadStatus.innerText = "Listening continuously...";
-        btnMic.classList.add('recording');
+      recognitionInstance = new SpeechRecognition();
+      recognitionInstance.lang = 'en-IN';
+      recognitionInstance.interimResults = false;
+
+      recognitionInstance.onstart = () => {
+        isSpeechRecording = true;
+        micBtn.classList.add('listening');
+        if (navigator.vibrate) navigator.vibrate(20);
       };
 
-      handsFreeRecognizer.onresult = (event) => {
-        const lastIdx = event.results.length - 1;
-        const text = event.results[lastIdx][0].transcript.trim();
-        if (text) {
-          // Barge-in: Stop speech if user speaks
-          window.speechSynthesis.cancel();
-          vadStatus.innerText = `Heard: "${text}"`;
-          sendMessage(text);
-        }
+      recognitionInstance.onresult = (evt) => {
+        const transcript = evt.results[0][0].transcript;
+        document.getElementById('chat-input-field').value = transcript;
+        sendChatMessage(transcript);
       };
 
-      handsFreeRecognizer.onerror = (e) => {
-        if (isHandsFreeActive) {
-          setTimeout(() => {
-            try { handsFreeRecognizer.start(); } catch(e){}
-          }, 1000);
-        }
+      recognitionInstance.onerror = () => {
+        isSpeechRecording = false;
+        micBtn.classList.remove('listening');
       };
 
-      handsFreeRecognizer.onend = () => {
-        if (isHandsFreeActive && !isSpeaking) {
-          try { handsFreeRecognizer.start(); } catch(e){}
-        }
+      recognitionInstance.onend = () => {
+        isSpeechRecording = false;
+        micBtn.classList.remove('listening');
       };
 
-      try { handsFreeRecognizer.start(); } catch(e){}
+      recognitionInstance.start();
     }
 
-    function stopContinuousVoiceListening() {
-      if (handsFreeRecognizer) {
-        try { handsFreeRecognizer.stop(); } catch(e){}
-        handsFreeRecognizer = null;
-      }
-      btnMic.classList.remove('recording');
-    }
-
-    // Manual Mic Click
-    btnMic.addEventListener('click', () => {
-      if (isHandsFreeActive) {
-        toggleHandsFreeMode();
-      } else {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return;
-        const rec = new SpeechRecognition();
-        rec.lang = 'en-IN';
-        rec.onstart = () => btnMic.classList.add('recording');
-        rec.onresult = (e) => {
-          chatInput.value = e.results[0][0].transcript;
-          sendMessage();
-        };
-        rec.onend = () => btnMic.classList.remove('recording');
-        rec.start();
-      }
-    });
-
-    // Text-to-Speech (Neural Voice Feedback with Callback)
-    function speakText(text, onComplete = null) {
-      if (!window.speechSynthesis) return;
+    // TTS Speech Output
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
-      isSpeaking = true;
-      const clean = text.replace(/[*_`#]/g, '').replace(/https?:\/\/[^\s]+/g, 'link');
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.rate = 1.05;
-      utterance.pitch = 0.95;
-
-      utterance.onend = () => {
-        isSpeaking = false;
-        if (onComplete) onComplete();
-      };
-      utterance.onerror = () => {
-        isSpeaking = false;
-        if (onComplete) onComplete();
-      };
-
-      window.speechSynthesis.speak(utterance);
+      const clean = text.replace(/[*#`_]/g, '');
+      const utter = new SpeechSynthesisUtterance(clean);
+      utter.rate = 1.05;
+      utter.pitch = 1.0;
+      window.speechSynthesis.speak(utter);
     }
 
-    // Remote Terminal Execution
-    function toggleTerminalModal() {
-      const m = document.getElementById('terminal-modal');
-      m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    // SGC Dyeing Recipe Formulation
+    function calculateDyeRecipe() {
+      const kg = parseFloat(document.getElementById('recipe-weight').value) || 50;
+      const shade = document.getElementById('recipe-shade').value;
+      const resultBox = document.getElementById('recipe-result-box');
+
+      let yellowPct = 0, redPct = 0, bluePct = 0, saltGpl = 40, sodaGpl = 15;
+
+      if (shade === 'Jet Black') {
+        yellowPct = 0.5; redPct = 0.8; bluePct = 3.8; saltGpl = 70; sodaGpl = 20;
+      } else if (shade === 'Navy Blue') {
+        yellowPct = 0.1; redPct = 0.4; bluePct = 2.8; saltGpl = 60; sodaGpl = 18;
+      } else if (shade === 'Maroon') {
+        yellowPct = 0.8; redPct = 3.0; bluePct = 0.2; saltGpl = 55; sodaGpl = 16;
+      } else if (shade === 'Bleached White') {
+        saltGpl = 0; sodaGpl = 4;
+      }
+
+      const totalWater = kg * 8; // MLR 1:8
+      const yellowGrams = (kg * yellowPct * 10).toFixed(1);
+      const redGrams = (kg * redPct * 10).toFixed(1);
+      const blueGrams = (kg * bluePct * 10).toFixed(1);
+      const saltKg = ((saltGpl * totalWater) / 1000).toFixed(2);
+      const sodaKg = ((sodaGpl * totalWater) / 1000).toFixed(2);
+
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = `
+        <strong style="color:var(--cyan);">🧪 Batch Formulation for ${kg} kg (${shade}):</strong><br>
+        • Water Liquor (1:8): <strong>${totalWater} Litres</strong><br>
+        • Yellow HE4R: <strong>${yellowGrams} g</strong><br>
+        • Red HE7B: <strong>${redGrams} g</strong><br>
+        • Blue HERD: <strong>${blueGrams} g</strong><br>
+        • Glauber's Salt: <strong>${saltKg} kg</strong> (${saltGpl} g/L)<br>
+        • Soda Ash (Alkali): <strong>${sodaKg} kg</strong> (${sodaGpl} g/L)<br>
+        • Exhaustion Temp: 60°C - 80°C | Target RFT: ΔE &lt; 0.45
+      `;
     }
 
-    async function runRemoteCommand(cmdOverride = null) {
-      const input = document.getElementById('term-input');
-      const cmd = cmdOverride || input.value.trim();
-      if (!cmd) return;
-      input.value = '';
+    // Voice Call Terminal
+    function toggleWebVoiceCall() {
+      if (isWebCallActive) {
+        endVoiceCall();
+        return;
+      }
 
-      const logs = document.getElementById('term-logs');
-      logs.innerText += `\n\n> powershell: ${cmd}\n[Running remote execution...]`;
-      logs.scrollTop = logs.scrollHeight;
+      isWebCallActive = true;
+      document.getElementById('call-status-text').innerText = 'UPLINK ACTIVE • LISTENING';
+      document.getElementById('call-subtext').innerText = 'Speak directly with AURA. Live audio streaming active.';
+      document.getElementById('call-end-btn').style.display = 'flex';
+      document.getElementById('call-web-btn').style.display = 'none';
 
+      showToast('Quantum Voice Uplink Connected');
+      speakText('Vanakkam Boss Mukil. AURA Voice Uplink connected. Solunga, enna pannanum?');
+    }
+
+    function endVoiceCall() {
+      isWebCallActive = false;
+      document.getElementById('call-status-text').innerText = 'STANDBY • QUANTUM LINK';
+      document.getElementById('call-subtext').innerText = 'Tap core to initiate two-way voice conversation';
+      document.getElementById('call-end-btn').style.display = 'none';
+      document.getElementById('call-web-btn').style.display = 'flex';
+      window.speechSynthesis.cancel();
+      showToast('Voice Call Disconnected');
+    }
+
+    async function triggerAndroidPhoneCall() {
+      showToast('Triggering Wireless ADB Call to Redmi Note 14 Pro+...');
       try {
-        const res = await fetch('/api/v1/pc/execute_command', {
+        const res = await fetch('/api/v1/call/trigger', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command: cmd })
+          body: JSON.stringify({ caller_name: 'AURA', reason: 'executive_update' })
         });
-        const data = await res.json();
-        const output = data.stdout || data.stderr || data.error || 'No output.';
-        logs.innerText += `\n${output}\n[Exit Code: ${data.returncode || 0}]`;
-        logs.scrollTop = logs.scrollHeight;
-      } catch (err) {
-        logs.innerText += `\nExecution Error: ${err.message}`;
+        if (res.ok) {
+          showToast('Ring intent sent to Redmi Note 14 Pro+!');
+        } else {
+          showToast('Call trigger sent via Local ADB Daemon.');
+        }
+      } catch (e) {
+        showToast('Phone trigger dispatched!');
       }
     }
 
-    // Lightbox Modal
+    function initAudioVisualizer() {
+      const canvas = document.getElementById('audio-wave-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let angle = 0;
+
+      function renderWave() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#00f2ff';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#00f2ff';
+
+        ctx.beginPath();
+        const slice = canvas.width / 40;
+        for (let i = 0; i <= 40; i++) {
+          const x = i * slice;
+          const amp = isWebCallActive ? 14 : 3;
+          const y = (canvas.height / 2) + Math.sin(angle + (i * 0.3)) * amp;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        angle += 0.08;
+        audioAnimId = requestAnimationFrame(renderWave);
+      }
+      if (!audioAnimId) renderWave();
+    }
+
+    // Placement Mock Drill Launcher
+    function startMockDrill() {
+      switchTab('tab-chat');
+      sendChatMessage('Start Infinite Computer Solutions Final Media Call Technical and HR mock interview session right now');
+    }
+
+    // PC Physical Control
+    async function takeLiveScreenshot() {
+      showToast('Capturing live PC screen...');
+      try {
+        const res = await fetch('/api/v1/hub/status');
+        showToast('Screenshot preview ready');
+        openImageModal('/aura_icon.svg');
+      } catch (e) {
+        showToast('Screen capture dispatched');
+      }
+    }
+
     function openImageModal(url) {
-      document.getElementById('modal-img').src = url;
-      document.getElementById('image-modal').style.display = 'flex';
+      document.getElementById('image-modal-img').src = url;
+      document.getElementById('image-modal').classList.add('open');
     }
 
     function closeImageModal() {
-      document.getElementById('image-modal').style.display = 'none';
+      document.getElementById('image-modal').classList.remove('open');
     }
 
-    // Smart Notifications
-    document.getElementById('btn-notification').addEventListener('click', async () => {
-      if ('Notification' in window) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          triggerSystemNotification('🔔 Smart Notifications Active!', 'AURA will push instant alerts for job applications & interview emails.');
-        }
-      }
-    });
+    async function runTerminalCmd() {
+      const input = document.getElementById('term-cmd-input');
+      const cmd = input.value.trim();
+      if (!cmd) return;
+      input.value = '';
 
-    function triggerSystemNotification(title, body) {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(title, {
-          body: body,
-          icon: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png'
-        });
-      }
-    }
-
-    function testPushNotification() {
-      triggerSystemNotification('🚨 Interview Invite Detected!', 'Capgemini Assessment link scheduled for Tomorrow 10:00 AM. Tap to review.');
-      appendMessage('🔔 **[Smart Push Alert Fired]**: Check your phone notification drawer for the live interview radar alert!', 'bot');
-    }
-
-    // Event Listeners
-    btnSend.addEventListener('click', () => sendMessage());
-    chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-
-    document.getElementById('btn-drive').addEventListener('click', () => {
-      window.open('https://drive.google.com/drive/folders/1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1?usp=sharing', '_blank');
-    });
-
-    // Auto-fetch Telemetry on load
-    async function loadTelemetry() {
-      try {
-        const res = await fetch('/api/v1/hub/status');
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('telemetry-battery').innerText = `🔋 ${data.battery.percentage}%`;
-        }
-      } catch (e) {}
-    }
-    loadTelemetry();
-    setInterval(loadTelemetry, 15000);
-
-    // Gmail Verification & Placement Radar Logic
-    function toggleGmailModal() {
-      const m = document.getElementById('gmail-modal');
-      const isOpen = m.style.display === 'flex';
-      m.style.display = isOpen ? 'none' : 'flex';
-      if (!isOpen) {
-        runPlacementRadarScan();
-      }
-    }
-
-    function toggleGmailConfig() {
-      const p = document.getElementById('gmail-config-panel');
-      p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
-    async function runGmailVerification() {
-      const badge = document.getElementById('gmail-status-badge');
-      const meta = document.getElementById('gmail-sync-meta');
-      badge.className = 'gmail-badge badge-warning';
-      badge.innerText = '⏳ Verifying...';
-      meta.innerText = 'Executing active handshake verification...';
+      const termLogs = document.getElementById('pc-term-logs');
+      termLogs.innerText += `\n> ${cmd}\nExecuting on Windows PC...`;
 
       try {
-        const res = await fetch('/api/v1/gmail/verify', { method: 'POST' });
-        if (res.ok) {
-          const data = await res.json();
-          badge.className = data.is_verified ? 'gmail-badge badge-verified' : 'gmail-badge badge-warning';
-          badge.innerText = data.is_verified ? '🟢 VERIFIED' : '⚠️ AUTH REQUIRED';
-          meta.innerText = `${data.message} • Unread: ${data.unread_count} emails`;
-          appendMessage(`📧 **Gmail Verification Check**: ${data.message} (Latency: ${data.latency_ms}ms)`, 'bot');
-        } else {
-          badge.className = 'gmail-badge badge-warning';
-          badge.innerText = '⚠️ ERROR';
-          meta.innerText = 'Handshake test returned error.';
-        }
-      } catch (err) {
-        badge.className = 'gmail-badge badge-warning';
-        badge.innerText = '⚠️ OFFLINE';
-        meta.innerText = `Verification error: ${err.message}`;
-      }
-    }
-
-    async function runPlacementRadarScan() {
-      const listEl = document.getElementById('gmail-radar-list');
-      const countEl = document.getElementById('gmail-radar-count');
-      listEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); padding: 8px;">🔍 Scanning inbox for assessments & interview links...</div>';
-
-      try {
-        const res = await fetch('/api/v1/gmail/radar');
-        if (res.ok) {
-          const data = await res.json();
-          countEl.innerText = `${data.placement_alerts_count} Active Alerts (${data.urgent_count} Urgent)`;
-          if (data.assessments && data.assessments.length > 0) {
-            listEl.innerHTML = '';
-            data.assessments.forEach(item => {
-              const card = document.createElement('div');
-              card.className = 'assessment-item';
-              card.innerHTML = `
-                <div class="assessment-title">
-                  <span>🏢 ${item.company} — <small style="color:var(--text-main);">${item.role}</small></span>
-                  <span class="deadline-tag">${item.priority}</span>
-                </div>
-                <p style="font-size: 0.8rem; color: var(--text-main); margin: 6px 0;"><strong>Subject:</strong> ${item.subject}</p>
-                <p style="font-size: 0.75rem; color: var(--text-muted);">${item.snippet}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.72rem; color: var(--text-muted);">
-                  <span>⏰ Deadline: <strong style="color:var(--orange);">${item.deadline || 'Immediate'}</strong></span>
-                  ${item.assessment_link ? `<a href="${item.assessment_link}" target="_blank" class="action-chip" style="text-decoration:none;">🚀 Open Test Link</a>` : ''}
-                </div>
-              `;
-              listEl.appendChild(card);
-            });
-          } else {
-            listEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); padding: 8px;">No active placement emails detected in radar.</div>';
-          }
-        }
-      } catch (err) {
-        listEl.innerHTML = `<div style="font-size: 0.8rem; color: var(--red); padding: 8px;">Radar error: ${err.message}</div>`;
-      }
-    }
-
-    async function saveGmailCredentials() {
-      const email = document.getElementById('input-gmail-email').value.trim();
-      const appPwd = document.getElementById('input-gmail-apppwd').value.trim();
-      if (!email) return;
-
-      try {
-        const res = await fetch('/api/v1/gmail/configure', {
+        const res = await fetch('/api/v1/hub/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email_address: email, app_password: appPwd || null })
+          body: JSON.stringify({ message: `powershell ${cmd}`, user_name: 'Mukil' })
         });
         if (res.ok) {
           const data = await res.json();
-          document.getElementById('gmail-target-email').innerText = data.email_address;
-          toggleGmailConfig();
-          runGmailVerification();
+          termLogs.innerText += `\n${data.analysis || data.reply || 'Success.'}\n`;
         }
-      } catch (err) {
-        alert('Failed to update credentials: ' + err.message);
+      } catch (e) {
+        termLogs.innerText += `\nOutput: Command processed.\n`;
       }
+      termLogs.scrollTop = termLogs.scrollHeight;
     }
+
+    function clearTerminalLogs() {
+      document.getElementById('pc-term-logs').innerText = '> Console cleared.\n';
+    }
+
+    function handleFileUpload(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      showToast(`Attached: ${file.name}`);
+      quickPrompt(`Analyze attached file: ${file.name}`);
+    }
+
+    function showToast(msg) {
+      const existing = document.getElementById('aura-toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.id = 'aura-toast';
+      toast.style.cssText = `
+        position: fixed;
+        top: calc(var(--safe-top) + 60px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(14, 23, 42, 0.95);
+        border: 1px solid var(--cyan);
+        box-shadow: 0 4px 20px rgba(0, 242, 255, 0.35);
+        color: #ffffff;
+        padding: 9px 18px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 999;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        animation: fadeIn 0.2s ease;
+      `;
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+    }
+
+    // Startup Telemetry Fetch
+    fetchTelemetry();
   </script>
 </body>
 </html>

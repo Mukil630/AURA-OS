@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a192f"/>
+      <stop offset="60%" stop-color="#060913"/>
+      <stop offset="100%" stop-color="#020408"/>
+    </radialGradient>
+    
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="25%" stop-color="#7df9ff"/>
+      <stop offset="65%" stop-color="#00f2ff"/>
+      <stop offset="100%" stop-color="#0066cc"/>
+    </radialGradient>
+
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2ff"/>
+      <stop offset="50%" stop-color="#7928ca"/>
+      <stop offset="100%" stop-color="#00f2ff"/>
+    </linearGradient>
+
+    <filter id="neonBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur1"/>
+      <feGaussianBlur stdDeviation="24" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGlow)"/>
+  
+  <!-- Outer Glow Hex Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#00f2ff" stroke-width="2" stroke-opacity="0.25" stroke-dasharray="8 12"/>
+  <circle cx="256" cy="256" r="185" fill="none" stroke="url(#ringGrad)" stroke-width="6" filter="url(#neonBlur)" stroke-opacity="0.8"/>
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Arc Segments (Stark Arc Reactor) -->
+  <g stroke="#00f2ff" stroke-width="8" stroke-linecap="round" opacity="0.9">
+    <path d="M 256 95 A 161 161 0 0 1 370 142" />
+    <path d="M 405 190 A 161 161 0 0 1 417 256" />
+    <path d="M 405 322 A 161 161 0 0 1 370 370" />
+    <path d="M 322 405 A 161 161 0 0 1 256 417" />
+    <path d="M 190 405 A 161 161 0 0 1 142 370" />
+    <path d="M 107 322 A 161 161 0 0 1 95 256" />
+    <path d="M 107 190 A 161 161 0 0 1 142 142" />
+    <path d="M 190 107 A 161 161 0 0 1 256 95" />
+  </g>
+
+  <!-- Middle Mechanical Ring -->
+  <circle cx="256" cy="256" r="130" fill="#060e1d" stroke="#00f2ff" stroke-width="4" stroke-opacity="0.6"/>
+  
+  <!-- Mechanical Inner Notches -->
+  <g stroke="#00f2ff" stroke-width="4" opacity="0.8">
+    <line x1="256" y1="130" x2="256" y2="148" />
+    <line x1="256" y1="364" x2="256" y2="382" />
+    <line x1="130" y1="256" x2="148" y2="256" />
+    <line x1="364" y1="256" x2="382" y2="256" />
+    <line x1="167" y1="167" x2="180" y2="180" />
+    <line x1="345" y1="345" x2="332" y2="332" />
+    <line x1="345" y1="167" x2="332" y2="180" />
+    <line x1="167" y1="345" x2="180" y2="332" />
+  </g>
+
+  <!-- Quantum Reactor Core Glow -->
+  <circle cx="256" cy="256" r="85" fill="url(#coreGlow)" filter="url(#neonBlur)" opacity="0.95"/>
+  <circle cx="256" cy="256" r="70" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Futuristic "A" Monogram for AURA -->
+  <path d="M 256 185 L 295 295 L 217 295 Z" fill="none" stroke="#060913" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M 230 265 L 282 265" stroke="#060913" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="256" cy="235" r="7" fill="#00f2ff"/>
+</svg>

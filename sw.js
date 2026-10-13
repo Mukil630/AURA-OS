@@ -1,7 +1,8 @@
-const CACHE_NAME = 'aura-hub-v1';
+const CACHE_NAME = 'aura-os-v2';
 const ASSETS_TO_CACHE = [
   '/',
-  '/manifest.json'
+  '/manifest.json',
+  '/aura_icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -36,11 +37,11 @@ self.addEventListener('fetch', (event) => {
 
 // WebPush Background Notifications
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'AURA Alert', body: 'New task update received.' };
+  const data = event.data ? event.data.json() : { title: 'AURA Executive Alert', body: 'New system event recorded.' };
   const options = {
     body: data.body,
-    icon: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png',
-    badge: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png',
+    icon: '/aura_icon.svg',
+    badge: '/aura_icon.svg',
     vibrate: [200, 100, 200],
     data: {
       url: data.url || '/'
