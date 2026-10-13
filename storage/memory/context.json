@@ -50,9 +50,10 @@
       "date": "October 13, 2026",
       "status": "REGISTRATION_FORM_SUBMITTED_SLOT_PENDING",
       "form_submitted_date": "2026-10-12",
-      "preparation_status": "WAR_ROOM_PREPARATION_ACTIVE"
+      "preparation_status": "FULL_RESUME_AND_INFRA_STUDY_SESSION_ACTIVE",
+      "active_study_guide": "INFINITE_TECH_SERVICES_CRASH_COURSE.md"
     },
-    "next_checkpoint": "Infinite Media Call Interview (Technical + HR) War Room: Java/OOPs, SQL, SGC Billing Project & Confident HR Delivery."
+    "next_checkpoint": "Mukil mastering all resume concepts (Linux, Networking, Support, Cloud, Java) via Crash Course; Live Mock Drill on standby."
   },
   "executive_business_radar_system": {
     "status": "OPERATIONAL_ACTIVE",

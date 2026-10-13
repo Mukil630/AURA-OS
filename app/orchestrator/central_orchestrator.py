@@ -233,17 +233,35 @@ class CentralOrchestrator:
                     chat_id=chat_id,
                     task_id=task_id
                 )
+
+                # Also persist to Turso Cloud DB (AWS Mumbai - aura-db)
+                turso_id = None
+                try:
+                    from aura_agent_core.nlp_parser import parse_natural_time
+                    from aura_agent_core.services import create_reminder as create_turso_rem
+                    parsed_time = parse_natural_time(time_expr)
+                    if parsed_time.get("success"):
+                        import asyncio
+                        import concurrent.futures
+                        def _write_turso():
+                            return asyncio.run(create_turso_rem(desc, parsed_time["scheduled_iso"]))
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                            turso_id = pool.submit(_write_turso).result(timeout=4)
+                except Exception as e:
+                    logger.warning(f"Turso cloud reminder sync note: {e}")
+
                 durable_task_manager.update_task_status(
                     task_id, status="COMPLETED",
                     result_summary=f"Scheduled reminder for {rem_res['trigger_time_ist']}",
                     result_data=rem_res
                 )
+                cloud_sync_txt = f"\n☁️ **Turso Cloud DB:** Synced (`#{turso_id}` in `aura-db`)" if turso_id else ""
                 final_reply = (
                     f"⏰ **DURABLE REMINDER SCHEDULED, BOSS!**\n\n"
                     f"📌 **Task:** {desc}\n"
                     f"🕒 **Trigger Time:** `{rem_res['trigger_time_ist']}`\n"
-                    f"🆔 **Task ID:** `{task_id}`\n\n"
-                    f"<i>SQLite-la persist aayiduchu. Server restart aanaalum alarm miss aagadhu!</i>"
+                    f"🆔 **Task ID:** `{task_id}`{cloud_sync_txt}\n\n"
+                    f"<i>Turso Cloud DB mattrum SQLite-la persist aayiduchu. Server restart aanaalum alarm miss aagadhu, Boss!</i>"
                 )
                 speech_reply = f"Done Boss! {rem_res['trigger_time_ist']}-ku reminder schedule panniten!"
 

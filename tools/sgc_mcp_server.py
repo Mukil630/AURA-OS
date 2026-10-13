@@ -1055,7 +1055,7 @@ from aura_agent_core.services import (
 
 
 @mcp.tool()
-def sgc_add_turso_reminder(task: str, when: str) -> str:
+async def sgc_add_turso_reminder(task: str, when: str) -> str:
     """
     Saves an NLP/Tanglish reminder into Turso Cloud DB (AWS Mumbai) with limitless auto-clean.
 
@@ -1063,11 +1063,10 @@ def sgc_add_turso_reminder(task: str, when: str) -> str:
         task: Task or reminder description (e.g. 'Pay Lakshmi Chemicals 25000').
         when: Natural or Tanglish date/time (e.g. 'tomorrow 6pm', 'naalaiki kaalaila 9am', '10s').
     """
-    import asyncio
     parsed = parse_natural_time(when)
     if not parsed["success"]:
         return f"❌ Error: {parsed['error']}"
-    rem_id = asyncio.run(create_reminder(task, parsed["scheduled_iso"]))
+    rem_id = await create_reminder(task, parsed["scheduled_iso"])
     return (
         f"✅ **Reminder Saved in Turso Cloud DB (AWS Mumbai)!**\n"
         f"• **Task ID:** #{rem_id}\n"
@@ -1078,12 +1077,11 @@ def sgc_add_turso_reminder(task: str, when: str) -> str:
 
 
 @mcp.tool()
-def sgc_list_turso_reminders() -> str:
+async def sgc_list_turso_reminders() -> str:
     """
     Lists all active pending reminders in Turso Cloud DB.
     """
-    import asyncio
-    items = asyncio.run(list_active_reminders())
+    items = await list_active_reminders()
     if not items:
         return "ℹ️ No pending reminders in Turso Cloud DB (0 MB storage maintained)."
     out = [f"📋 **Active Turso Cloud Reminders ({len(items)} Tasks):**"]
@@ -1093,34 +1091,31 @@ def sgc_list_turso_reminders() -> str:
 
 
 @mcp.tool()
-def sgc_cancel_turso_reminder(reminder_id: int) -> str:
+async def sgc_cancel_turso_reminder(reminder_id: int) -> str:
     """
     Cancels and immediately purges a reminder from Turso Cloud DB.
     """
-    import asyncio
-    success = asyncio.run(cancel_reminder(reminder_id))
+    success = await cancel_reminder(reminder_id)
     if success:
         return f"✅ Reminder #{reminder_id} cancelled & purged from Turso Cloud DB."
     return f"❌ Reminder #{reminder_id} not found in Turso Cloud."
 
 
 @mcp.tool()
-def sgc_save_memory_vault(category: str, title: str, content: str, drive_link: str = "", tags: str = "") -> str:
+async def sgc_save_memory_vault(category: str, title: str, content: str, drive_link: str = "", tags: str = "") -> str:
     """
     Saves personal memories, notes, or Google Drive links into Turso Universal Vault.
     """
-    import asyncio
-    v_id = asyncio.run(save_to_vault(category, title, content, drive_link, tags))
+    v_id = await save_to_vault(category, title, content, drive_link, tags)
     return f"✅ Saved in Turso Vault with ID #{v_id} (Category: {category.upper()})!"
 
 
 @mcp.tool()
-def sgc_search_memory_vault(keyword: str = "", category: str = "", limit: int = 10) -> str:
+async def sgc_search_memory_vault(keyword: str = "", category: str = "", limit: int = 10) -> str:
     """
     Searches Turso Universal Memory Vault across keywords, categories, and tags.
     """
-    import asyncio
-    results = asyncio.run(search_vault(keyword=keyword, category=category, limit=limit))
+    results = await search_vault(keyword=keyword, category=category, limit=limit)
     if not results:
         return f"ℹ️ No memories found matching '{keyword}'."
     out = [f"🧠 **Found {len(results)} Memories in Turso Universal Vault:**"]

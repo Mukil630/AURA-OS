@@ -170,6 +170,20 @@ def create_app() -> FastAPI:
         sw_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sw.js")
         return FileResponse(sw_path, media_type="application/javascript")
 
+    @app.get("/apk", tags=["APK"])
+    @app.get("/download-apk", tags=["APK"])
+    async def get_apk():
+        apk_path = r"C:\Users\mukil\Desktop\AURA_OS_VoiceAssistant_Update.apk"
+        if not os.path.exists(apk_path):
+            apk_path = r"C:\Users\mukil\AndroidProjects\VoiceAssistantApp\app\build\outputs\apk\debug\app-debug.apk"
+        if os.path.exists(apk_path):
+            return FileResponse(
+                apk_path,
+                media_type="application/vnd.android.package-archive",
+                filename="AURA_OS_VoiceAssistant.apk"
+            )
+        return HTMLResponse("<h1>APK not found on host</h1>")
+
     @app.get("/call", tags=["Voice Agent"], response_class=HTMLResponse)
     async def call_page():
         call_ui = os.path.join(os.path.dirname(os.path.dirname(__file__)), "voice_agent", "call_ui.html")
