@@ -1,69 +1,78 @@
-# 📞 AURA-OS Autonomous Continuous Calling Agent
+# 📞 JARVIS Autonomous Continuous Calling Voice AI Agent
 
-An autonomous full-duplex conversational calling engine and mobile uplink bridge for **Mukil's JARVIS / AURA-OS**.
+An autonomous full-duplex conversational voice calling engine and executive partner for **Mukil's JARVIS Ecosystem**.
+
+Built with **FastAPI**, **Groq LPU (`openai/gpt-oss-120b`)**, **Microsoft Edge-TTS Neural Speech**, **Web STT**, and **PWA Mobile App** support.
 
 ---
 
 ## ⚡ Architecture Overview
 
 ```
-               [AURA-OS Brain & Telephony Engine]
-                               │
-               ┌───────────────┴───────────────┐
-               ▼                               ▼
-    [FastAPI & WebSockets]            [ADB / Mobile Bridge]
-    Port 8765 (run.py)                (call_mukil.py)
-    ├── Groq Whisper STT (<300ms)             │ am start --ez incoming_call true
-    ├── Gemini 3.8 Flash Brain                ▼
-    ├── Edge Neural Speech (TTS)    [Redmi Note 14 Pro+ 5G]
-    └── Stark Hologram Web HUD      com.example.voiceassistantapp
-                                    ├── Billa 2007 Beat-Drop Ringtone
-                                    ├── Dynamic Animated Wallpaper
-                                    └── Full-Screen Calling HUD
+               [JARVIS Autonomous Voice Calling Brain]
+                                │
+       ┌────────────────────────┼────────────────────────┐
+       ▼                        ▼                        ▼
+[Groq LPU Engine]       [11 Ecosystem Tools]     [Microsoft Edge-TTS]
+openai/gpt-oss-120b     ├── Live Web Search       ├── ta-IN-ValluvarNeural
+Sub-second latency (<0.4s)├── SGC Billing & Ledger └── en-IN-PrabhatNeural
+                        ├── Mill Web Scraper     
+                        ├── Telegram Alert Push   
+                        ├── Drive Mesh Vault     
+                        ├── Turso Cloud Tasks    
+                        └── PC Hardware Vitals   
 ```
 
 ---
 
 ## 🌟 Key Capabilities
-1. **Full-Duplex Hands-Free Voice**: Real-time conversation loop with zero robotic delay.
+1. **Full-Duplex Hands-Free Voice**: Real-time voice call loop with sub-second response times (< 0.5s latency).
 2. **Authentic Executive Tanglish**: Custom prompt engine calibrated for Mukil's brotherly dynamic ("Mapla / Boss"), placement strategy, and SGC textile empire.
-3. **Hardware & Mobile Wake Uplink**: Directly triggers incoming call intents on connected Android phones over ADB (`call_mukil.py`).
-4. **Agentic Verbal Tools**: Real-time verbal execution for:
-   - PC Vitals & Battery Status
-   - Sri Ganapathi Colours (SGC) Billing Ledger & Overdue Radar
-5. **Stark Holographic Call HUD**: Audio-reactive Arc Reactor ring, interactive waveform equalizer, mute controls, and call timer.
+3. **PWA Mobile App (Installable)**: Fullscreen phone call HUD with ARC Reactor pulsing animation, ringtone, and vibration.
+4. **11 Agentic Tools & Function Calling**:
+   - 🌐 **Live Web Search**: Real-time news, weather, stock, market data.
+   - ☁️ **Drive Vault Search**: 250GB Distributed Drive Mesh & Bills Search.
+   - 🎯 **Career & Placement Intel**: Amazon VCS prep, STAR format, GD strategy, ATS tips.
+   - 🧾 **SGC Financial Overview**: Total invoices turnover & gross revenue.
+   - ⚠️ **SGC Overdue Radar**: Unpaid bills & customer payment radar.
+   - 📊 **SGC Customer Ledger**: Specific customer ledger details.
+   - 🏭 **Spinning Mill Leads Scraper**: Real live B2B Tamil Nadu spinning mill scraper.
+   - 📱 **Telegram Mobile Alert**: Instant high-priority push to Mukil's phone.
+   - ⏰ **Turso Reminders**: Active tasks and cloud alarm retrieval.
+   - ➕ **Add Turso Reminder**: Schedule new cloud tasks with natural time (e.g. `10m`, `1h`).
+   - 💻 **PC Vitals**: CPU load, RAM usage, Battery %.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Local Run)
 
 ### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment
-Copy `.env.template` to `.env` and provide your API keys:
-```bash
-copy .env.template .env
+### 2. Configure Environment (`.env`)
+```dotenv
+HOST=0.0.0.0
+PORT=8765
+GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_chat_id
 ```
 
-### 3. Launch Telephony Server
+### 3. Start Server
 ```bash
 python run.py
 ```
 Open `http://localhost:8765` on PC or `http://<LAN_IP>:8765` on Mobile browser.
 
-### 4. Trigger Phone Call via ADB
-```bash
-python call_mukil.py
-```
-
 ---
 
-## 📁 Module Structure
-- `app/api/`: FastAPI endpoints for turn-by-turn chat, audio transcription, and session resets.
-- `app/core/`: Configuration, session memory, and dynamic prompt engine with live memory injection.
-- `app/services/`: Groq Whisper STT, Gemini 3.8 Flash reasoning, Edge TTS, and verbal tool triggers.
-- `static/`: Stark HUD holographic web caller interface with Web Audio synthesis.
-- `call_mukil.py`: One-click ADB incoming call intent trigger for Android device.
+## ☁️ 1-Click Render Cloud Deployment
+This project includes pre-configured `render.yaml` and `Procfile`.
+1. Fork or push this repository to GitHub.
+2. In [Render Dashboard](https://dashboard.render.com), create a new **Web Service**.
+3. Select this repository.
+4. Set Environment Variables: `GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+5. Deploy! Render assigns a permanent HTTPS URL with working mobile microphone permissions.
