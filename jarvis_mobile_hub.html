@@ -1048,10 +1048,18 @@
         if (res.ok) {
           const data = await res.json();
           if (data.battery) {
-            document.getElementById('battery-text').innerText = `${data.battery.percentage}%`;
-            document.getElementById('sys-battery').innerText = `${data.battery.percentage}%`;
+            const bTxt = document.getElementById('battery-text');
+            if (bTxt) bTxt.innerText = `${data.battery.percentage}%`;
+            const sysB = document.getElementById('sys-battery');
+            if (sysB) sysB.innerText = `${data.battery.percentage}%`;
           }
-          toast('System synced');
+          if (data.sgc_financials) {
+            const heroAmt = document.querySelector('.hero-amount');
+            if (heroAmt) heroAmt.innerText = `₹${Number(data.sgc_financials.receivables).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            const recEl = document.querySelector('.hero-metrics-split .split-col:first-child .split-val');
+            if (recEl) recEl.innerText = `₹${Math.round(data.sgc_financials.receivables).toLocaleString('en-IN')}`;
+          }
+          toast('⚡ AURA Synced with Ground Truth');
         }
       } catch (e) {
         toast('Sync complete');
