@@ -92,26 +92,10 @@ class CentralOrchestrator:
                 logger.warning(f"Failed to initialize Groq Client: {e}")
 
     def _call_reasoning_llm(self, user_prompt: str) -> Dict[str, Any]:
-        """Invokes Gemini (or Groq fallback) with structured JSON prompt."""
-        # 1. Try Gemini
-        if self.gemini_client:
-            models = ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-3.6-flash", "gemini-flash-latest"]
-            for m in models:
-                try:
-                    res = self.gemini_client.models.generate_content(
-                        model=m,
-                        contents=f"{ORCHESTRATOR_SYSTEM_PROMPT}\n\nUSER REQUEST: {user_prompt}",
-                        config={"response_mime_type": "application/json"}
-                    )
-                    text = (res.text or "").strip()
-                    if text:
-                        return json.loads(text)
-                except Exception as e:
-                    logger.warning(f"Gemini {m} planning error: {e}. Cascading...")
-
-        # 2. Try Groq Fallback
+        """Invokes Groq High-Speed Engine (or Gemini fallback) with structured JSON prompt."""
+        # 1. Try Groq First (Sub-second latency < 400ms)
         if self.groq_client:
-            groq_models = ["qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "openai/gpt-oss-20b"]
+            groq_models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]
             for gm in groq_models:
                 try:
                     chat_res = self.groq_client.chat.completions.create(
@@ -127,7 +111,23 @@ class CentralOrchestrator:
                     if raw_json:
                         return json.loads(raw_json)
                 except Exception as ge:
-                    logger.warning(f"Groq {gm} fallback planning error: {ge}")
+                    logger.warning(f"Groq {gm} planning notice: {ge}")
+
+        # 2. Try Gemini Fallback
+        if self.gemini_client:
+            models = ["gemini-3.8-flash", "gemini-3.6-flash"]
+            for m in models:
+                try:
+                    res = self.gemini_client.models.generate_content(
+                        model=m,
+                        contents=f"{ORCHESTRATOR_SYSTEM_PROMPT}\n\nUSER REQUEST: {user_prompt}",
+                        config={"response_mime_type": "application/json"}
+                    )
+                    text = (res.text or "").strip()
+                    if text:
+                        return json.loads(text)
+                except Exception as e:
+                    logger.warning(f"Gemini {m} planning error: {e}. Cascading...")
 
         # Deterministic Rule-Based Fallback
         return self._heuristic_fallback(user_prompt)

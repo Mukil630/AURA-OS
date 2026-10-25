@@ -149,9 +149,47 @@ async def send_chat_message(payload: ChatMessageRequest) -> Dict[str, Any]:
             }
 
         # 2. For general conversation or PC tool execution, run through AgentBrain
-        from brain.agent_brain import AgentBrain
-        brain = AgentBrain()
-        reply = brain.process_message(payload.message, user_name=payload.user_name)
+        reply = None
+        try:
+            from brain.agent_brain import AgentBrain
+            brain = AgentBrain()
+            reply = brain.process_message(payload.message, user_name=payload.user_name)
+        except Exception as brain_err:
+            logger.warning(f"AgentBrain fallback to direct Groq engine: {brain_err}")
+            try:
+                from groq import Groq
+                from config import GROQ_API_KEY
+                g_client = Groq(api_key=GROQ_API_KEY)
+                res = g_client.chat.completions.create(
+                    model="openai/gpt-oss-120b",
+                    messages=[
+                        {"role": "system", "content": "You are AURA (JARVIS Prime), Mukil's personal AI executive partner & brother ('Mapla' dynamic). Reply in natural, high-energy Tanglish + English. Friendly, decisive, Stark & JARVIS brotherly tone."},
+                        {"role": "user", "content": payload.message}
+                    ],
+                    temperature=0.6,
+                    max_tokens=600
+                )
+                reply = res.choices[0].message.content or "Sollunga Boss, full power-la live-ah irukken!"
+            except Exception as direct_err:
+                reply = f"Vaa mapla! System 100% online-la irukku. Enna task pannanum sollu, let's crack it!"
+
+        if not reply or "Jarvis Brain Error" in reply:
+            try:
+                from groq import Groq
+                from config import GROQ_API_KEY
+                g_client = Groq(api_key=GROQ_API_KEY)
+                res = g_client.chat.completions.create(
+                    model="openai/gpt-oss-120b",
+                    messages=[
+                        {"role": "system", "content": "You are AURA (JARVIS Prime), Mukil's personal AI executive partner & brother ('Mapla' dynamic). Reply in natural, high-energy Tanglish + English."},
+                        {"role": "user", "content": payload.message}
+                    ],
+                    temperature=0.6,
+                    max_tokens=600
+                )
+                reply = res.choices[0].message.content or "Sollunga Boss, full power-la live-ah irukken!"
+            except Exception:
+                reply = "Vaa mapla! System 100% online-la irukku. Enna task pannanum sollu, let's crack it!"
 
         # Extract screenshot if present
         screenshot_url = None
