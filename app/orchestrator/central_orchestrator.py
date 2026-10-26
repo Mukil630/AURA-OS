@@ -91,8 +91,25 @@ class CentralOrchestrator:
             except Exception as e:
                 logger.warning(f"Failed to initialize Groq Client: {e}")
 
+    def _get_dynamic_system_prompt(self) -> str:
+        """Dynamically injects live real-time clock, date, and SGC facts into system prompt."""
+        now_ist = datetime.now(IST_TZ)
+        time_str = now_ist.strftime("%I:%M %p")
+        date_str = now_ist.strftime("%A, %d %B %Y")
+        return f"""{ORCHESTRATOR_SYSTEM_PROMPT}
+
+LIVE REAL-TIME CONTEXT:
+- Current Clock Time (Asia/Kolkata): {time_str}
+- Today's Date: {date_str}
+- Region: Karur, Tamil Nadu
+- Core Enterprise: Sri Ganapathi Colours (Yarn Dyeing) & Industrial Washing Hub
+- Verified Financials: 10 customer sales bills, ₹63,917.00 pending receivables (Bannari Amman Dyeing ₹30,000 overdue)
+- Persona Directive: You are AURA (JARVIS Prime), Mukil's executive partner & brother ('Mapla' dynamic). Always give accurate real-time time, date, and operations facts in warm, high-energy Tanglish + English.
+"""
+
     def _call_reasoning_llm(self, user_prompt: str) -> Dict[str, Any]:
         """Invokes Groq High-Speed Engine (or Gemini fallback) with structured JSON prompt."""
+        system_content = self._get_dynamic_system_prompt()
         # 1. Try Groq First (Sub-second latency < 400ms)
         if self.groq_client:
             groq_models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]
@@ -101,7 +118,7 @@ class CentralOrchestrator:
                     chat_res = self.groq_client.chat.completions.create(
                         model=gm,
                         messages=[
-                            {"role": "system", "content": ORCHESTRATOR_SYSTEM_PROMPT},
+                            {"role": "system", "content": system_content},
                             {"role": "user", "content": user_prompt}
                         ],
                         response_format={"type": "json_object"},
@@ -120,7 +137,7 @@ class CentralOrchestrator:
                 try:
                     res = self.gemini_client.models.generate_content(
                         model=m,
-                        contents=f"{ORCHESTRATOR_SYSTEM_PROMPT}\n\nUSER REQUEST: {user_prompt}",
+                        contents=f"{system_content}\n\nUSER REQUEST: {user_prompt}",
                         config={"response_mime_type": "application/json"}
                     )
                     text = (res.text or "").strip()
@@ -198,6 +215,38 @@ class CentralOrchestrator:
         start_time = time.time()
         clean_input = raw_message.strip()
         logger.info(f"🎯 Central Orchestrator received [{channel}]: '{clean_input[:80]}'")
+
+        # Fast-Path Deterministic Interceptors (< 2ms instantaneous response)
+        raw_low = clean_input.lower()
+
+        # A. Real-Time Clock & Date Interceptor
+        time_triggers = ["time enna", "enna time", "time sollu", "what is the time", "current time", "what time", "mani enna", "enna mani", "mani sollu", "neram enna", "date enna", "today date", "enna date", "what is the date", "date sollu", "today enna date"]
+        if any(t in raw_low for t in time_triggers) or (raw_low in ["time", "mani", "date"]):
+            now_ist = datetime.now(IST_TZ)
+            time_display = now_ist.strftime("%I:%M %p")
+            date_display = now_ist.strftime("%A, %d %B %Y")
+            reply = f"மாப்ள, இப்போ கரெக்டா மணி {time_display}! இன்னைக்கு {date_display}."
+            return {
+                "task_id": "tsk_time_fastpath",
+                "intent": "TIME_QUERY",
+                "status": "COMPLETED",
+                "reply": reply,
+                "speech_reply": reply,
+                "execution_time_ms": round((time.time() - start_time) * 1000, 2)
+            }
+
+        # B. Persona Identity Interceptor
+        identity_triggers = ["nee yaaru", "who are you", "un name enna", "what is your name", "unga per enna", "peru enna", "un peru enna"]
+        if any(it in raw_low for it in identity_triggers) or (raw_low in ["who r u"]):
+            reply = "நான் உங்க பர்சனல் எக்ஸிகியூட்டிவ் பார்ட்னர் ஜார்விஸ் மாப்ள! ஸ்ரீ கணபதி கலர்ஸ், கேரியர், பிளேஸ்மென்ட், பிசி கண்ட்ரோல் எல்லாமே 100% என் கண்ட்ரோல்ல இருக்கு. என்ன டாஸ்க் பண்ணனும் சொல்லுங்க, செஞ்சிடலாம்!"
+            return {
+                "task_id": "tsk_identity_fastpath",
+                "intent": "GENERAL_CONVERSATION",
+                "status": "COMPLETED",
+                "reply": reply,
+                "speech_reply": reply,
+                "execution_time_ms": round((time.time() - start_time) * 1000, 2)
+            }
 
         # 1. LLM Planning
         plan = self._call_reasoning_llm(clean_input)
