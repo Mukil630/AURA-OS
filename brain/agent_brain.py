@@ -63,7 +63,82 @@ TOOLS_DEFINITION = [
         "type": "function",
         "function": {
             "name": "get_daily_schedule",
-            "description": "Get today's active schedule (shows active sprint override if in progress, or baseline Java/Python/Aptitude routine).",
+            "description": "Get Mukil's recurring daily schedule, workout split, and completion status from Turso Cloud DB. Supports 'today', 'tomorrow', or specific day names.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "target_day": {
+                        "type": "string",
+                        "description": "Day to inspect ('today', 'tomorrow', 'Monday', 'Tuesday', etc. Defaults to 'today')."
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "log_routine_completed",
+            "description": "Marks a daily recurring routine or workout (e.g. 'gym', 'upper body', 'morning code') as completed for today in Turso Cloud DB without deleting it.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "routine_query": {
+                        "type": "string",
+                        "description": "Routine activity or workout name completed today (e.g. 'upper body', 'workout', 'gym')."
+                    }
+                },
+                "required": ["routine_query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "modify_daily_schedule",
+            "description": "Dynamically modifies Mukil's daily schedule blueprint or workout split in Turso Cloud DB when life flow changes.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "block_query": {
+                        "type": "string",
+                        "description": "Schedule block or workout day to modify (e.g. 'gym', 'Tuesday workout', 'college')."
+                    },
+                    "new_time": {
+                        "type": "string",
+                        "description": "New timing string, e.g. '08:00 PM - 09:30 PM'."
+                    },
+                    "new_activity": {
+                        "type": "string",
+                        "description": "New title or workout split."
+                    }
+                },
+                "required": ["block_query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "complete_task",
+            "description": "Marks a one-off action task or reminder as completed by task ID or title keywords. Purges from active reminders table in Turso Cloud (0 MB bloat) and archives in Cloud Vault.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task_query_or_id": {
+                        "type": "string",
+                        "description": "Task ID (e.g. '13') or title keywords (e.g. 'bills', 'prep', 'interview')."
+                    }
+                },
+                "required": ["task_query_or_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_active_tasks",
+            "description": "Lists all pending one-off action tasks and reminders stored in Turso Cloud DB.",
             "parameters": {
                 "type": "object",
                 "properties": {}
@@ -714,9 +789,24 @@ class AgentBrain:
             )
             return f"✅ 7-Day Sprint '{res['sprint_name']}' created successfully! Expiry Date: {res['expiry_date']}. Daily schedule has been prioritized for this drive and will auto-revert upon completion."
         elif name == "get_daily_schedule":
-            sched = AdaptiveScheduler()
-            res = sched.get_today_active_schedule()
-            return f"📅 Today's Active Schedule (Mode: {res['mode']}):\n" + json.dumps(res['schedule'], indent=2)
+            from tools.daily_schedule import get_daily_schedule as get_sched
+            return get_sched(args.get("target_day", "today"))
+        elif name == "log_routine_completed":
+            from tools.daily_schedule import log_routine_completed as log_routine
+            return log_routine(args.get("routine_query", "workout"))
+        elif name == "modify_daily_schedule":
+            from tools.daily_schedule import modify_daily_schedule as mod_sched
+            return mod_sched(
+                block_query=args.get("block_query", ""),
+                new_time=args.get("new_time", ""),
+                new_activity=args.get("new_activity", "")
+            )
+        elif name == "complete_task":
+            from tools.daily_schedule import complete_task as comp_task
+            return comp_task(args.get("task_query_or_id", ""))
+        elif name == "list_active_tasks":
+            from tools.daily_schedule import list_active_tasks as list_tasks
+            return list_tasks()
         elif name == "open_browser_url":
             return pc_tools.open_browser_url(args.get("url", "https://google.com"))
         elif name == "run_powershell":

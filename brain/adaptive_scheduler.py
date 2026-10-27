@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import logging
+import asyncio
+import concurrent.futures
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 
@@ -13,17 +15,46 @@ logger = logging.getLogger("adaptive_scheduler")
 
 SCHEDULE_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "storage", "memory", "schedule_state.json")
 
+def _turso_execute(sql: str, params: list = None):
+    try:
+        from aura_agent_core.database import get_db_client
+        async def _exec():
+            async with get_db_client() as c:
+                return await c.execute(sql, params or [])
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        if loop and loop.is_running():
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                return pool.submit(asyncio.run, _exec()).result()
+        return asyncio.run(_exec())
+    except Exception:
+        return None
+
 class AdaptiveScheduler:
     """
     AURA Adaptive Sprints & Life Scheduler Engine.
     Handles Baseline Routine, Temporary Sprints (e.g. 7-day placement drive prep),
-    and Autonomous Auto-Reversion State Machine.
+    and Autonomous Auto-Reversion State Machine backed by Turso Cloud DB.
     """
     def __init__(self):
         self.mem = MemoryManager()
         self._ensure_schedule_db()
 
     def _ensure_schedule_db(self):
+        # 1. Primary: Check Turso Cloud DB
+        res = _turso_execute("SELECT content FROM aura_vault WHERE category = 'SPRINT_OVERRIDE' AND title = 'schedule_state' LIMIT 1;")
+        if res and res.rows and res.rows[0][0]:
+            try:
+                cloud_data = json.loads(res.rows[0][0])
+                os.makedirs(os.path.dirname(SCHEDULE_DB_PATH), exist_ok=True)
+                with open(SCHEDULE_DB_PATH, "w", encoding="utf-8") as f:
+                    json.dump(cloud_data, f, indent=2)
+                return
+            except Exception:
+                pass
+
         if not os.path.exists(SCHEDULE_DB_PATH):
             default_schedule = {
                 "base_routine": {
@@ -37,17 +68,48 @@ class AdaptiveScheduler:
                 "completed_sprints": [],
                 "last_checked": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
+            os.makedirs(os.path.dirname(SCHEDULE_DB_PATH), exist_ok=True)
             with open(SCHEDULE_DB_PATH, "w", encoding="utf-8") as f:
                 json.dump(default_schedule, f, indent=2)
+            _turso_execute(
+                "INSERT INTO aura_vault (category, title, content, tags) VALUES ('SPRINT_OVERRIDE', 'schedule_state', ?, 'sprint,schedule');",
+                [json.dumps(default_schedule)]
+            )
 
     def load_schedule_state(self) -> Dict[str, Any]:
-        with open(SCHEDULE_DB_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+        # 1. Primary from Turso Cloud DB
+        res = _turso_execute("SELECT content FROM aura_vault WHERE category = 'SPRINT_OVERRIDE' AND title = 'schedule_state' LIMIT 1;")
+        if res and res.rows and res.rows[0][0]:
+            try:
+                cloud_state = json.loads(res.rows[0][0])
+                with open(SCHEDULE_DB_PATH, "w", encoding="utf-8") as f:
+                    json.dump(cloud_state, f, indent=2)
+                return cloud_state
+            except Exception:
+                pass
+
+        if os.path.exists(SCHEDULE_DB_PATH):
+            with open(SCHEDULE_DB_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {}
 
     def save_schedule_state(self, state: Dict[str, Any]):
         state["last_checked"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(SCHEDULE_DB_PATH, "w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2)
+        # 1. Turso Cloud DB
+        payload = json.dumps(state)
+        res = _turso_execute("UPDATE aura_vault SET content = ? WHERE category = 'SPRINT_OVERRIDE' AND title = 'schedule_state';", [payload])
+        if res and res.rows_affected == 0:
+            _turso_execute(
+                "INSERT INTO aura_vault (category, title, content, tags) VALUES ('SPRINT_OVERRIDE', 'schedule_state', ?, 'sprint,schedule');",
+                [payload]
+            )
+
+        # 2. Local cache
+        try:
+            with open(SCHEDULE_DB_PATH, "w", encoding="utf-8") as f:
+                json.dump(state, f, indent=2)
+        except Exception:
+            pass
 
     def create_sprint_override(self, event_name: str, duration_days: int = 7, focus_topics: List[str] = None) -> Dict[str, Any]:
         """

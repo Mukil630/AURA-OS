@@ -136,8 +136,8 @@ async def send_chat_message(payload: ChatMessageRequest) -> Dict[str, Any]:
         )
         intent = orch_res.get("intent")
 
-        # If it's a domain task (billing, payables, reminders, washing ops, tasks), return orchestrator's verified output
-        if intent in ["SCHEDULE_REMINDER", "SGC_BILLING_QUERY", "BUSINESS_PAYABLES", "WASHING_HUB_OPS", "TASK_MANAGEMENT"]:
+        # If it's a domain task (billing, payables, reminders, washing ops, tasks, schedule, routine), return orchestrator's verified output
+        if intent in ["SCHEDULE_REMINDER", "SGC_BILLING_QUERY", "BUSINESS_PAYABLES", "WASHING_HUB_OPS", "TASK_MANAGEMENT", "DAILY_SCHEDULE", "ROUTINE_LOG", "TIME_QUERY"]:
             return {
                 "reply": orch_res.get("reply"),
                 "speech_reply": orch_res.get("speech_reply"),

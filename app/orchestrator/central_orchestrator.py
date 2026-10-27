@@ -248,6 +248,80 @@ LIVE REAL-TIME CONTEXT:
                 "execution_time_ms": round((time.time() - start_time) * 1000, 2)
             }
 
+        # C. Daily Schedule & Workout Split Interceptor (Turso Cloud DB Ground Truth)
+        sched_triggers = ["schedule sollu", "schedule enna", "naalaikku schedule", "nalaiku schedule", "today schedule", "innaiku schedule", "innikku schedule", "workout split", "enna workout", "today workout", "daily routine", "daily schedule", "routine sollu"]
+        if (any(st in raw_low for st in sched_triggers) or raw_low in ["schedule", "routine", "workout"]) and not any(w in raw_low for w in ["change", "modify", "update"]):
+            try:
+                from tools.daily_schedule import get_daily_schedule
+                target_d = "tomorrow" if ("naalaikku" in raw_low or "nalaiku" in raw_low or "tomorrow" in raw_low) else "today"
+                sched_md = get_daily_schedule(target_d)
+                speech = f"Boss, {target_d} schedule and workout split Turso Cloud-la irundhu load panniten!"
+                return {
+                    "task_id": "tsk_schedule_fastpath",
+                    "intent": "DAILY_SCHEDULE",
+                    "status": "COMPLETED",
+                    "reply": sched_md,
+                    "speech_reply": speech,
+                    "execution_time_ms": round((time.time() - start_time) * 1000, 2)
+                }
+            except Exception as se:
+                logger.warning(f"Fast-path schedule error: {se}")
+
+        # D. Active Tasks Interceptor (Turso Cloud DB Ground Truth)
+        active_task_triggers = ["task enna", "active tasks", "tasks enna", "enna tasks", "task list", "active task", "pending tasks", "pending task"]
+        if any(att in raw_low for att in active_task_triggers) or raw_low in ["tasks", "task"]:
+            try:
+                from tools.daily_schedule import list_active_tasks
+                tasks_md = list_active_tasks()
+                speech = "Boss, active tasks Turso Cloud-la irundhu fetch panniten!"
+                return {
+                    "task_id": "tsk_activetasks_fastpath",
+                    "intent": "TASK_MANAGEMENT",
+                    "status": "COMPLETED",
+                    "reply": tasks_md,
+                    "speech_reply": speech,
+                    "execution_time_ms": round((time.time() - start_time) * 1000, 2)
+                }
+            except Exception as te:
+                logger.warning(f"Fast-path active tasks error: {te}")
+
+        # E. Routine Workout Completion Interceptor
+        routine_done_triggers = ["mudichiten", "mudinjidhu", "done", "completed", "finish panniten"]
+        workout_keywords = ["upper body", "lower body", "chest", "back", "legs", "shoulders", "gym", "workout", "cardio"]
+        if any(rd in raw_low for rd in routine_done_triggers) and any(wk in raw_low for wk in workout_keywords):
+            try:
+                from tools.daily_schedule import log_routine_completed
+                matched_kw = next((wk for wk in workout_keywords if wk in raw_low), "workout")
+                log_res = log_routine_completed(matched_kw)
+                speech = f"Super Boss! {matched_kw} workout complete pannatha Turso Cloud-la log panniten!"
+                return {
+                    "task_id": "tsk_routine_done_fastpath",
+                    "intent": "ROUTINE_LOG",
+                    "status": "COMPLETED",
+                    "reply": log_res,
+                    "speech_reply": speech,
+                    "execution_time_ms": round((time.time() - start_time) * 1000, 2)
+                }
+            except Exception as rde:
+                logger.warning(f"Fast-path routine done error: {rde}")
+
+        # F. One-off Task Completion Interceptor (e.g. "bills mudichiten", "prep mudichiten", "task #13 completed")
+        if any(rd in raw_low for rd in routine_done_triggers) and not any(wk in raw_low for wk in workout_keywords):
+            try:
+                from tools.daily_schedule import complete_task
+                comp_res = complete_task(clean_input)
+                speech = "Task completed Boss! Turso Cloud-la irundhu purge panniten."
+                return {
+                    "task_id": "tsk_complete_fastpath",
+                    "intent": "TASK_MANAGEMENT",
+                    "status": "COMPLETED",
+                    "reply": comp_res,
+                    "speech_reply": speech,
+                    "execution_time_ms": round((time.time() - start_time) * 1000, 2)
+                }
+            except Exception as ce:
+                logger.warning(f"Fast-path complete task error: {ce}")
+
         # 1. LLM Planning
         plan = self._call_reasoning_llm(clean_input)
         intent = plan.get("intent", "GENERAL_CONVERSATION")

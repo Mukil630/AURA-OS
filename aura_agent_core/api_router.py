@@ -4,7 +4,9 @@ from typing import Optional, List
 from aura_agent_core.nlp_parser import parse_natural_time
 from aura_agent_core.services import (
     create_reminder, cancel_reminder, list_active_reminders,
-    save_to_vault, search_vault, delete_vault_item
+    save_to_vault, search_vault, delete_vault_item,
+    get_daily_schedule_report, modify_daily_schedule_cloud,
+    log_routine_completed_cloud, complete_task_cloud
 )
 
 router = APIRouter(prefix="/api", tags=["AURA-OS Core Engine"])
@@ -114,3 +116,75 @@ async def delete_vault_endpoint(item_id: int):
     if not deleted:
         raise HTTPException(status_code=404, detail="Vault item not found")
     return {"status": "success", "message": f"Vault item #{item_id} deleted"}
+
+
+# ====================
+# Request Models for Schedule & Tasks
+# ====================
+
+class ScheduleModifyRequest(BaseModel):
+    block_query: str = Field(..., description="Schedule block or workout day to modify, e.g. 'gym', 'Tuesday workout'")
+    new_time: Optional[str] = Field(default="", description="New timing, e.g. '08:00 PM - 09:30 PM'")
+    new_activity: Optional[str] = Field(default="", description="New activity or workout split")
+
+
+class RoutineLogRequest(BaseModel):
+    routine_query: str = Field(..., description="Routine activity or workout completed today, e.g. 'upper body', 'gym', 'morning code'")
+
+
+class TaskCompleteRequest(BaseModel):
+    task_query_or_id: str = Field(..., description="Task ID or title keywords to mark as done and purge from active list")
+
+
+# ====================
+# Daily Schedule & Routine Endpoints (Turso Cloud DB)
+# ====================
+
+@router.get("/schedule/get")
+async def get_schedule_endpoint(target_day: str = Query(default="today", description="'today', 'tomorrow', 'Monday', etc.")):
+    """Retrieves 24/7 master daily schedule & workout split from Turso Cloud DB"""
+    res = await get_daily_schedule_report(target_day=target_day)
+    return res
+
+
+@router.post("/schedule/modify")
+async def modify_schedule_endpoint(req: ScheduleModifyRequest):
+    """Dynamically updates daily schedule blueprint in Turso Cloud DB"""
+    res = await modify_daily_schedule_cloud(
+        block_query=req.block_query,
+        new_time=req.new_time or "",
+        new_activity=req.new_activity or ""
+    )
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("message"))
+    return res
+
+
+@router.post("/schedule/log-routine")
+async def log_routine_endpoint(req: RoutineLogRequest):
+    """Marks a daily routine block or workout completed for today in Turso Cloud DB"""
+    res = await log_routine_completed_cloud(req.routine_query)
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("message"))
+    return res
+
+
+# ====================
+# Task Lifecycle Endpoints (Auto-Purge & Cloud Archive)
+# ====================
+
+@router.get("/tasks/active")
+async def get_active_tasks_endpoint():
+    """Retrieves all pending one-off tasks from Turso Cloud DB"""
+    reminders = await list_active_reminders()
+    return {"count": len(reminders), "tasks": reminders}
+
+
+@router.post("/tasks/complete")
+async def complete_task_endpoint(req: TaskCompleteRequest):
+    """Marks a one-off task as done: purges from active reminders table and archives in Cloud Vault"""
+    res = await complete_task_cloud(req.task_query_or_id)
+    if not res.get("success"):
+        raise HTTPException(status_code=404, detail=res.get("message"))
+    return res
+
