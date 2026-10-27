@@ -1,46 +1,6 @@
 [
   {
     "sender": "Mukil",
-    "text": "Hi maapla eppadi irukka?",
-    "timestamp": "2026-09-07T20:47:32.551292"
-  },
-  {
-    "sender": "JARVIS",
-    "text": "Hey boss, nalla irukken! Neenga eppadi irukka?",
-    "timestamp": "2026-09-07T20:47:32.576484"
-  },
-  {
-    "sender": "Mukil",
-    "text": "Andha task status enna mapla?",
-    "timestamp": "2026-09-07T20:47:33.854336"
-  },
-  {
-    "sender": "JARVIS",
-    "text": "Task\u2011status: **\u2705 Completed** \u2013 I\u2019ve already extracted the customer names from the PDF filenames in the SGC billing folder and prepared the list.\n\nTo show you the folder and the file list on your screen, I just need the exact path where those PDFs live (e.g., `C:/Users/mukil/Documents/SGC_Bills`). Drop the folder location and I\u2019ll open it for you right away.",
-    "timestamp": "2026-09-07T20:47:33.883694"
-  },
-  {
-    "sender": "Mukil",
-    "text": "Open panni kaatu mapla screen-la",
-    "timestamp": "2026-09-07T20:47:55.328598"
-  },
-  {
-    "sender": "JARVIS",
-    "text": "Sure thing! Could you let me know the exact folder path on your PC where the SGC billing PDFs are stored (for example\u202f`C:/Users/mukil/Documents/SGC_Bills`)? Once I have that, I\u2019ll open the folder and display the contents right on your screen.",
-    "timestamp": "2026-09-07T20:47:55.353596"
-  },
-  {
-    "sender": "Mukil",
-    "text": "Check my battery percentage",
-    "timestamp": "2026-09-07T20:48:58.539575"
-  },
-  {
-    "sender": "JARVIS",
-    "text": "Your laptop\u2019s battery is at **42\u202f%**, currently discharging (not charging) with about **48\u202fminutes** of runtime left. Let me know if you need anything else!",
-    "timestamp": "2026-09-07T20:48:58.562542"
-  },
-  {
-    "sender": "Mukil",
     "text": "Andha task status enna mapla?",
     "timestamp": "2026-09-07T20:53:54.996029"
   },
@@ -248,5 +208,45 @@
     "sender": "Antigravity",
     "text": "Naan eppo **Render Cloud-la 24/7 active-ah** run aagittu irukken, Boss! \u2601\ufe0f\u26a1\n\nHere is my exact system layout right now:\n\n1. **Cloud Core:** Render Platform (24/7 Headless Engine \u2013 non-stop active).\n2. **Data Mesh:** 250GB Distributed Drive Mesh (10 Nodes) connected.\n3. **Local PC Twin:** Paired with your Windows PC node for local triggers, OCR typing, and Telegram Gateway Daemon.\n\nCloud twin fully online & primed, Mapla. Sollunga, Placement application update edhavadhu paakkanuma, illana SGC task eedhaavadhu execute pannanuma?",
     "timestamp": "2026-09-20T15:20:20.043011"
+  },
+  {
+    "sender": "Mukil",
+    "text": "check upcoming payments and cashflow radar",
+    "timestamp": "2026-10-12T11:56:17.461679"
+  },
+  {
+    "sender": "JARVIS",
+    "text": "**Cash\u2011flow radar \u2013 quick snapshot**\n\n| Category | Amount (\u20b9) | Status |\n|----------|-----------|--------|\n| **Receivables** (pending SGC invoices) | **47,725.00** | 7 bills \u2013 all due |\n| **Payables** (suppliers, EB, GST, etc.) | **55,900.00** | 3 obligations \u2013 upcoming |\n| **Net Working Capital** | **\u20118,175.00** | **\u26a0\ufe0f Attention required** \u2013 cash\u2011out > cash\u2011in |\n\n**What to do next (high\u2011impact actions)**  \n1. **Accelerate collections** \u2013 send reminder WhatsApp/SMS to the 7 pending customers (e.g., MSK\u202fFabrics, Sowbhagiya, GAIA).  \n2. **Prioritise payables** \u2013 schedule payments for the most urgent supplier (e.g., Lakshmi\u202fChemicals) to avoid penalties.  \n3. **Bridge gap** \u2013 consider a short\u2011term working\u2011capital loan or a cash\u2011discount offer to customers for early payment.\n\nLet me know if you want me to:\n\n- Draft and send collection messages now.  \n- Create a payment schedule for the pending payables.  \n- Generate a detailed cash\u2011flow forecast for the next 30\u202fdays.  \n\nJust tell me the next step, Boss! \ud83d\ude80",
+    "timestamp": "2026-10-12T11:56:17.487261"
+  },
+  {
+    "sender": "Mukil",
+    "text": "Hello mapla, epdi irukka?",
+    "timestamp": "2026-10-25T20:45:04.258045"
+  },
+  {
+    "sender": "JARVIS",
+    "text": "Hey Boss, nalla irukken! Neenga epdi irukeenga?",
+    "timestamp": "2026-10-25T20:45:04.286043"
+  },
+  {
+    "sender": "Mukil",
+    "text": "Hello mapla epdi irukka?",
+    "timestamp": "2026-10-25T20:47:13.484862"
+  },
+  {
+    "sender": "JARVIS",
+    "text": "Hey Boss, nalla irukken! Neenga epdi irukeenga?",
+    "timestamp": "2026-10-25T20:47:13.517896"
+  },
+  {
+    "sender": "Mukil",
+    "text": "Hello mapla, ready-aa?",
+    "timestamp": "2026-10-25T20:48:43.519477"
+  },
+  {
+    "sender": "JARVIS",
+    "text": "Hey Boss, always ready! What\u2019s on the agenda today?",
+    "timestamp": "2026-10-25T20:48:43.545341"
   }
 ]
