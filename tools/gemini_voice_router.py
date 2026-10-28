@@ -74,17 +74,23 @@ def synthesize_persona_voice(
 
     try:
         client = genai.Client(api_key=config.GEMINI_API_KEY)
-        res = client.models.generate_content(
-            model="gemini-3.8-flash-tts",
-            contents=full_prompt
-        )
-        for part in res.candidates[0].content.parts:
-            if part.inline_data:
-                with open(out_path, "wb") as f:
-                    f.write(part.inline_data.data)
-                logger.info(f"[VoiceRouter] Successfully generated {out_path}")
-                return True, str(out_path)
-        return False, "No audio inline data returned from Gemini"
+        for model_name in ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts"]:
+            try:
+                res = client.models.generate_content(
+                    model=model_name,
+                    contents=full_prompt
+                )
+                if res.candidates and res.candidates[0].content and res.candidates[0].content.parts:
+                    for part in res.candidates[0].content.parts:
+                        if part.inline_data:
+                            with open(out_path, "wb") as f:
+                                f.write(part.inline_data.data)
+                            logger.info(f"[VoiceRouter] Successfully generated {out_path} using {model_name}")
+                            return True, str(out_path)
+            except Exception as me:
+                logger.warning(f"[VoiceRouter] Model {model_name} failed: {me}")
+                continue
+        return False, "No audio inline data returned from Gemini TTS models"
     except Exception as e:
         logger.error(f"[VoiceRouter] Gemini TTS failed: {e}")
         return False, str(e)
