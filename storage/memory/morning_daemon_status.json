@@ -1,0 +1,21 @@
+{
+  "status": "RUNNING",
+  "started_at": "2026-10-28T10:59:44.253143",
+  "registered_jobs": [
+    {
+      "time": "06:00",
+      "persona": "MORNING_WAKEUP",
+      "desc": "Karur Weather & Yarn Drying"
+    },
+    {
+      "time": "06:05",
+      "persona": "WORKOUT_BEAST",
+      "desc": "Workout Split & Gym Coach"
+    },
+    {
+      "time": "07:00",
+      "persona": "BUSINESS_FINANCE",
+      "desc": "Monthly 1st SGC 5% GST Audit"
+    }
+  ]
+}
