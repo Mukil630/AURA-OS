@@ -38,9 +38,36 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from app.services.durable_scheduler import durable_scheduler
     await durable_scheduler.start()
 
-    # Telegram Bridge is retired per Mukil's directive (all operations migrated to native AURA Mobile App)
+    # Start 24/7 Telegram Bridge Daemon when deployed to Cloud / Production
     telegram_process = None
-    logger.info("📱 Telegram Bridge disabled. Native AURA App active.")
+    from config import TELEGRAM_BOT_TOKEN
+    token = os.getenv("TELEGRAM_BOT_TOKEN") or TELEGRAM_BOT_TOKEN
+    is_cloud = bool(os.getenv("RENDER") or settings.ENVIRONMENT == "production" or os.getenv("RUN_TELEGRAM_BOT", "false").lower() == "true")
+    if is_cloud and token:
+        bridge_script = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tools", "telegram_bridge.py")
+        import psutil
+        already_running = False
+        try:
+            for p in psutil.process_iter(["cmdline"]):
+                cmd = p.info.get("cmdline") or []
+                if any("telegram_bridge.py" in str(arg) for arg in cmd) and p.pid != os.getpid():
+                    already_running = True
+                    logger.info(f"✅ Telegram Bridge is already active in background with PID: {p.pid}")
+                    break
+        except Exception:
+            pass
+
+        if not already_running and os.path.exists(bridge_script):
+            logger.info("🚀 Starting 24/7 Telegram Bridge Daemon on Cloud Container...")
+            try:
+                import subprocess
+                import sys
+                sub_env = os.environ.copy()
+                sub_env["TELEGRAM_BOT_TOKEN"] = token
+                telegram_process = subprocess.Popen([sys.executable, "-u", bridge_script], env=sub_env)
+                logger.info(f"✅ Telegram Bridge Daemon running with PID: {telegram_process.pid}")
+            except Exception as e:
+                logger.error(f"Failed to launch Telegram Bridge Daemon: {e}")
     
     # Initialize Turso Cloud Database Tables and Schemas
     aura_scheduler = None
@@ -154,10 +181,26 @@ def create_app() -> FastAPI:
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "aura_icon.svg")
         return FileResponse(icon_path, media_type="image/svg+xml")
 
+    @app.get("/api/voice/stream/{filename}", tags=["Voice"])
+    async def stream_voice_audio(filename: str):
+        import tempfile
+        temp_dir = tempfile.gettempdir()
+        file_path = os.path.join(temp_dir, filename)
+        if not os.path.exists(file_path):
+            storage_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "storage", "voice_cache", filename)
+            if os.path.exists(storage_path):
+                file_path = storage_path
+            else:
+                return JSONResponse(status_code=404, content={"error": "Audio file not found"})
+        mime = "audio/ogg" if filename.endswith(".ogg") else ("audio/mpeg" if filename.endswith(".mp3") else "audio/wav")
+        return FileResponse(file_path, media_type=mime)
+
     @app.get("/apk", tags=["APK"])
     @app.get("/download-apk", tags=["APK"])
     async def get_apk():
-        apk_path = r"C:\Users\mukil\Desktop\AURA_OS_VoiceAssistant_Update.apk"
+        apk_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "storage", "AURA_OS_VoiceAssistant.apk")
+        if not os.path.exists(apk_path):
+            apk_path = r"C:\Users\mukil\Desktop\AURA_OS_VoiceAssistant_Update.apk"
         if not os.path.exists(apk_path):
             apk_path = r"C:\Users\mukil\AndroidProjects\VoiceAssistantApp\app\build\outputs\apk\debug\app-debug.apk"
         if os.path.exists(apk_path):

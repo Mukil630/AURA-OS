@@ -124,7 +124,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/drive` - ☁️ Access 5TB Google Drive Vault\n\n"
         "Press the mic button or type to command me, Maapla!"
     )
-    await update.message.reply_text(welcome_msg, parse_mode="Markdown")
+    await _send_reply_safely(update, welcome_msg, send_voice=True, parse_mode="Markdown")
 
 async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ctx = mem.get_context()
@@ -143,7 +143,7 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"• *PC Node*: 🟢 Online & Autonomous\n"
         f"• *Last Updated*: {time_val}"
     )
-    await update.message.reply_text(status_text, parse_mode="Markdown", disable_web_page_preview=True)
+    await _send_reply_safely(update, status_text, send_voice=True, parse_mode="Markdown")
 
 async def diagnose_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Executes live Phase 1 hardware telemetry and AI health diagnosis."""
@@ -798,20 +798,20 @@ async def paid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"• **Payment Mode:** {res['paymentMode']}\n\n"
             f"Ledger automatically updated across all local and cloud nodes, Boss! 💰"
         )
-        await update.message.reply_text(msg, parse_mode="Markdown")
+        await _send_reply_safely(update, msg, send_voice=True, parse_mode="Markdown")
     else:
-        await update.message.reply_text(f"❌ {res.get('error', 'Error updating bill')}", parse_mode="Markdown")
+        await _send_reply_safely(update, f"❌ {res.get('error', 'Error updating bill')}", send_voice=False, parse_mode="Markdown")
 
 async def ledger_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetches customer historical dossier & ledger."""
     args = context.args
     if not args:
-        await update.message.reply_text("Usage: `/ledger <Customer_Name>` (e.g. `/ledger Sri Laxmi`)", parse_mode="Markdown")
+        await _send_reply_safely(update, "Usage: `/ledger <Customer_Name>` (e.g. `/ledger Sri Laxmi`)", send_voice=False, parse_mode="Markdown")
         return
     query = " ".join(args).strip()
     from tools.sgc_billing_query import format_customer_ledger
     rep = format_customer_ledger(query)
-    await update.message.reply_text(rep, parse_mode="Markdown")
+    await _send_reply_safely(update, rep, send_voice=True, parse_mode="Markdown")
 
 async def drill_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetches a high-yield placement question (Zoho, TCS, Infosys, Cognizant)."""
@@ -1677,7 +1677,7 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 1. Check direct shortcuts first (Bill, Overdue, Reminders, Notes, Resume)
         shortcut_handled = await handle_direct_shortcuts(transcribed_text, update, context)
         if shortcut_handled:
-            await send_voice_reply_guaranteed(update, f"Boss, unga shortcut task execute aayiduchu!", caption="🔊 JARVIS Spoken Voice")
+            pass
             return
 
         # 2. Execute directly on Google Antigravity
@@ -1689,7 +1689,7 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _send_pdf_if_present(update, reply)
 
         # 3. Guaranteed Spoken Neural Voice Note Reply back to Mukil
-        await send_voice_reply_guaranteed(update, reply, caption="🔊 JARVIS Spoken Voice")
+        # Guaranteed voice note already dispatched via _send_reply_safely
 
     except Exception as e:
         logger.error(f"Voice processing error: {e}")

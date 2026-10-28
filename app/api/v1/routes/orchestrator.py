@@ -3,6 +3,7 @@ AURA-OS Central Cognitive Orchestrator API Router.
 app/api/v1/routes/orchestrator.py
 Direct REST interface to the Gemini-powered Central Orchestrator & Durable Task Lifecycle.
 """
+import os
 import time
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException, Query, status
@@ -39,6 +40,19 @@ async def process_orchestrator_request(payload: ProcessRequestPayload) -> Dict[s
             channel=payload.channel or "MOBILE_APP",
             chat_id=payload.chat_id
         )
+        # Generate neural audio voice file for mobile playback
+        audio_url = None
+        try:
+            from tools.tts_generator import generate_voice_audio
+            speech = result.get("speech_reply") or result.get("reply") or ""
+            if speech:
+                voice_file = await generate_voice_audio(speech)
+                if voice_file and os.path.exists(voice_file):
+                    fname = os.path.basename(voice_file)
+                    audio_url = f"/api/voice/stream/{fname}"
+        except Exception as ve:
+            pass
+
         return {
             "status": "success",
             "task_id": result.get("task_id"),
@@ -46,6 +60,7 @@ async def process_orchestrator_request(payload: ProcessRequestPayload) -> Dict[s
             "task_status": result.get("status"),
             "reply": result.get("reply"),
             "speech_reply": result.get("speech_reply"),
+            "audio_url": audio_url,
             "duration_ms": result.get("duration_ms"),
             "execution_result": result.get("execution_result"),
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
