@@ -231,11 +231,35 @@ async def call_llm(user_message: str) -> str:
     CALL_HISTORY.append({"role": "assistant", "content": fallback})
     return fallback
 
-async def generate_speech_base64(text: str) -> str:
-    """Generates MP3 audio using Edge Neural TTS and returns base64 encoded string."""
+async def generate_speech_base64(text: str, persona: str = "MORNING_WAKEUP") -> str:
+    """Generates audio using Google Gemini 3.8 Flash Native Audio with Edge-TTS Fallback and returns base64."""
     clean = clean_text_for_speech(text)
+    directive = "Speak in a warm, natural, brotherly Tamil slang like Tony Stark talking to his best friend Mukil: "
+    if persona == "WORKOUT_BEAST":
+        directive = "Speak in an energetic, pumped-up workout motivation coach tone in Tamil slang: "
+    elif persona == "BUSINESS_FINANCE":
+        directive = "Speak in a confident, sharp business executive partner tone in Tamil: "
+
+    # 1. Primary: Gemini Native Audio
+    if GEMINI_API_KEY:
+        for model_name in ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts"]:
+            try:
+                from google import genai
+                client = genai.Client(api_key=GEMINI_API_KEY)
+                prompt = f"{directive}{clean}"
+                res = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                if res.candidates and res.candidates[0].content and res.candidates[0].content.parts:
+                    for part in res.candidates[0].content.parts:
+                        if part.inline_data and part.inline_data.data:
+                            return base64.b64encode(part.inline_data.data).decode("utf-8")
+            except Exception:
+                continue
+
+    # 2. Fallback: Edge-TTS
     voice = detect_language_and_voice(clean)
-    
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tf:
         temp_path = tf.name
         
