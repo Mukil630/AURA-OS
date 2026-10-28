@@ -1113,7 +1113,7 @@ async def menu_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/drive` - 5TB Master Vault & 250GB Mesh access\n"
         "• `/vitals` - Live PC hardware vitals"
     )
-    await update.message.reply_text(menu_text, parse_mode="Markdown")
+    await _send_reply_safely(update, menu_text, send_voice=True, parse_mode="Markdown")
 
 async def remind_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Sets a timed reminder, alarm, or countdown timer."""
@@ -1199,7 +1199,7 @@ async def overdue_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         from tools.sgc_overdue_radar import format_overdue_telegram
         report = format_overdue_telegram()
-        await update.message.reply_text(report, parse_mode="HTML")
+        await _send_reply_safely(update, report, send_voice=True, parse_mode="HTML")
     except Exception as e:
         logger.error(f"Overdue radar error: {e}", exc_info=True)
         await update.message.reply_text(f"❌ Overdue Radar error: {e}")
@@ -1534,19 +1534,31 @@ async def _send_pdf_if_present(update: Update, text: str):
         except Exception as pdf_err:
             logger.error(f"Error sending PDF: {pdf_err}")
 
-async def _send_reply_safely(update: Update, text: str):
-    """Safely sends replies splitting chunks >4000 chars and falling back if Markdown fails."""
-    if not text:
+async def _send_reply_safely(update: Update, text: str, send_voice: bool = True, parse_mode: Optional[str] = "Markdown"):
+    """Safely sends replies splitting chunks >4000 chars and falling back if Markdown/HTML fails.
+    Automatically generates and replays with Gemini Native Neural Voice note for ALL requests when ALWAYS_VOICE_REPLY is True."""
+    if not text or not update or not update.effective_message:
         return
     chunks = [text[i:i+4000] for i in range(0, len(text), 4000)]
     for chunk in chunks:
-        try:
-            await update.message.reply_text(chunk, parse_mode="Markdown")
-        except Exception:
+        sent = False
+        if parse_mode:
             try:
-                await update.message.reply_text(chunk)
+                await update.effective_message.reply_text(chunk, parse_mode=parse_mode)
+                sent = True
+            except Exception:
+                pass
+        if not sent:
+            try:
+                await update.effective_message.reply_text(chunk)
             except Exception as ex:
                 logger.error(f"Error delivering Telegram message: {ex}")
+
+    if ALWAYS_VOICE_REPLY and send_voice:
+        try:
+            await send_voice_reply_guaranteed(update, text, caption="🎙️ AURA Spoken Voice")
+        except Exception as ve:
+            logger.error(f"Voice replay error: {ve}")
 
 async def send_voice_reply_guaranteed(update: Update, text: str, caption: str = "🔊 JARVIS Spoken Voice"):
     """Guarantees a high-quality Neural Voice Note reply back to Telegram."""
@@ -1722,9 +1734,7 @@ async def chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await _send_screenshot_if_present(update, reply)
     await _send_pdf_if_present(update, reply)
 
-    # 6. Guaranteed Neural Voice reply back to Mukil
-    if ALWAYS_VOICE_REPLY:
-        await send_voice_reply_guaranteed(update, reply, caption="🔊 JARVIS Spoken Voice")
+    # 6. Note: Guaranteed Gemini Voice reply is already dispatched inside _send_reply_safely!
 
 def main():
     import time
