@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Consolas', 'Courier New', monospace;
+    width: 1280px;
+    height: 720px;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow: hidden;
+  }
+  .window-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+  .title { font-size: 13px; color: #8b949e; margin-left: 12px; font-weight: 600; }
+  .terminal-body {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .line { opacity: 0; transform: translateY(4px); transition: all 0.2s ease; }
+  .line.visible { opacity: 1; transform: translateY(0); }
+  .prompt { color: #58a6ff; font-weight: bold; }
+  .cmd { color: #fff; }
+  .info { color: #8b949e; }
+  .success { color: #3fb950; font-weight: bold; }
+  .highlight { color: #d29922; font-weight: bold; }
+  .cyan { color: #38bdf8; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="window-bar">
+  <div class="dot dot-red"></div>
+  <div class="dot dot-yellow"></div>
+  <div class="dot dot-green"></div>
+  <span class="title">PowerShell — JARVIS Autonomous Core Daemon</span>
+</div>
+
+<div class="terminal-body" id="termBody">
+  <div class="line visible"><span class="prompt">PS C:\Users\mukil\jarvis-core></span> <span class="cmd">python tools/daily_fresher_job_dispatcher.py --auto-apply</span></div>
+  <div class="line" id="l1"><span class="info">[*]</span> <span class="highlight">[09:00:00 AM IST]</span> Windows Task Scheduler Trigger Fired (JARVIS_Daily_Fresher_Jobs_9AM)</div>
+  <div class="line" id="l2"><span class="info">[*]</span> Connecting to Greenhouse & Lever REST APIs (11 Global Tech Boards)...</div>
+  <div class="line" id="l3"><span class="success">[+]</span> Discovered 59 active fresher / early-career openings matching criteria</div>
+  <div class="line" id="l4"><span class="info">[*]</span> Calculating ATS Semantic Match against Mukil Master Resume (Google Drive Vault)...</div>
+  <div class="line" id="l5"><span class="cyan">[★] TOP MATCH #1:</span> GitLab — AI Engineer (Remote, Bangalore) | <span class="success">ATS SCORE: 98%</span></div>
+  <div class="line" id="l6"><span class="cyan">[★] TOP MATCH #2:</span> Canonical — Software Engineer (Container Images) | <span class="highlight">ATS SCORE: 94%</span></div>
+  <div class="line" id="l7"><span class="info">[*]</span> Initializing Autonomous Playwright BrowserPilot (Session ID: jarvis-live-pilot)...</div>
+  <div class="line" id="l8"><span class="success">[+]</span> Launching Chromium Headless Session ➔ <span class="cmd">https://job-boards.greenhouse.io/gitlab/jobs/8556658002</span></div>
+</div>
+
+<script>
+  const lines = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8'];
+  lines.forEach((id, idx) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add('visible');
+    }, (idx + 1) * 450);
+  });
+</script>
+</body>
+</html>

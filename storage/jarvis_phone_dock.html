@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>JARVIS HUD — Autonomous Phone Dock</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #03050a;
+      color: #00f0ff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 16px;
+      overflow: hidden;
+    }
+
+    /* Top Status Bar */
+    .header {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.85;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      padding-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #00ff88;
+      box-shadow: 0 0 8px #00ff88;
+      animation: blink 2s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Big Clock */
+    .clock-section {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .clock {
+      font-size: 64px;
+      font-weight: 200;
+      letter-spacing: 3px;
+      color: #ffffff;
+      text-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+      line-height: 1;
+    }
+
+    .date {
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #00f0ff;
+      opacity: 0.8;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    /* Arc Reactor Core */
+    .reactor-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+
+    .ring-outer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px dashed rgba(0, 240, 255, 0.5);
+      animation: rotateRing 20s linear infinite;
+    }
+
+    .ring-mid {
+      position: absolute;
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      border-top-color: #00ff88;
+      border-bottom-color: #00f0ff;
+      animation: rotateReverse 12s linear infinite;
+    }
+
+    .core-inner {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00f0ff 0%, #004466 70%, #020a14 100%);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.8), inset 0 0 20px #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .core-inner.listening {
+      background: radial-gradient(circle, #ff0055 0%, #660022 70%, #14020a 100%);
+      box-shadow: 0 0 50px rgba(255, 0, 85, 0.9), inset 0 0 25px #ffffff;
+      animation: pulseCore 0.8s infinite alternate;
+    }
+
+    @keyframes rotateRing {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes rotateReverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes pulseCore {
+      from { transform: scale(0.95); }
+      to { transform: scale(1.08); }
+    }
+
+    .core-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .core-subtext {
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 2px;
+    }
+
+    /* Live Speech Display */
+    .speech-box {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      min-height: 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .speech-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(0, 240, 255, 0.6);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .transcript {
+      font-size: 15px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      font-weight: 400;
+    }
+
+    /* Quick Action Pills */
+    .actions-grid {
+      width: 100%;
+      max-width: 440px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-action {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: #00f0ff;
+      border-radius: 8px;
+      padding: 10px 4px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-action:active {
+      background: rgba(0, 240, 255, 0.3);
+      transform: scale(0.96);
+    }
+
+    /* Bottom Info */
+    .footer {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: rgba(0, 240, 255, 0.6);
+      padding-top: 8px;
+      border-top: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .fullscreen-btn {
+      background: transparent;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: #00f0ff;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 9px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Status -->
+  <div class="header">
+    <div class="badge">
+      <span class="dot"></span>
+      <span>JARVIS DOCK V1.0</span>
+    </div>
+    <div>MUKIL MASTER AGENT</div>
+  </div>
+
+  <!-- Big Clock -->
+  <div class="clock-section">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="date" id="date">MONDAY, OCT 27</div>
+  </div>
+
+  <!-- Arc Reactor Voice Trigger -->
+  <div class="reactor-container" id="reactorBtn" onclick="toggleVoice()">
+    <div class="ring-outer"></div>
+    <div class="ring-mid"></div>
+    <div class="core-inner" id="reactorCore">
+      <div class="core-text" id="coreStatus">JARVIS</div>
+      <div class="core-subtext">TAP TO SPEAK</div>
+    </div>
+  </div>
+
+  <!-- Live Speech / Transcript -->
+  <div class="speech-box">
+    <div class="speech-label" id="speechLabel">AWAITING VOICE OR COMMAND</div>
+    <div class="transcript" id="transcript">"Tap Arc Reactor to talk with JARVIS"</div>
+  </div>
+
+  <!-- Quick Home Controls -->
+  <div class="actions-grid">
+    <button class="btn-action" onclick="simulateCommand('TV Power Toggle')">📺 TV Power</button>
+    <button class="btn-action" onclick="simulateCommand('TV Mute')">🔇 TV Mute</button>
+    <button class="btn-action" onclick="simulateCommand('Launch YouTube')">▶ YouTube</button>
+    <button class="btn-action" onclick="simulateCommand('AC 24°C Mode')">❄ Haier AC</button>
+    <button class="btn-action" onclick="simulateCommand('SGC Bills Radar')">🧾 SGC Radar</button>
+    <button class="btn-action" onclick="simulateCommand('Career Status')">🎯 Placement</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>SYSTEM: ONLINE • 24/7 DOCK</span>
+    <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ FULLSCREEN</button>
+  </div>
+
+  <!-- SGC Month-End GST 5% Audit Modal Card -->
+  <div id="gstModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(3,5,10,0.92); z-index:999; flex-direction:column; justify-content:center; align-items:center; padding:20px;">
+    <div style="background:rgba(16,24,45,0.95); border:1px solid #00f0ff; border-radius:16px; padding:24px; max-width:400px; width:100%; text-align:center; box-shadow:0 0 40px rgba(0,240,255,0.3);">
+      <div style="font-size:12px; letter-spacing:2px; color:#00ff88; font-weight:bold;">SRI GANAPATHI COLOURS</div>
+      <div style="font-size:18px; color:#fff; font-weight:700; margin-top:4px;">MONTHLY GST 5% IT REPORT</div>
+      <div style="font-size:11px; color:rgba(0,240,255,0.7); margin-bottom:16px;">GSTR-3B / IT FILING AUDIT</div>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; font-size:12px; margin-bottom:16px;">
+        <div style="background:rgba(0,240,255,0.05); padding:10px; border-radius:8px;">
+          <div style="color:#8ca0c3; font-size:10px;">TURNOVER (GROSS)</div>
+          <div style="color:#fff; font-weight:bold; font-size:14px;">₹63,917.00</div>
+        </div>
+        <div style="background:rgba(0,240,255,0.05); padding:10px; border-radius:8px;">
+          <div style="color:#8ca0c3; font-size:10px;">TAXABLE TURNOVER</div>
+          <div style="color:#00f0ff; font-weight:bold; font-size:14px;">₹60,872.34</div>
+        </div>
+        <div style="background:rgba(0,255,136,0.05); padding:10px; border-radius:8px;">
+          <div style="color:#8ca0c3; font-size:10px;">CGST (2.5%)</div>
+          <div style="color:#00ff88; font-weight:bold; font-size:13px;">₹1,521.81</div>
+        </div>
+        <div style="background:rgba(0,255,136,0.05); padding:10px; border-radius:8px;">
+          <div style="color:#8ca0c3; font-size:10px;">SGST (2.5%)</div>
+          <div style="color:#00ff88; font-weight:bold; font-size:13px;">₹1,521.81</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,75,130,0.1); border:1px solid rgba(255,75,130,0.4); padding:12px; border-radius:10px; margin-bottom:18px;">
+        <div style="font-size:11px; color:#ff4b82; font-weight:bold; letter-spacing:1px;">TOTAL GST 5% DUE</div>
+        <div style="font-size:22px; color:#ffffff; font-weight:800;">₹3,043.62</div>
+      </div>
+
+      <button onclick="closeGstModal()" style="background:#00f0ff; color:#03050a; border:none; border-radius:8px; padding:10px 24px; font-weight:bold; font-size:12px; cursor:pointer; width:100%;">DISMISS REPORT</button>
+    </div>
+  </div>
+
+  <script>
+    // 1. Clock Engine & Automated Morning Touchpoints
+    let triggered6am = false;
+    let triggered605am = false;
+    let triggered7am = false;
+
+    function resetDailyTriggers() {
+      triggered6am = false;
+      triggered605am = false;
+      triggered7am = false;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const secs = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${mins}:${secs}`;
+
+      const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+      document.getElementById('date').textContent = now.toLocaleDateString('en-US', options).toUpperCase();
+
+      // Check Automated Morning Touchpoints (Native Tamil Slang)
+      if (hours === '06' && mins === '00' && !triggered6am) {
+        triggered6am = true;
+        const msg = "Hello Boss! Good morning! கரூர்ல இன்னைக்கு நல்ல வெயில் மாப்ள, மழை வர வாய்ப்பு zero percent. SGC yarn காய வைக்க சரியான நாள்! வெளில போறப்ப மறக்காம sunglasses போட்டுக்கோங்க, நல்லா தண்ணி குடிங்க!";
+        const transcriptEl = document.getElementById('transcript');
+        if (transcriptEl) transcriptEl.textContent = msg;
+        speak(msg);
+      } else if (hours === '06' && mins === '05' && !triggered605am) {
+        triggered605am = true;
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const daySplits = {
+          "Monday": "Chest, Shoulders & Triceps Push Day.",
+          "Tuesday": "Back & Biceps Pull Day — Lat pulldowns, seated cable rows, மற்றும் hammer curls.",
+          "Wednesday": "Legs & Core — Squats, leg press, மற்றும் Romanian deadlifts.",
+          "Thursday": "Shoulders, Traps & Abs — Overhead press, lateral raises, மற்றும் crunches.",
+          "Friday": "Arms & Upper Pump — Biceps மற்றும் Triceps supersets.",
+          "Saturday": "High Intensity Cardio மற்றும் full body stretch.",
+          "Sunday": "Active Recovery மற்றும் முழு Rest Day!"
+        };
+        const todayDay = days[now.getDay()];
+        const workout = daySplits[todayDay] || "Full Body Workout.";
+        const msg = `Workout time Boss! இன்னைக்கு ${todayDay}. Workout target: ${workout} செம்மையா முடிச்சு தூள் கிளப்பலாம் மாப்ள!`;
+        const transcriptEl = document.getElementById('transcript');
+        if (transcriptEl) transcriptEl.textContent = msg;
+        speak(msg);
+      } else if (hours === '07' && mins === '00' && now.getDate() === 1 && !triggered7am) {
+        triggered7am = true;
+        showGstModal();
+        const msg = "Boss, happy 1st of the month! போன மாசத்தோட SGC 5% GST IT filing report ரெடி ஆயிடுச்சு. மொத்த GST ₹3,043.62. ஆடிட்டர் ஃபைலிங்கான இன்ஃபோகிராஃபிக் ரெடியா இருக்கு மாப்ள!";
+        const transcriptEl = document.getElementById('transcript');
+        if (transcriptEl) transcriptEl.textContent = msg;
+        speak(msg);
+      } else if (hours === '00' && mins === '00') {
+        resetDailyTriggers();
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Speech Synthesis (Tamil & English Natural Engine)
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.pitch = 0.95;
+
+        const isTamil = /[\u0B80-\u0BFF]/.test(text);
+        const voices = window.speechSynthesis.getVoices();
+
+        if (isTamil) {
+          utterance.lang = 'ta-IN';
+          const taVoice = voices.find(v => v.lang.includes('ta') || v.name.includes('Tamil'));
+          if (taVoice) utterance.voice = taVoice;
+        } else {
+          utterance.lang = 'en-IN';
+          const enVoice = voices.find(v => v.lang.includes('en-IN') || v.name.includes('India')) || voices.find(v => v.lang.startsWith('en'));
+          if (enVoice) utterance.voice = enVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // 3. Speech Recognition (Web Speech API)
+    let recognition = null;
+    let isListening = false;
+    const core = document.getElementById('reactorCore');
+    const coreStatus = document.getElementById('coreStatus');
+    const transcriptEl = document.getElementById('transcript');
+    const speechLabel = document.getElementById('speechLabel');
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isListening = true;
+        core.classList.add('listening');
+        coreStatus.textContent = 'LISTENING';
+        speechLabel.textContent = 'JARVIS IS LISTENING...';
+        transcriptEl.textContent = 'Speak your command now, Boss...';
+      };
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        transcriptEl.textContent = `"${text}"`;
+        speechLabel.textContent = 'COMMAND CAPTURED';
+        processCommand(text);
+      };
+
+      recognition.onerror = (e) => {
+        console.error('Speech error', e);
+        resetListening();
+      };
+
+      recognition.onend = () => {
+        resetListening();
+      };
+    }
+
+    function resetListening() {
+      isListening = false;
+      core.classList.remove('listening');
+      coreStatus.textContent = 'JARVIS';
+    }
+
+    function toggleVoice() {
+      if (!recognition) {
+        speak("Speech recognition not supported on this browser. Tap buttons below.");
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch(e) {
+          recognition.stop();
+        }
+      }
+    }
+
+    // 4. Command Parser
+    function processCommand(cmd) {
+      const lower = cmd.toLowerCase();
+      let reply = "";
+
+      if (lower.includes("tv") && (lower.includes("on") || lower.includes("off") || lower.includes("power"))) {
+        reply = "Toggling TV power via Airtel Xstream Box, Boss.";
+      } else if (lower.includes("mute")) {
+        reply = "TV muted.";
+      } else if (lower.includes("youtube")) {
+        reply = "Launching YouTube on TV.";
+      } else if (lower.includes("ac")) {
+        reply = "Haier AC set to 24 degrees Celsius cooling mode.";
+      } else if (lower.includes("bill") || lower.includes("sgc") || lower.includes("radar") || lower.includes("gst")) {
+        reply = "SGC Billing & GST 5% radar active: Total GST due is ₹3,043.62. Displaying filing card on screen.";
+        showGstModal();
+      } else if (lower.includes("career") || lower.includes("placement")) {
+        reply = "Placement War Room active: Infinite Computer Solutions technical interview slot primed. Amazon VCS fast-track ready. Master resume ATS score is above 94 percent.";
+      } else if (lower.includes("briefing") || lower.includes("morning") || lower.includes("update") || lower.includes("status")) {
+        reply = "Good morning Mukil! Today is Tuesday. Tiruppur weather is pleasant. SGC has 10 bills totaling 63,917 rupees pending collection. Infinite Computer Solutions interview preparation is active. All 10 Google Drive nodes 100 percent synchronized. All systems locked and green, Boss!";
+      } else if (lower.includes("time")) {
+        reply = `The current time is ${new Date().toLocaleTimeString()}.`;
+      } else if (lower.includes("who are you") || lower.includes("jarvis")) {
+        reply = "I am JARVIS, Mukil's autonomous personal executive partner.";
+      } else {
+        reply = `Command received: ${cmd}. Verified and executing via JARVIS Swarm.`;
+      }
+
+      transcriptEl.textContent = reply;
+      speak(reply);
+    }
+
+    function simulateCommand(name) {
+      processCommand(name);
+    }
+
+    function showGstModal() {
+      const modal = document.getElementById('gstModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeGstModal() {
+      const modal = document.getElementById('gstModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    // Auto-display GST audit on Day 1 of every month
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date();
+      if (today.getDate() === 1) {
+        showGstModal();
+      }
+    });
+
+    // 5. Fullscreen Toggle
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`Fullscreen error: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  </script>
+</body>
+</html>

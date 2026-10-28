@@ -1,0 +1,249 @@
+\documentclass[10pt,a4paper]{article}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+\usepackage[
+    a4paper,
+    top=0.48in,
+    bottom=0.45in,
+    left=0.60in,
+    right=0.60in
+]{geometry}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tabularx}
+
+% ============================================================
+% COLORS
+% ============================================================
+\definecolor{accent}{RGB}{26,86,219}      % Professional Royal Blue
+\definecolor{darktext}{RGB}{30,37,50}     % Charcoal Black
+\definecolor{graytext}{RGB}{65,70,80}     % Readable Slate
+\definecolor{lightgray}{RGB}{100,110,120} % Subtle Gray
+
+% ============================================================
+% HYPERLINKS & PDF METADATA
+% ============================================================
+\hypersetup{
+    pdftitle={Mukilarasu S - Resume},
+    pdfauthor={Mukilarasu S},
+    pdfsubject={AI & Automation Engineer Resume},
+    pdfkeywords={AI Engineer, Full-Stack Developer, LangGraph, Python, FastAPI, Java},
+    colorlinks=true,
+    urlcolor=accent,
+    linkcolor=accent,
+    pdfborder={0 0 0}
+}
+\urlstyle{same}
+
+% ============================================================
+% PAGE SETTINGS
+% ============================================================
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{0pt}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+
+% ============================================================
+% SECTION FORMATTING
+% ============================================================
+\titleformat{\section}
+    {\normalsize\bfseries\color{darktext}\uppercase}
+    {}{0pt}{}
+    [\vspace{2pt}{\color{accent}\titlerule[0.7pt]}]
+
+\titlespacing*{\section}
+    {0pt}{7pt}{4pt}
+
+% ============================================================
+% LIST SETTINGS (Compact & Aligned)
+% ============================================================
+\setlist[itemize]{
+    leftmargin=14pt,
+    label={\small\textbullet},
+    itemsep=1.5pt,
+    topsep=2pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+
+% ============================================================
+% CUSTOM ROW COMMANDS
+% ============================================================
+\newcommand{\projectitem}[4]{%
+    \noindent
+    \begin{tabularx}{\textwidth}{@{}X r@{}}
+        \textbf{\color{darktext}#1} & {\small\color{accent}\textbf{#2}}
+    \end{tabularx}
+    \vspace{0.5pt}
+
+    {\small\color{graytext}\textit{#3}}\par
+    \vspace{-0.5pt}
+
+    \begin{itemize}
+        \item {\small\color{graytext}#4}
+    \end{itemize}
+    \vspace{2.5pt}
+}
+
+\newcommand{\headingrow}[2]{%
+    \noindent
+    \begin{tabularx}{\textwidth}{@{}X r@{}}
+        \textbf{\color{darktext}#1} & {\small\color{graytext}#2}
+    \end{tabularx}\par
+}
+
+\newcommand{\skillrow}[2]{%
+    \noindent
+    \begin{tabularx}{\textwidth}{@{}p{1.45in}@{\hspace{5pt}}X@{}}
+        \textbf{\color{darktext}#1} & {\small\color{graytext}#2}
+    \end{tabularx}\par
+    \vspace{1.5pt}
+}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+\begin{document}
+\color{darktext}
+
+% ============================================================
+% HEADER
+% ============================================================
+\begin{center}
+
+    {\LARGE\bfseries MUKILARASU S}
+
+    \vspace{3pt}
+
+    {\normalsize\color{accent}\textbf{
+    AI Engineer \enspace$\vert$\enspace Full-Stack Developer \enspace$\vert$\enspace Agentic AI
+    }}
+
+    \vspace{5pt}
+
+    {\small\color{graytext}
+    \textbf{Phone:} +91 9080030538
+    \quad
+    \textbf{Email:} \href{mailto:mukilarasu55@gmail.com}{mukilarasu55@gmail.com}
+    \quad
+    \textbf{Location:} Karur, Tamil Nadu
+    }
+
+    \vspace{3pt}
+
+    {\small\color{graytext}
+    \textbf{LinkedIn:} \href{https://linkedin.com/in/mukilarasu-s-333771302}{mukilarasu-s-333771302}
+    \quad
+    \textbf{GitHub:} \href{https://github.com/Mukil630}{github.com/Mukil630}
+    \quad
+    \textbf{LeetCode:} \href{https://leetcode.com/u/Mukil55}{leetcode.com/u/Mukil55}
+    }
+
+\end{center}
+
+\vspace{-4pt}
+
+% ============================================================
+% SUMMARY
+% ============================================================
+\section{Summary}
+
+{\small\color{graytext}
+Final-year B.Tech Information Technology student with hands-on experience in AI, automation, and full-stack development. Experienced in building LLM-powered applications, agentic AI systems, business automation tools, and production software through freelance projects and internships. Strong technical foundation in backend development, networking protocols, LangGraph orchestration, and API engineering.
+}
+
+% ============================================================
+% EDUCATION
+% ============================================================
+\section{Education}
+
+\headingrow{VSB Engineering College, Karur}{2023 -- 2027}
+{\small\color{graytext}B.Tech in Information Technology \hfill CGPA: \textbf{8.1 / 10}}\par
+\vspace{4pt}
+
+\headingrow{Bharani Park Matric Hr. Sec. School, Karur}{March 2023}
+{\small\color{graytext}Higher Secondary Certificate (Class XII) \hfill Percentage: \textbf{68.95\%}}\par
+
+% ============================================================
+% PROJECTS
+% ============================================================
+\section{Projects}
+
+\projectitem
+{Botify -- AI-Powered WhatsApp Bot SaaS}
+{Freelance}
+{Flask, Node.js, Groq API, PostgreSQL, Railway}
+{Architected a multi-tenant SaaS platform enabling businesses to deploy automated WhatsApp bots for client inquiries, featuring sub-second LLM inference and session-based PostgreSQL conversation caching.}
+
+\projectitem
+{AURA-OS -- Agentic AI Operating System}
+{Personal Project}
+{Python, FastAPI, LangGraph, Telegram Bot API, Google Drive API, Render}
+{Engineered an autonomous 24/7 executive agent featuring multi-agent cognitive routing, persistent cloud memory across Google Drive, voice-calling pipelines, and transactional state-machine rollback.}
+
+\projectitem
+{SGC Billing -- AI Invoice Automation System}
+{Freelance}
+{Electron, React, Python, Groq LLM, Google Drive API}
+{Built a desktop invoicing application for a textile dyeing mill, automating dual-tax GST calculations, customer overdue radars, and automated PDF cloud backups to Google Drive.}
+
+% ============================================================
+% INTERNSHIPS
+% ============================================================
+\section{Internships}
+
+\headingrow{Hero MotoCorp Ltd. -- Research \& Development Intern}{1 Month}
+\begin{itemize}
+    \item {\small\color{graytext}Gained practical exposure to automotive research, product development methodologies, and engineering workflows within the core R\&D division.}
+\end{itemize}
+\vspace{2pt}
+
+\headingrow{IBM -- AI \& Automation Weekend Internship}{2026}
+\begin{itemize}
+    \item {\small\color{graytext}Completed an intensive program covering enterprise AI fundamentals, intelligent automation workflows, and cognitive system applications.}
+\end{itemize}
+
+% ============================================================
+% ACHIEVEMENTS
+% ============================================================
+\section{Achievements}
+
+\begin{itemize}
+    \item {\small\color{graytext}\textbf{Top 5, Hero Campus Challenge} -- Developed an innovative technology solution evaluated across national engineering rounds.}
+    \item {\small\color{graytext}Received the prestigious \textbf{Governor's Certificate} for exemplary service, leadership, and community support during a State Scout Camp.}
+\end{itemize}
+
+% ============================================================
+% TECHNICAL SKILLS
+% ============================================================
+\section{Technical Skills}
+
+\skillrow{Programming}{Java, Python, JavaScript, SQL}
+\skillrow{Development}{FastAPI, Flask, React.js, Node.js, REST APIs}
+\skillrow{AI \& Automation}{LLM Integration, RAG Pipelines, LangGraph, Telegram Bot API, Agentic Workflows}
+\skillrow{Networking}{TCP/IP, DNS, DHCP, HTTP/HTTPS, IPv4/IPv6}
+\skillrow{Systems \& Tools}{Linux (Bash), Windows CMD/PowerShell, Git, GitHub, PostgreSQL, Docker}
+
+% ============================================================
+% CERTIFICATIONS
+% ============================================================
+\section{Certifications}
+
+\begin{itemize}
+    \item {\small\color{graytext}\textbf{AI \& Automation} -- Full Course Specialization (2025)}
+    \item {\small\color{graytext}\textbf{AI \& ML Made Easy: From Basic to Advanced} -- Udemy (2025)}
+    \item {\small\color{graytext}\textbf{Demystifying Networking} -- NPTEL (2025)}
+    \item {\small\color{graytext}\textbf{Infosys Certified Java Programmer} -- Infosys Springboard (2024)}
+\end{itemize}
+
+\end{document}

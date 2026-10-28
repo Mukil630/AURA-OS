@@ -106,3 +106,6 @@ desktop.ini
 .env.*
 *.log
 logs/
+
+*.apk
+server_dist/

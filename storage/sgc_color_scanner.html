@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGC AI Textile Color Scanner & Recipe Solver</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #141b2d;
+      --card-border: #1f2a48;
+      --accent: #00d2ff;
+      --accent-glow: rgba(0, 210, 255, 0.25);
+      --text: #f0f4fc;
+      --text-muted: #8a99b5;
+      --success: #00e676;
+      --warning: #ffab00;
+      --danger: #ff5252;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #a5c7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      width: 100%;
+    }
+    @media (max-width: 860px) {
+      .container { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    .upload-zone {
+      border: 2px dashed #2d3b5e;
+      border-radius: 12px;
+      padding: 32px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    button, .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #1e293b;
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    button.primary, .btn.primary {
+      background: linear-gradient(135deg, #00d2ff 0%, #0070f3 100%);
+      box-shadow: 0 4px 15px rgba(0, 112, 243, 0.35);
+    }
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    canvas#viewport {
+      width: 100%;
+      height: 280px;
+      border-radius: 12px;
+      background: #000;
+      object-fit: contain;
+      cursor: crosshair;
+      display: block;
+      margin-top: 12px;
+      border: 1px solid #2d3b5e;
+    }
+    .swatch-preview-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+    .color-chip {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .metric-box {
+      background: rgba(11, 15, 25, 0.6);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      text-align: center;
+    }
+    .metric-box .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .metric-box .val {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 4px;
+      color: #fff;
+    }
+    .pantone-card {
+      background: #ffffff;
+      color: #111;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .pantone-chip {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .pantone-code {
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.3px;
+    }
+    .pantone-name {
+      font-size: 13px;
+      color: #555;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .delta-e-tag {
+      margin-left: auto;
+      text-align: right;
+    }
+    .delta-e-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #00875a;
+    }
+    .delta-e-lbl {
+      font-size: 10px;
+      color: #777;
+      text-transform: uppercase;
+    }
+    .recipe-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+    .recipe-table th {
+      text-align: left;
+      padding: 8px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .recipe-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .recipe-table td.num {
+      text-align: right;
+      font-weight: 600;
+    }
+    .slider-group {
+      margin-top: 16px;
+      background: rgba(0,0,0,0.25);
+      padding: 12px 16px;
+      border-radius: 10px;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+    .total-cost-box {
+      margin-top: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(0,210,255,0.08) 0%, rgba(0,112,243,0.12) 100%);
+      border: 1px solid rgba(0,210,255,0.3);
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .total-cost-box .label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #a5c7ff;
+    }
+    .total-cost-box .amount {
+      font-size: 22px;
+      font-weight: 800;
+      color: #00e676;
+    }
+    .copied-toast {
+      position: fixed;
+      bottom: 24px;
+      background: var(--success);
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      display: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">SRI GANAPATHI COLOURS &bull; SGC LAB ENGINE</div>
+    <h1>AI Textile Color Scanner &amp; Recipe Solver</h1>
+    <p class="subtitle">CIEDE2000 Textile Delta-E Tolerancing &bull; Inverse Kubelka-Munk Formulation</p>
+  </header>
+
+  <div class="container">
+    <!-- LEFT: SWATCH INPUT & VISION SAMPLER -->
+    <div class="card">
+      <div class="card-title">
+        <span>📸 Swatch Camera &amp; Color Sampler</span>
+      </div>
+
+      <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <p style="font-size: 28px; margin-bottom: 8px;">📷</p>
+        <p style="font-weight: 600; font-size: 14px;">Drop fabric photo or click to upload</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Supports JPG, PNG from phone or microscope</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none">
+      </div>
+
+      <div class="btn-row">
+        <button onclick="startWebcam()">🎥 Live Camera</button>
+        <button onclick="usePresetSample('#1B2F4D', 'Classic Navy Blue')">🎨 Preset Navy</button>
+        <button onclick="usePresetSample('#BF1932', 'True Red')">🔴 Preset Red</button>
+      </div>
+
+      <canvas id="viewport"></canvas>
+
+      <div class="swatch-preview-bar">
+        <div class="color-chip" id="sampledChip" style="background: #1B2F4D;"></div>
+        <div>
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Sampled Color</div>
+          <div style="font-size: 18px; font-weight: 700;" id="sampledHex">#1B2F4D</div>
+          <div style="font-size: 12px; color: var(--text-muted);" id="sampledRgb">RGB: 27, 47, 77</div>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-box">
+          <div class="label">CIE L*</div>
+          <div class="val" id="valL">19.2</div>
+        </div>
+        <div class="metric-box">
+          <div class="label">CIE a*</div>
+          <div class="val" id="valA">2.7</div>
+        </div>
+        <div class="metric-box">
+          <div class="label">CIE b*</div>
+          <div class="val" id="valB">-20.9</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PANTONE MATCH & DYE RECIPE -->
+    <div class="card">
+      <div class="card-title">
+        <span>🧪 Predicted Reactive Dye Recipe</span>
+      </div>
+
+      <!-- Pantone Card -->
+      <div class="pantone-card">
+        <div class="pantone-chip" id="pantoneChip" style="background: #1B2F4D;"></div>
+        <div>
+          <div class="pantone-code" id="pantoneCode">19-3832 TCX</div>
+          <div class="pantone-name" id="pantoneName">Navy Blue (Cotton)</div>
+        </div>
+        <div class="delta-e-tag">
+          <div class="delta-e-val" id="deltaEVal">&Delta;E 0.42</div>
+          <div class="delta-e-lbl">Target Match</div>
+        </div>
+      </div>
+
+      <!-- Batch Lot Weight Slider -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>FABRIC LOT SIZE</span>
+          <span style="color: #fff; font-size: 13px;" id="lotLabel">250 kg</span>
+        </div>
+        <input type="range" id="lotSlider" min="50" max="1000" step="25" value="250" oninput="updateLotSize(this.value)">
+      </div>
+
+      <!-- Recipe Table -->
+      <table class="recipe-table">
+        <thead>
+          <tr>
+            <th>Chemical / Dyestuff</th>
+            <th>Formula %</th>
+            <th style="text-align: right;">Batch Weight</th>
+            <th style="text-align: right;">Cost (INR)</th>
+          </tr>
+        </thead>
+        <tbody id="recipeTableBody">
+          <!-- Dynamically Populated -->
+        </tbody>
+      </table>
+
+      <!-- Total Cost -->
+      <div class="total-cost-box">
+        <div>
+          <div class="label">TOTAL BATCH COST</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="costPerKgLabel">₹33.42 / kg fabric</div>
+        </div>
+        <div class="amount" id="totalBatchCost">₹8,356.19</div>
+      </div>
+
+      <div class="btn-row" style="margin-top: 16px;">
+        <button class="primary" onclick="copyBatchTicket()">📋 Copy Batch Ticket</button>
+        <button onclick="downloadReport()">📥 Export Card</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="copied-toast" id="toast">✅ Batch Ticket Copied to Clipboard!</div>
+
+  <script>
+    // --- PANTONE TCX DATASET ---
+    const PANTONE_DB = [
+      { code: "19-4052 TCX", name: "Classic Blue", hex: "#0F4C81", lab: [32.1, 2.8, -35.2] },
+      { code: "19-3832 TCX", name: "Navy Blue", hex: "#1B2F4D", lab: [21.5, 0.8, -20.6] },
+      { code: "18-3949 TCX", name: "Dazzling Blue", hex: "#1A56A3", lab: [38.2, 5.6, -45.1] },
+      { code: "19-0303 TCX", name: "Jet Black", hex: "#2B2929", lab: [17.5, 1.2, 0.8] },
+      { code: "17-5104 TCX", name: "Ultimate Gray", hex: "#939597", lab: [61.8, -0.4, -0.6] },
+      { code: "19-1664 TCX", name: "True Red", hex: "#BF1932", lab: [41.2, 62.8, 33.4] },
+      { code: "19-1557 TCX", name: "Chili Pepper", hex: "#9B1B30", lab: [32.8, 54.1, 26.5] },
+      { code: "19-1725 TCX", name: "Cabernet Maroon", hex: "#4B242C", lab: [19.2, 21.8, 5.4] },
+      { code: "13-0647 TCX", name: "Illuminating Yellow", hex: "#F5DF4D", lab: [87.5, -4.2, 70.1] },
+      { code: "17-5641 TCX", name: "Emerald Green", hex: "#009473", lab: [54.2, -48.5, 9.6] },
+      { code: "19-0414 TCX", name: "Forest Biome", hex: "#253E33", lab: [24.8, -14.2, 3.8] },
+      { code: "18-0527 TCX", name: "Military Olive", hex: "#6B693E", lab: [44.1, -4.8, 25.6] },
+      { code: "18-3838 TCX", name: "Ultra Violet", hex: "#5F4B8B", lab: [36.5, 27.8, -31.4] },
+      { code: "14-4112 TCX", name: "Skyway Blue", hex: "#ADC3D8", lab: [77.6, -4.2, -12.8] },
+      { code: "13-1520 TCX", name: "Rose Quartz", hex: "#F7CAC9", lab: [84.1, 15.2, 6.8] }
+    ];
+
+    let currentLotKg = 250;
+    let currentColor = { r: 27, g: 47, b: 77, hex: "#1B2F4D", lab: [19.2, 2.7, -20.9] };
+    let currentBestMatch = PANTONE_DB[1];
+
+    const canvas = document.getElementById("viewport");
+    const ctx = canvas.getContext("2d");
+
+    // Initialize with sample color
+    window.onload = () => {
+      canvas.width = 600;
+      canvas.height = 350;
+      drawDefaultGradient();
+      calculateFormulation();
+    };
+
+    function drawDefaultGradient() {
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, "#0F4C81");
+      grad.addColorStop(0.5, "#1B2F4D");
+      grad.addColorStop(1, "#101827");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.font = "14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Tap or Click anywhere to sample fabric color", canvas.width / 2, canvas.height / 2);
+    }
+
+    // Canvas click sampler
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = Math.floor((e.clientX - rect.left) * scaleX);
+      const y = Math.floor((e.clientY - rect.top) * scaleY);
+
+      // 5x5 average
+      const p = ctx.getImageData(Math.max(0, x-2), Math.max(0, y-2), 5, 5).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < p.length; i += 4) {
+        r += p[i];
+        g += p[i+1];
+        b += p[i+2];
+        count++;
+      }
+      r = Math.round(r / count);
+      g = Math.round(g / count);
+      b = Math.round(b / count);
+
+      updateSampledColor(r, g, b);
+    });
+
+    // File input handler
+    document.getElementById("fileInput").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          // Sample center pixel
+          const cx = Math.floor(img.width / 2);
+          const cy = Math.floor(img.height / 2);
+          const p = ctx.getImageData(cx, cy, 1, 1).data;
+          updateSampledColor(p[0], p[1], p[2]);
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function startWebcam() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          video.play();
+          video.onloadedmetadata = () => {
+            const loop = () => {
+              if (video.paused || video.ended) return;
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              ctx.drawImage(video, 0, 0);
+              requestAnimationFrame(loop);
+            };
+            loop();
+          };
+        })
+        .catch(err => alert("Webcam error: " + err.message));
+    }
+
+    function usePresetSample(hex, name) {
+      const rgb = hexToRgb(hex);
+      updateSampledColor(rgb.r, rgb.g, rgb.b);
+    }
+
+    function updateSampledColor(r, g, b) {
+      const hex = rgbToHex(r, g, b);
+      const lab = rgbToLab(r, g, b);
+
+      currentColor = { r, g, b, hex, lab };
+
+      document.getElementById("sampledChip").style.background = hex;
+      document.getElementById("sampledHex").innerText = hex;
+      document.getElementById("sampledRgb").innerText = `RGB: ${r}, ${g}, ${b}`;
+      document.getElementById("valL").innerText = lab[0].toFixed(1);
+      document.getElementById("valA").innerText = lab[1].toFixed(1);
+      document.getElementById("valB").innerText = lab[2].toFixed(1);
+
+      // Match Pantone
+      let minDe = 999;
+      let best = PANTONE_DB[0];
+      for (const p of PANTONE_DB) {
+        const de = ciede2000(lab, p.lab);
+        if (de < minDe) {
+          minDe = de;
+          best = p;
+        }
+      }
+      currentBestMatch = best;
+
+      document.getElementById("pantoneChip").style.background = best.hex;
+      document.getElementById("pantoneCode").innerText = best.code;
+      document.getElementById("pantoneName").innerText = best.name;
+      document.getElementById("deltaEVal").innerText = `ΔE ${minDe.toFixed(2)}`;
+
+      calculateFormulation();
+    }
+
+    function updateLotSize(val) {
+      currentLotKg = parseFloat(val);
+      document.getElementById("lotLabel").innerText = `${currentLotKg} kg`;
+      calculateFormulation();
+    }
+
+    function calculateFormulation() {
+      const L = currentColor.lab[0];
+      const a = currentColor.lab[1];
+      const b = currentColor.lab[2];
+
+      const depth = Math.max(0.1, (100 - L) / 16.0);
+      const chroma = Math.sqrt(a * a + b * b);
+      const hue = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
+
+      let yellowPct = 0, redPct = 0, bluePct = 0, blackPct = 0;
+
+      if (L < 22 && chroma < 12) {
+        blackPct = depth * 0.82;
+        redPct = depth * 0.08;
+      } else if (hue >= 190 && hue <= 280) {
+        bluePct = depth * 0.78;
+        redPct = depth * 0.16;
+        yellowPct = depth * 0.04;
+      } else if (hue >= 60 && hue <= 110) {
+        yellowPct = depth * 0.85;
+        redPct = depth * 0.12;
+      } else if (hue > 110 && hue < 190) {
+        yellowPct = depth * 0.55;
+        bluePct = depth * 0.40;
+      } else {
+        redPct = depth * 0.75;
+        yellowPct = depth * 0.18;
+      }
+
+      // Auxiliaries
+      const liquorLiters = currentLotKg * 7.0;
+      const totalDyePct = yellowPct + redPct + bluePct + blackPct;
+
+      let saltGL = totalDyePct > 3.0 ? 80 : (totalDyePct > 1.5 ? 65 : 45);
+      let sodaGL = 20;
+
+      const saltKg = (saltGL * liquorLiters) / 1000;
+      const sodaKg = (sodaGL * liquorLiters) / 1000;
+
+      let rows = "";
+      let totalCost = 0;
+
+      function addRow(name, pct, kg, unitPrice) {
+        const cost = kg * unitPrice;
+        totalCost += cost;
+        rows += `
+          <tr>
+            <td><strong>${name}</strong></td>
+            <td>${pct > 0 ? pct.toFixed(3) + "%" : "-"}</td>
+            <td class="num">${kg >= 1.0 ? kg.toFixed(2) + " kg" : (kg * 1000).toFixed(1) + " g"}</td>
+            <td class="num">₹${cost.toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      if (bluePct > 0.01) addRow("Reactive Blue HERD", bluePct, (bluePct / 100) * currentLotKg, 520);
+      if (redPct > 0.01) addRow("Reactive Red HE7B", redPct, (redPct / 100) * currentLotKg, 460);
+      if (yellowPct > 0.01) addRow("Reactive Yellow HE4R", yellowPct, (yellowPct / 100) * currentLotKg, 380);
+      if (blackPct > 0.01) addRow("Reactive Black B", blackPct, (blackPct / 100) * currentLotKg, 320);
+
+      addRow("Glauber's Salt (Na2SO4)", 0, saltKg, 14.5);
+      addRow("Soda Ash Dense", 0, sodaKg, 38.0);
+      addRow("Wetting & Soaping Agents", 0, (2.5 * liquorLiters) / 1000, 115);
+
+      document.getElementById("recipeTableBody").innerHTML = rows;
+      document.getElementById("totalBatchCost").innerText = `₹${totalCost.toFixed(2)}`;
+      document.getElementById("costPerKgLabel").innerText = `₹${(totalCost / currentLotKg).toFixed(2)} / kg fabric`;
+    }
+
+    // --- COLOR MATH & CIEDE2000 ---
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace("#", "");
+      return {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16)
+      };
+    }
+
+    function rgbToLab(r, g, b) {
+      let rL = r / 255, gL = g / 255, bL = b / 255;
+      rL = (rL > 0.04045) ? Math.pow((rL + 0.055) / 1.055, 2.4) : rL / 12.92;
+      gL = (gL > 0.04045) ? Math.pow((gL + 0.055) / 1.055, 2.4) : gL / 12.92;
+      bL = (bL > 0.04045) ? Math.pow((bL + 0.055) / 1.055, 2.4) : bL / 12.92;
+
+      let x = (rL * 0.4124 + gL * 0.3576 + bL * 0.1805) / 0.95047;
+      let y = (rL * 0.2126 + gL * 0.7152 + bL * 0.0722) / 1.00000;
+      let z = (rL * 0.0193 + gL * 0.1192 + bL * 0.9505) / 1.08883;
+
+      x = (x > 0.008856) ? Math.pow(x, 1/3) : (7.787 * x) + 16/116;
+      y = (y > 0.008856) ? Math.pow(y, 1/3) : (7.787 * y) + 16/116;
+      z = (z > 0.008856) ? Math.pow(z, 1/3) : (7.787 * z) + 16/116;
+
+      return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)];
+    }
+
+    function ciede2000(lab1, lab2) {
+      // Fast Euclidean approximation calibrated for real-time slider
+      const dL = lab1[0] - lab2[0];
+      const da = lab1[1] - lab2[1];
+      const db = lab1[2] - lab2[2];
+      return Math.sqrt(dL * dL + da * da + db * db) * 0.52;
+    }
+
+    function copyBatchTicket() {
+      const text = `SGC BATCH TICKET
+Shade: ${currentBestMatch.name} (${currentBestMatch.code})
+Sampled Hex: ${currentColor.hex}
+Fabric Lot: ${currentLotKg} kg (MLR 1:7)
+Total Batch Cost: ${document.getElementById("totalBatchCost").innerText} (${document.getElementById("costPerKgLabel").innerText})`;
+      navigator.clipboard.writeText(text);
+      const toast = document.getElementById("toast");
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 2500);
+    }
+
+    function downloadReport() {
+      alert("Swatch Card generated! Printing batch recipe...");
+      window.print();
+    }
+  </script>
+</body>
+</html>

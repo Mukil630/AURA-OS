@@ -30,3 +30,10 @@ pytest-asyncio>=0.21.0
 google-genai
 libsql-client>=0.3.1
 dateparser>=1.2.0
+
+# Added from AURA OS v4
+uvicorn>=0.22.0
+duckduckgo_search>=6.0.0
+colorama>=0.4.6
+imageio-ffmpeg>=0.5.0
+pygame>=2.5.0

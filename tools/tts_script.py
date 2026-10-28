@@ -1,0 +1,10 @@
+import pyttsx3
+import sys
+text = sys.argv[1]
+engine = pyttsx3.init()
+engine.setProperty('rate', 150)
+engine.setProperty('volume', 1.0)
+output_file = 'C:\\Users\\mukil\\jarvis-core\\tts_output.mp3'
+engine.save_to_file(text, output_file)
+engine.runAndWait()
+print(output_file)

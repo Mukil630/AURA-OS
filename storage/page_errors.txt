@@ -1,0 +1,12 @@
+info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+You might need to use a local HTTP server (instead of file://): https://reactjs.org/link/react-devtools-faq font-weight:bold
+warning: You are using the in-browser Babel transformer. Be sure to precompile your scripts for production - https://babeljs.io/docs/setup/
+/Inline Babel script: Unexpected token (2060:2)
+
+  2058 | // ── DASHBOARD ─────────────────────────────────────────────────────────────────
+  2059 | function Dashboard({ bills, onNewBill, onShowLedger, customers, company }) {
+> 2060 |   const totalAmt   = bills.reduce((s,b)=>s+Number(b.netAmount||0),0);
+       |   ^
+  2061 |   const totalPaid  = bills.reduce((s,b)=>s+getBillFinancials(b).totalPaid,0);
+  2062 |   const pendingAmt = Math.max(0, totalAmt - totalPaid);
+  2063 |   const synced     = bills.filter(b=>b.driveUrl).length;

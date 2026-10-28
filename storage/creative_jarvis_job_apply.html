@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JARVIS 9:00 AM Autonomous Job Strike</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #03050a;
+    color: #e0f2fe;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+  }
+  .hud-overlay {
+    position: relative;
+    z-index: 10;
+    width: 1180px;
+    height: 640px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid rgba(56,189,248,0.3);
+    padding-bottom: 14px;
+  }
+  .hud-title {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #38bdf8;
+    text-shadow: 0 0 15px rgba(56,189,248,0.8);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hud-status-badge {
+    background: rgba(16,185,129,0.15);
+    border: 1px solid #10b981;
+    color: #34d399;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    box-shadow: 0 0 15px rgba(16,185,129,0.4);
+  }
+  .hud-center-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    position: relative;
+  }
+  .holo-card {
+    background: rgba(10,18,34,0.75);
+    border: 1.5px solid rgba(56,189,248,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    width: 340px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 25px rgba(0,0,0,0.8), inset 0 0 15px rgba(56,189,248,0.1);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0.2;
+    transform: scale(0.92);
+  }
+  .holo-card.active {
+    opacity: 1;
+    transform: scale(1);
+    border-color: #ffc84a;
+    box-shadow: 0 0 35px rgba(255,200,74,0.35), inset 0 0 20px rgba(255,200,74,0.15);
+  }
+  .holo-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ffc84a;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .holo-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+  .hud-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1.5px solid rgba(56,189,248,0.3);
+    padding-top: 14px;
+    font-size: 11px;
+    color: #64748b;
+    letter-spacing: 1px;
+  }
+  /* Center Reactor Reticle */
+  .center-core {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .core-clock {
+    font-size: 36px;
+    font-weight: 900;
+    color: #ffc84a;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(255,200,74,0.9);
+  }
+  .core-subtitle {
+    font-size: 11px;
+    font-weight: 800;
+    color: #38bdf8;
+    letter-spacing: 2.5px;
+    margin-top: 4px;
+    text-shadow: 0 0 10px rgba(56,189,248,0.8);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="cyberCanvas"></canvas>
+
+<div class="hud-overlay">
+  <div class="hud-header">
+    <div class="hud-title">
+      <span>⚡</span> JARVIS AUTONOMOUS PLACEMENT ENGINE // 9:00 AM STRIKE
+    </div>
+    <div class="hud-status-badge" id="hudStatus">
+      SYSTEM ARMED: WAITING 09:00 AM
+    </div>
+  </div>
+
+  <div class="hud-center-stage">
+    <!-- Left Card: Radar Targets -->
+    <div class="holo-card" id="cardRadar">
+      <div class="holo-card-title">
+        <span>🎯</span> GLOBAL TECH RADAR SCAN
+      </div>
+      <div class="holo-item">
+        <span>GitLab AI Engineer:</span>
+        <strong style="color:#4ade80;">98% ATS MATCH</strong>
+      </div>
+      <div class="holo-item">
+        <span>Canonical Python Containers:</span>
+        <strong style="color:#ffc84a;">94% ATS MATCH</strong>
+      </div>
+      <div class="holo-item">
+        <span>Canonical Go Containers:</span>
+        <strong style="color:#ffc84a;">92% ATS MATCH</strong>
+      </div>
+      <div class="holo-item">
+        <span>Datadog Developer Advocate:</span>
+        <strong style="color:#38bdf8;">90% ATS MATCH</strong>
+      </div>
+      <div style="font-size:10px; color:#34d399; margin-top:6px; text-align:center;">
+        ✔ 59 Fresh Positions Identified
+      </div>
+    </div>
+
+    <!-- Center Reactor HUD -->
+    <div class="center-core">
+      <div class="core-clock" id="clockDisplay">09:00:00</div>
+      <div class="core-subtitle" id="coreLabel">CRON TRIGGER ENGAGED</div>
+    </div>
+
+    <!-- Right Card: Form Pilot & Cloud Sync -->
+    <div class="holo-card" id="cardPilot">
+      <div class="holo-card-title">
+        <span>🤖</span> AUTONOMOUS BROWSERPILOT
+      </div>
+      <div class="holo-item">
+        <span>Engine:</span>
+        <strong style="color:#38bdf8;">Playwright + Chromium</strong>
+      </div>
+      <div class="holo-item">
+        <span>Resume:</span>
+        <strong style="color:#60a5fa;">Mukil_Master_Resume.pdf</strong>
+      </div>
+      <div class="holo-item">
+        <span>AI Solver:</span>
+        <strong style="color:#ffc84a;">Gemini 3.6 Flash</strong>
+      </div>
+      <div class="holo-item">
+        <span>Combobox Dropdowns:</span>
+        <strong style="color:#4ade80;">100% Selected</strong>
+      </div>
+      <div style="font-size:10px; color:#ffc84a; margin-top:6px; text-align:center;">
+        📱 Live Proof Dispatched to Telegram
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-footer">
+    <div>PROTOCOL: DUAL-ENGINE HEADLESS + PC RESIDENTIAL FAILOVER</div>
+    <div>CANDIDATE: MUKIL (AI ENGINEER / FULL-STACK) • GOOGLE DRIVE VAULT MESH</div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('cyberCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height, cx, cy;
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  cx = width / 2;
+  cy = height / 2;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Particle system
+const particles = [];
+for (let i = 0; i < 180; i++) {
+  particles.push({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    vx: (Math.random() - 0.5) * 0.8,
+    vy: (Math.random() - 0.5) * 0.8,
+    size: Math.random() * 2 + 1,
+    alpha: Math.random() * 0.7 + 0.3,
+    color: Math.random() > 0.4 ? '#38bdf8' : '#ffc84a'
+  });
+}
+
+// Radar sweep angle
+let radarAngle = 0;
+let phase = 1;
+
+function drawCyberGrid() {
+  ctx.strokeStyle = 'rgba(56,189,248,0.04)';
+  ctx.lineWidth = 1;
+  const step = 40;
+  for (let x = 0; x < width; x += step) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < height; y += step) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+}
+
+function drawHUDCircles() {
+  const time = Date.now() * 0.001;
+
+  // Outer ring 1
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(time * 0.2);
+  ctx.strokeStyle = 'rgba(56,189,248,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([12, 18, 6, 18]);
+  ctx.beginPath();
+  ctx.arc(0, 0, 190, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Outer ring 2 (Reverse rotate)
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-time * 0.35);
+  ctx.strokeStyle = 'rgba(255,200,74,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([20, 10, 4, 10]);
+  ctx.beginPath();
+  ctx.arc(0, 0, 230, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Innermost glowing circle
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.strokeStyle = 'rgba(56,189,248,0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, 140, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Crosshairs
+  ctx.strokeStyle = 'rgba(56,189,248,0.3)';
+  ctx.beginPath();
+  ctx.moveTo(-160, 0); ctx.lineTo(160, 0);
+  ctx.moveTo(0, -160); ctx.lineTo(0, 160);
+  ctx.stroke();
+  ctx.restore();
+
+  // Radar beam
+  ctx.save();
+  ctx.translate(cx, cy);
+  radarAngle += 0.04;
+  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 230);
+  gradient.addColorStop(0, 'rgba(56,189,248,0.25)');
+  gradient.addColorStop(1, 'rgba(56,189,248,0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, 230, radarAngle, radarAngle + 0.4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function updateParticles() {
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0) p.x = width;
+    if (p.x > width) p.x = 0;
+    if (p.y < 0) p.y = height;
+    if (p.y > height) p.y = 0;
+
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.alpha;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1.0;
+}
+
+function render() {
+  ctx.fillStyle = '#03050a';
+  ctx.fillRect(0, 0, width, height);
+
+  drawCyberGrid();
+  updateParticles();
+  drawHUDCircles();
+
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+// Cinematic Stage Transition Sequence
+window.setPhase = function(p) {
+  phase = p;
+  const status = document.getElementById('hudStatus');
+  const clock = document.getElementById('clockDisplay');
+  const label = document.getElementById('coreLabel');
+  const cardRadar = document.getElementById('cardRadar');
+  const cardPilot = document.getElementById('cardPilot');
+
+  if (p === 1) {
+    status.innerText = "STAGE 1: 09:00 AM CRON TRIGGERED";
+    status.style.borderColor = "#ffc84a";
+    status.style.color = "#ffc84a";
+    clock.style.color = "#ffc84a";
+    label.innerText = "CRON STRIKE ENGAGED";
+    cardRadar.classList.remove('active');
+    cardPilot.classList.remove('active');
+  } else if (p === 2) {
+    status.innerText = "STAGE 2: ATS RADAR MATCHING (>90%)";
+    status.style.borderColor = "#38bdf8";
+    status.style.color = "#38bdf8";
+    label.innerText = "RADAR SCANNING BOARDS";
+    cardRadar.classList.add('active');
+    cardPilot.classList.remove('active');
+  } else if (p === 3) {
+    status.innerText = "STAGE 3: BROWSERPILOT AUTONOMOUS APPLY";
+    status.style.borderColor = "#a855f7";
+    status.style.color = "#c084fc";
+    label.innerText = "PLAYWRIGHT FORM INJECTION";
+    cardRadar.classList.remove('active');
+    cardPilot.classList.add('active');
+  } else if (p === 4) {
+    status.innerText = "STAGE 4: 100% SUBMITTED & TELEGRAM PROOF DELIVERED";
+    status.style.borderColor = "#10b981";
+    status.style.color = "#34d399";
+    clock.innerText = "VERIFIED";
+    clock.style.color = "#10b981";
+    label.innerText = "TELEGRAM RECEIPT DISPATCHED";
+    cardRadar.classList.add('active');
+    cardPilot.classList.add('active');
+  }
+};
+</script>
+</body>
+</html>
