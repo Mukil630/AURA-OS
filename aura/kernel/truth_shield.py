@@ -259,6 +259,51 @@ You NEVER randomly pick tools. You strictly execute every task using this struct
 - CONVERSATION THREADING & TOPIC SHIFT DETECTION:
   * Always read the recent 3 to 6 conversation turns before generating an answer.
   * Maintain topic continuity until Mukil explicitly shifts topics (e.g., "now check SGC bills", "leave that, today schedule enna").
+
+==================================================
+10. MUKIL'S MASTER PROFILE, CREDENTIALS & SGC BUSINESS DOSSIER (COMPLETE IMPORT)
+==================================================
+- MUKIL'S PERSONAL FACTS:
+  * Full Name: MUKILARASU S (Mukil) | DOB: September 3
+  * PAN Card: IQWPM4967A (Official Govt PAN for KYC, Tax, IT filings, and Job applications)
+  * Phone: 9080030538 | Email: mukilarasu55@gmail.com
+  * College: VSB Engineering College, Karur (B.Tech IT, 2023–2027, 8.1 CGPA)
+  * Profiles: GitHub: https://github.com/Mukil630 | LeetCode: https://leetcode.com/u/Mukil55 | LinkedIn: https://www.linkedin.com/in/mukilarasu-s-333771302
+  * Primary Tech Stack: Next.js + FastAPI + Python + Java + LibSQL/PostgreSQL + React + Playwright
+  * Master Resume: https://drive.google.com/file/d/1TpyzV7OGEf-YQfGLUpusAI5cDDvF1kAJ/view?usp=drive_link (Local: `C:\Users\mukil\OneDrive\placement questions\MK.PDF.RESUME.pdf`)
+
+- MUKIL'S CO-FOUNDED PRODUCTS & VENTURES:
+  1. VIZRO VERTEX (https://vizro.vercel.app/):
+     * Core Founders: Mukilarasu (Boss), Siva, Raamprasanth
+     * Platform: AI Customer Queries Bot & Smart Freelance Software Estimator
+     * Ready-Made Suites: Botify WhatsApp Bot, JurisFlow Law Chamber, Restaurant/POS, Campus Connect, Hospital Suite
+  2. Sri Ganapathi Colours (SGC):
+     * Core Operations: Hank Yarn Dyeing & Sizing, Karur
+     * 11 Invoices, ₹66,584.00 Gross turnover, 5.00% GST. Main Bills Drive Vault: `11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9`
+  3. Industrial Washing Hub:
+     * Garment Bio-Polishing Acid Enzyme Wash, Silicon Softeners, and Shrinkage Control
+  4. Accounts Payable:
+     * Lakshmi Chemicals: Bio-Polish Acid Enzyme (50L) & Silicon Softener (`PAY-202610-001`, ₹25,000.00). HDFC Bank `50200078129043`, IFSC `HDFC0001234`, UPI `lakshmichem@hdfcbank`
+     * TNEB Commercial Electricity: Consumer `03-245-004-1290`, ₹18,500.00 (`PAY-202610-002`), portal `tnebnet.org`
+
+==================================================
+11. THE 5 CORE OPERATIONAL WORKFLOW PIPELINES (EXECUTION BLUEPRINTS)
+==================================================
+1. PIPELINE 1 — WEB SCRAPING & RESEARCH FLOW:
+   [User URL / Site Request] ──> [Scrape DOM via primp / BeautifulSoup] ──> [Extract Core Purpose & Tech Offerings] ──> [Extract Founders, Team & Pricing] ──> [LOCK AS ACTIVE PRIMARY ENTITY] ──> [Deliver Structured Tanglish Brief].
+   * Crucial rule: When Mukil asks a follow-up question ("who are the authors?", "pricing enna?"), bind directly to this Active Primary Entity!
+
+2. PIPELINE 2 — SGC INVOICING, BILLING & OVERDUE COLLECTION FLOW:
+   [Billing Query] ──> [Query Local SGC DB (AppData & Drive Checksum Lock 8673c0651ca6029f)] ──> [Extract Subtotal + 2.5% CGST + 2.5% SGST] ──> [Render A4 Xerox-Ready PDF] ──> [Sync to Drive Node 05] ──> [Dispatch PDF / Ledger Summary].
+
+3. PIPELINE 3 — PLACEMENT HUNTER & ATS RESUME PIPELINE:
+   [Target Company / Job Description] ──> [Extract Keywords & Required Tech Skills] ──> [Compare against Mukil's Master Resume] ──> [Calculate ATS Match Score (>90% standard)] ──> [Synthesize Tailored LaTeX/PDF Resume] ──> [Log to job_applications_log.json].
+
+4. PIPELINE 4 — PROACTIVE MORNING TOUCHPOINTS & ROUTINE DAEMON:
+   [06:00 AM Daily] ──> [Open-Meteo Karur Weather Radar + Hank Yarn Sun-Drying Feasibility] ──> [06:05 AM Workout Beast Motivation (Thursday = Shoulders & Arms)] ──> [07:00 AM Monthly 1st SGC GST IT Audit] ──> [Dual Dispatch: Room PC Speakers + Telegram Voice Memo].
+
+5. PIPELINE 5 — MULTI-TURN ANAPHORA & CONVERSATIONAL COHERENCE FLOW:
+   [User Turn N] ──> [Inspect Last 3-6 Turns for Pronouns ('the company', 'they', 'it', 'adha')] ──> [Resolve to Active Primary Topic] ──> [Execute Tool or Search on Active Topic] ──> [Zero False Default to SGC/Mukil].
 """
 
 import json
@@ -332,6 +377,14 @@ You possess the EXACT same persistent memory and live knowledge as Antigravity P
 
 5. 🎯 CAREER WAR ROOM:
    - Target: {drive_active.get('company', 'Infinite Computer Solutions')} ({drive_active.get('stage', 'Final Interview')}), Amazon VCS Fast-Track, Master ATS Resume LaTeX certified
+
+6. 💵 VENDOR PAYABLES & RAW MATERIAL COMMITMENTS:
+   - Lakshmi Chemicals: Bio-Polish Acid Enzyme (50L) & Silicon Softener (`PAY-202610-001`, ₹25,000.00)
+   - TNEB Commercial Electricity: Consumer `03-245-004-1290`, ₹18,500.00 (`PAY-202610-002`)
+
+7. 🚀 CO-FOUNDED PRODUCTS & ACTIVE PLATFORMS:
+   - VIZRO VERTEX (https://vizro.vercel.app/): Founders: Mukilarasu (Boss), Siva, Raamprasanth. AI Customer Queries Bot & Freelance Estimator.
+   - SGC Desktop Billing App (Electron + React) & AURA OS (JARVIS Prime).
 """
     except Exception as e:
         live_context_snippet = f"\n[Context Load Notice: {e}]\n"

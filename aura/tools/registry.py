@@ -28,6 +28,7 @@ from aura.tools.telegram_tools import send_telegram_alert, send_telegram_documen
 from aura.tools.voice_tools import speak_voice, list_voice_personas, generate_voice_file, set_active_persona
 from aura.tools.antigravity_bridge import uplink_to_antigravity, sync_unified_credentials_and_state
 from aura.tools.meta_tools import create_and_register_new_tool, list_custom_tools, CUSTOM_TOOLS_MANIFEST
+from aura.tools.knowledge_vault_tools import query_master_knowledge
 from aura.kernel.hooks import hooks_engine
 from aura.kernel.swarm import subagent_swarm
 from aura.kernel.task_manager import task_manager
@@ -100,6 +101,7 @@ class ToolRegistry:
         # 8. Antigravity (JARVIS Prime) Supreme Uplink Bridge
         self.register("uplink_to_antigravity", uplink_to_antigravity)
         self.register("sync_unified_credentials_and_state", sync_unified_credentials_and_state)
+        self.register("query_master_knowledge", query_master_knowledge)
 
         # Load any previously synthesized tools
         self._load_custom_tools()
