@@ -18,6 +18,7 @@ from aura.tools.sgc_radar import (
     get_sgc_customer_ledger,
     list_sgc_recent_invoices
 )
+from aura.tools.weather_radar import get_live_weather_radar
 from aura.tools.drive_mesh import get_drive_mesh_status, get_master_resume_link
 from aura.tools.github_tools import get_github_profile, list_github_repositories
 from aura.tools.screen_vision import inspect_screen
@@ -58,6 +59,7 @@ class ToolRegistry:
         self.register("get_sgc_bill_by_number", get_sgc_bill_by_number)
         self.register("get_sgc_customer_ledger", get_sgc_customer_ledger)
         self.register("list_sgc_recent_invoices", list_sgc_recent_invoices)
+        self.register("get_live_weather_radar", get_live_weather_radar)
         
         # 3. 250GB Distributed Drive Mesh & Placement / GitHub Tools
         self.register("get_drive_mesh_status", get_drive_mesh_status)

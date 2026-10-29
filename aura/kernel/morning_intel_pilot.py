@@ -26,6 +26,7 @@ from groq import Groq
 import edge_tts
 
 from aura.config import GROQ_API_KEY, GEMINI_API_KEY, WORKSPACE_DIR
+from aura.tools.weather_radar import get_live_weather_radar
 from aura.tools.sgc_radar import get_sgc_financial_summary, get_sgc_dual_month_gst
 from aura.tools.reminders import list_active_reminders, get_daily_completed_tasks
 from aura.memory.brain_store import brain_store
@@ -45,6 +46,12 @@ class MorningIntelPilot:
     def gather_ground_truth(self) -> Dict[str, Any]:
         """Collects live facts from SGC billing, Turso reminders, and Placement profile."""
         now = datetime.now(IST)
+
+        # 0. Karur Live Weather & SGC Hank Yarn Sun-Drying Radar
+        try:
+            weather_radar = get_live_weather_radar("karur")
+        except Exception as e:
+            weather_radar = f"Weather Radar: Error {e}"
         
         # 1. SGC Business Financials
         try:
@@ -94,6 +101,7 @@ class MorningIntelPilot:
 
         return {
             "datetime": now.strftime("%A, %d %B %Y | %I:%M %p IST"),
+            "weather_radar": weather_radar,
             "sgc_summary": sgc_summary,
             "gst_radar": gst_radar,
             "reminders": reminders_str,
@@ -126,6 +134,7 @@ class MorningIntelPilot:
 
         user_content = (
             f"Here is Mukil's Live Intel as of {intel['datetime']}:\n\n"
+            f"0. Karur Weather & SGC Hank Yarn Sun-Drying:\n{intel.get('weather_radar', 'N/A')}\n\n"
             f"1. Recent Conversation Context (Yesterday's Flow):\n{intel.get('recent_convo', 'None')}\n\n"
             f"2. Turso Cloud Active Pending Reminders / Tasks:\n{intel['reminders']}\n\n"
             f"3. SGC Business Ground Truth:\n{intel['sgc_summary']}\n{intel['gst_radar']}\n\n"
