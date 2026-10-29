@@ -1,0 +1,18 @@
+{
+  "calculate_yarn_warp_weight": {
+    "file": "C:\\Users\\mukil\\aura-os\\aura\\tools\\custom\\calculate_yarn_warp_weight.py",
+    "description": "Calculates warp yarn weight in kg for weaving"
+  },
+  "auto_multiplier_test": {
+    "file": "C:\\Users\\mukil\\aura-os\\aura\\tools\\custom\\auto_multiplier_test.py",
+    "description": "Auto multiplier self-extension verification tool"
+  },
+  "calculate_gst_split": {
+    "file": "C:\\Users\\mukil\\aura-os\\aura\\tools\\custom\\calculate_gst_split.py",
+    "description": "Calculates reverse GST split for textile invoicing"
+  },
+  "morning_autonomous_wakeup_briefing": {
+    "file": "C:\\Users\\mukil\\aura-os\\aura\\tools\\custom\\morning_autonomous_wakeup_briefing.py",
+    "description": "Performs Karur weather lookup and drafts the autonomous 6:00 AM morning briefing for Mukil."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "weekday_blocks": [
+    {
+      "id": "b1",
+      "time": "06:00 AM - 07:00 AM",
+      "title": "Wakeup, Morning Hydration & AURA Briefing",
+      "tag": "ROUTINE"
+    },
+    {
+      "id": "b2",
+      "time": "09:00 AM - 04:30 PM",
+      "title": "College Core / Engineering & Lab Block",
+      "tag": "CAREER"
+    },
+    {
+      "id": "b3",
+      "time": "04:30 PM - 06:00 PM",
+      "title": "SGC Business Operations & Mill Collections",
+      "tag": "SGC"
+    },
+    {
+      "id": "b4",
+      "time": "06:00 PM - 07:30 PM",
+      "title": "Gym & Fitness Workout",
+      "tag": "WORKOUT"
+    },
+    {
+      "id": "b5",
+      "time": "08:30 PM - 10:30 PM",
+      "title": "Placement DSA / LeetCode & AI Engineering",
+      "tag": "CAREER"
+    },
+    {
+      "id": "b6",
+      "time": "10:30 PM - 11:00 PM",
+      "title": "AURA EOD Retrospective & Wind Down",
+      "tag": "ROUTINE"
+    }
+  ],
+  "workout_splits": {
+    "Monday": "Upper Body (Chest & Triceps)",
+    "Tuesday": "Upper Body (Back & Biceps)",
+    "Wednesday": "Lower Body (Legs, Calves & Abs)",
+    "Thursday": "Upper Body (Shoulders & Arms)",
+    "Friday": "Functional Core & High-Intensity Cardio",
+    "Saturday": "Full Body Compound / Sports",
+    "Sunday": "Active Recovery & Mobility Stretch"
+  }
+}
