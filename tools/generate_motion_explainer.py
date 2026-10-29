@@ -30,7 +30,7 @@ AUDIO_PATH = VIDEOS_DIR / "motion_vo.mp3"
 RAW_VIDEO = VIDEOS_DIR / "temp_motion_raw.webm"
 FINAL_MP4 = Path(r"C:\Users\mukil\Desktop\AURA_OS_2D_Motion_Graphics_Explainer.mp4")
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 HTML_CONTENT = """<!DOCTYPE html>

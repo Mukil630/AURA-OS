@@ -12,7 +12,7 @@ TAILORED_DIR = STORAGE_DIR / "tailored_resumes"
 MEMORY_DIR = STORAGE_DIR / "memory"
 DESKTOP_DIR = Path(os.environ.get("USERPROFILE", "C:/Users/mukil")) / "Desktop"
 
-TELEGRAM_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = "6233907249"
 
 TAILORED_DIR.mkdir(parents=True, exist_ok=True)

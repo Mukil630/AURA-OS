@@ -32,7 +32,7 @@ with sync_playwright() as p:
     browser.close()
 
 # Send to Telegram
-TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 caption = (
     "🎥 <b>LINKEDIN VIDEO POST PUBLISHED LIVE!</b>\n\n"

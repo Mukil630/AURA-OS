@@ -21,7 +21,7 @@ if sys.stdout.encoding != 'utf-8':
 ENV_PATH = r"C:\Users\mukil\jarvis-core\.env"
 load_dotenv(ENV_PATH)
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk")
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", os.getenv("TELEGRAM_BOT_TOKEN", ""))
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 PROOF_FILES = [

@@ -2,7 +2,7 @@ import urllib.request
 import json
 from pathlib import Path
 
-token = '8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk'
+token = os.getenv("TELEGRAM_BOT_TOKEN", "")
 chat_id = '6233907249'
 photo_path = r'C:\Users\mukil\.gemini\antigravity-cli\brain\c4314e11-bbb8-4d64-bf89-1849d00acf1a\sgc_automation_flow_1789868868962.jpg'
 

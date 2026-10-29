@@ -32,7 +32,7 @@ desktop = r"C:\Users\mukil\Desktop"
 output_docx = os.path.join(desktop, "Economics_Test_5_Question_Paper_Final.docx")
 output_pdf = os.path.join(desktop, "Economics_Test_5_Question_Paper_Final.pdf")
 
-TELEGRAM_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = "6233907249"
 
 def load_questions():

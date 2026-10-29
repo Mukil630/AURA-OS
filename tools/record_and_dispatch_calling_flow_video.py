@@ -32,7 +32,7 @@ VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 SHOWCASE_HTML = BASE_DIR / "storage" / "calling_flow_cinematic_showcase.html"
 DESKTOP_VIDEO = Path(r"C:\Users\mukil\Desktop\AURA_OS_CALLING_AGENT_FLOW_DEMO.webm")
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 print(f"[*] Starting Flow Recording using Playwright...")

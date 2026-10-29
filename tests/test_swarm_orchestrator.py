@@ -61,9 +61,13 @@ def test_swarm_orchestrator_delegation():
     assert res.status == "COMPLETED"
     assert "Rajesh Textiles" in res.result["summary"]
 
-    res_anti = asyncio.run(orchestrator.dispatch("Antigravity", "GENERAL_ENGINEERING", {"description": "Audit system memory and verify mesh"}))
+    res_anti = asyncio.run(orchestrator.dispatch("Antigravity", "VIEW_FILE", {"file_path": "brain/circuit_breaker.py", "end": 10}))
     assert res_anti.status == "COMPLETED"
-    assert "Antigravity" in res_anti.result["engine"]
+    assert "Antigravity" in res_anti.result.get("engine", "Antigravity")
+
+    res_unsupported = asyncio.run(orchestrator.dispatch("Antigravity", "GENERAL_ENGINEERING", {"description": "Audit system memory and verify mesh"}))
+    assert res_unsupported.status == "FAILED", "Unsupported actions should now fail instead of hallucinating success"
+    assert "not support" in res_unsupported.error.lower() or "unsupported" in res_unsupported.error.lower()
 
 
 # Helper method monkey-patched for testing

@@ -1,7 +1,7 @@
 import requests
 import os
 
-TELEGRAM_BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 RESUME_PDF_PATH = r"C:\Users\mukil\Desktop\MUKILARASU_S_RESUME.pdf"
 

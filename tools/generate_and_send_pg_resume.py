@@ -371,7 +371,7 @@ def generate_and_deliver():
         browser.close()
 
     # Send to Telegram
-    token = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "")
     chat_id = "6233907249"
 
     print(f"[*] Uploading tailored resume to Telegram chat {chat_id}...")

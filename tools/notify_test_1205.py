@@ -2,7 +2,7 @@ import requests
 import datetime
 import time
 
-TELEGRAM_BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 text = (

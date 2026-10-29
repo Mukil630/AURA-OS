@@ -75,7 +75,7 @@
 ### Active Credentials Managed by VaultManager:
 - **GitHub PAT**: Full repo, workflow, and administrative scopes for zero-touch cloud operations.
 - **Groq API Key**: `llama-3.3-70b-versatile` & `openai/gpt-oss-120b`.
-- **Telegram Bot Token**: `8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk`.
+- **Telegram Bot Token**: `<REDACTED_TELEGRAM_BOT_TOKEN>`.
 - **Voice Gateway Secret Token**: `mukil-jarvis-vault-key-9080030538`.
 
 ---

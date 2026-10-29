@@ -196,7 +196,7 @@ def generate_doc(output_path):
     print(f"[OK] Successfully saved pure Tamil Bamini 10 Word Document: {output_path}")
 
 def send_to_telegram(file_path):
-    TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
     CHAT_ID = "6233907249"
 
     caption = (

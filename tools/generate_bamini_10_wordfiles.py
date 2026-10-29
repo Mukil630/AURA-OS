@@ -215,7 +215,7 @@ def build_word_file(questions, output_path, font_name="Bamini", is_bamini_encode
     print(f"[OK] Saved: {output_path}")
 
 def send_file_to_telegram(file_path, caption):
-    TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
     CHAT_ID = "6233907249"
     print(f"Uploading {os.path.basename(file_path)} to Telegram...")
     with open(file_path, "rb") as f:

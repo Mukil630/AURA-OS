@@ -26,7 +26,7 @@ def _get_helper(module_name: str, fn_name: str):
             continue
     return None
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", os.getenv("TELEGRAM_BOT_TOKEN", ""))
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "6233907249")
 
 # ==========================================

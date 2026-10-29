@@ -99,7 +99,7 @@ def record_and_dispatch():
     print(f"[+] Video successfully recorded! Path: {video_path} ({file_size_mb:.2f} MB)")
 
     # Send video to Telegram
-    token = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "")
     chat_id = "6233907249"
 
     print(f"[*] Uploading Proof Video to Telegram chat {chat_id}...")

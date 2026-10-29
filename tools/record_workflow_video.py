@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 VIDEOS_DIR = BASE_DIR / "storage" / "videos"
 VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 
-TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 RESUME_PATH = BASE_DIR / "storage" / "Mukil_Master_Resume.pdf"
 URL = "https://job-boards.greenhouse.io/gitlab/jobs/8785285002"

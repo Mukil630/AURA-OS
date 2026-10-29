@@ -34,7 +34,7 @@ VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 SGC_DATA_FILE = Path(os.getenv("APPDATA")) / "sgc-billing" / "sgc-billing-data.json"
 INDEX_HTML = Path(r"C:\Users\mukil\sgc-billing\public\index.html")
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 # Load bills from local data

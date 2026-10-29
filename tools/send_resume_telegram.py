@@ -1,7 +1,7 @@
 import os
 import requests
 
-TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 RESUME_PATH = r"C:\Users\mukil\jarvis-core\storage\Mukil_Master_Resume.pdf"
 

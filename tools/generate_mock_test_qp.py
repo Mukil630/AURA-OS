@@ -50,7 +50,7 @@ finally:
     word.Quit()
 
 print("\n=== 3. Sending Question Paper PDF to Mukil's Telegram ===")
-TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 caption = (

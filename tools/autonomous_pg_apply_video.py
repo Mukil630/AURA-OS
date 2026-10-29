@@ -56,7 +56,7 @@ def autonomous_apply():
     video_dir.mkdir(parents=True, exist_ok=True)
     resume_path = r"C:\Users\mukil\Desktop\MUKILARASU_S_PG_RESUME.pdf"
 
-    token = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "")
     chat_id = "6233907249"
 
     print("[*] Launching browser with full video recording...")

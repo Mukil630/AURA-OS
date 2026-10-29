@@ -36,7 +36,7 @@ sys.path.insert(0, str(BASE_DIR))
 ENV_PATH = BASE_DIR / ".env"
 load_dotenv(ENV_PATH)
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", os.getenv("TELEGRAM_BOT_TOKEN", ""))
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "6233907249")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 

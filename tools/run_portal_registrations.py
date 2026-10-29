@@ -5,7 +5,7 @@ import json
 import requests
 from playwright.sync_api import sync_playwright
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 SCREENSHOT_DIR = r"C:\Users\mukil\jarvis-core\storage\screenshots"

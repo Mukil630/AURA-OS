@@ -36,7 +36,7 @@ AUDIO_PATH = VIDEOS_DIR / "aura_it_architecture_vo.mp3"
 RAW_VIDEO = VIDEOS_DIR / "temp_raw_it_video.webm"
 FINAL_MP4 = Path(r"C:\Users\mukil\Desktop\AURA_OS_Agent_Architecture_IT_DeepDive.mp4")
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 VOICEOVER_TEXT = '''Welcome to the engineering architecture of AURA-OS, an autonomous agent operating system.

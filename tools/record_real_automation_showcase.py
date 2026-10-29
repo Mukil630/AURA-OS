@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 VIDEOS_DIR = BASE_DIR / "storage" / "videos"
 VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 RESUME_PATH = BASE_DIR / "storage" / "Mukil_Master_Resume.pdf"

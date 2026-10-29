@@ -103,21 +103,16 @@ class ServerAgent(BaseSwarmAgent):
                 return message
 
             else:
-                # Default to status check
-                return await self.process_task(
-                    SwarmTaskMessage(
-                        task_id=message.task_id,
-                        sender=message.sender,
-                        recipient=message.recipient,
-                        action="ALLOCATE_SERVER_MEMORY",
-                        payload=payload
-                    )
-                )
+                # Unknown action — do NOT hallucinate. Reject explicitly.
+                message.status = "FAILED"
+                message.error = f"ServerAgent does not support action '{message.action}'. Supported actions: ALLOCATE_SERVER_MEMORY, GET_SERVER_MEMORY, CHECK_SERVER_STATUS, SERVER_HEALTH, PING_SERVER, SYNC_MEMORY, SYNC_MEMORY_TO_CLOUD."
+                logger.error(f"ServerAgent rejected unsupported action: {message.action}")
+                return message
 
         except Exception as e:
-            logger.error(f"ServerAgent error: {e}")
+            logger.error(f"ServerAgent error: {e}", exc_info=True)
             message.status = "FAILED"
-            message.error = str(e)
+            message.error = f"{type(e).__name__}: {str(e)}"
             return message
 
     def _get_or_create_server_memory(self) -> Dict[str, Any]:

@@ -30,7 +30,7 @@ RAW_VIDEO = VIDEOS_DIR / "temp_raw_perfect_flow.webm"
 MASTER_MP3 = VIDEOS_DIR / "master_pro_narration.mp3"
 FINAL_MP4 = Path(r"C:\Users\mukil\Desktop\AURA_OS_Perfect_Synchronized_Demo.mp4")
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 SCENES = [

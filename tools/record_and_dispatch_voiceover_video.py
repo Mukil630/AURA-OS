@@ -34,7 +34,7 @@ AUDIO_PATH = BASE_DIR / "storage" / "videos" / "aura_os_voiceover_en_pro.mp3"
 RAW_VIDEO = BASE_DIR / "storage" / "videos" / "temp_raw_flow_pro.webm"
 FINAL_MP4 = Path(r"C:\Users\mukil\Desktop\AURA_OS_Autonomous_Calling_Professional_Demo.mp4")
 
-BOT_TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = "6233907249"
 
 VOICEOVER_TEXT = '''Welcome to AURA-OS: an Autonomous Sovereign Agent Operating System.

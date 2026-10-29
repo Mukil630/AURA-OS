@@ -224,7 +224,7 @@ def generate_paper(docx_path, pdf_path):
         word.Quit()
 
 def dispatch_to_telegram(pdf_path):
-    TOKEN = "8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
     CHAT_ID = "6233907249"
 
     caption = (
