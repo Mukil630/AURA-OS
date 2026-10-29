@@ -4,10 +4,11 @@ tools/weather_radar_tool.py - 100% Free Open-Meteo REST API integration.
 Fetches real-time temperature, humidity, precipitation probability, and wind speed.
 Evaluates industrial outdoor sun-drying feasibility for SGC yarn dyeing operations.
 """
+import sys
 import urllib.request
 import json
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger("weather_radar_tool")
 
@@ -209,33 +210,40 @@ def generate_human_sensory_weather_speech(w: Dict[str, Any]) -> str:
 
     # 1. Primary: Dynamic LLM Generation for organic human speech
     try:
+        import os
         from groq import Groq
+        from pathlib import Path
+        j_dir = Path(__file__).resolve().parent.parent
+        if str(j_dir) not in sys.path:
+            sys.path.insert(0, str(j_dir))
         import config
-        client = Groq(api_key=config.GROQ_API_KEY)
-        prompt = (
-            f"You are Mukil's close brother, friend, and executive partner living in {loc}, Tamil Nadu.\n"
-            f"You just stepped onto the terrace and felt the atmosphere.\n"
-            f"Real Metrics:\n"
-            f"- City: {loc}\n"
-            f"- Heat: {temp}°C, Feels-like {apparent}°C on skin\n"
-            f"- Sky: {cloud}% cloud cover, Rain chance: {rain_p}%\n"
-            f"- Air: {humidity}% humidity, Wind gusts: {gusts} km/h\n"
-            f"Write a 3-4 sentence natural spoken Tanglish message to Mukil.\n"
-            f"Guidelines:\n"
-            f"- DO NOT read numbers or sound like a robot.\n"
-            f"- Describe how the sky looks, how the wind feels, and how the heat feels on the head/skin.\n"
-            f"- Give brotherly care (sunglass/cap/tender coconut/water) and practical advice for SGC hank yarn sun-drying.\n"
-            f"- Use natural friendly Kongu/Tamil brotherly slang ('Mapla', 'Boss', 'velila paathen')."
-        )
-        r = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=200
-        )
-        msg = r.choices[0].message.content.strip()
-        if msg:
-            return msg
+        api_key = os.getenv("GROQ_API_KEY") or getattr(config, "GROQ_API_KEY", "")
+        if api_key:
+            client = Groq(api_key=api_key)
+            prompt = (
+                f"You are Mukil's close brother, friend, and executive partner living in {loc}, Tamil Nadu.\n"
+                f"You just stepped onto the terrace and felt the atmosphere.\n"
+                f"Real Metrics:\n"
+                f"- City: {loc}\n"
+                f"- Heat: {temp}°C, Feels-like {apparent}°C on skin\n"
+                f"- Sky: {cloud}% cloud cover, Rain chance: {rain_p}%\n"
+                f"- Air: {humidity}% humidity, Wind gusts: {gusts} km/h\n"
+                f"Write a 3-4 sentence natural spoken Tanglish message to Mukil.\n"
+                f"Guidelines:\n"
+                f"- DO NOT read numbers or sound like a robot.\n"
+                f"- Describe how the sky looks, how the wind feels, and how the heat feels on the head/skin.\n"
+                f"- Give brotherly care (sunglass/cap/tender coconut/sweater/water) and practical advice for SGC hank yarn sun-drying.\n"
+                f"- Use natural friendly Kongu/Tamil brotherly slang ('Mapla', 'Boss', 'velila paathen')."
+            )
+            r = client.chat.completions.create(
+                model="openai/gpt-oss-120b",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=200
+            )
+            msg = r.choices[0].message.content.strip()
+            if msg:
+                return msg
     except Exception as e:
         logger.warning(f"LLM sensory speech fallback: {e}")
 
@@ -251,6 +259,12 @@ def generate_human_sensory_weather_speech(w: Dict[str, Any]) -> str:
             f"Mapla, velila paathen, nalla thalayila suttu adikira veyil! {temp}°C thaan, aana kaathula puzhudhi yerudhu, "
             f"feels-like {apparent}°C thalavali vara madhiri irukku. SGC hank yarn-a velila potrundha indha veyilukku sarakunu "
             f"super-ah kaanjirum! Aana nee velila bike-la poradha irundha cap or sunglass pottuko, nalla elaneer illa thanni kudi mapla!"
+        )
+    elif temp <= 22:
+        return (
+            f"Mapla, velila terrace-la poi paathen, kaathu nalla jillunu chill-nu adikidhu! {temp}°C thaan irukku, "
+            f"feels-like {apparent}°C odambu nadunga vaikkira maadhiri kulirudhu. Yarn drying-ku kaathu irundhaalum veyil illaadhadhaala "
+            f"kaaya romba neram aagum. Velila poradha irundha nalla jacket or sweater pottu po mapla!"
         )
     else:
         return (
