@@ -16,9 +16,9 @@
       "role": "Core Memory & Task Logs"
     },
     "node_02_project_codebases": {
-      "id": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "id": "1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
       "name": "02_Project_Codebases_Git_Repos",
-      "url": "https://drive.google.com/drive/folders/1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "url": "https://drive.google.com/drive/folders/1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
       "role": "Project Codebases & Git Repos"
     },
     "node_03_placement_resumes": {
@@ -78,9 +78,9 @@
       "role": "Daily Chat Transcripts, Task Logs, Brain Context, Reminders & Profile JSONs"
     },
     "node_02_project_codebases": {
-      "id": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "id": "1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
       "name": "02_Projects_Codebases",
-      "url": "https://drive.google.com/drive/folders/1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+      "url": "https://drive.google.com/drive/folders/1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
       "role": "Zipped Codebases & Git Mirrored Project Repositories (Zero Local Disk Accumulation)"
     },
     "node_03_placement_resumes": {

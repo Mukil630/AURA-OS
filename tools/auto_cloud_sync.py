@@ -32,7 +32,7 @@ DATA_DIR = BASE_DIR / "data"
 
 MESH_NODES = {
     "node_01_core_memory": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
-    "node_02_project_codebases": "1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ",
+    "node_02_project_codebases": "1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
     "node_03_placement_resumes": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
     "node_04_b2b_scraped_data": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
     "node_05_sgc_invoices": "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
