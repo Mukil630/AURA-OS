@@ -20,7 +20,7 @@ if sys.platform == "win32":
 
 from groq import Groq
 from aura.config import GEMINI_API_KEY, GROQ_API_KEY, DEFAULT_ENGINE, DEFAULT_MODEL
-from aura.kernel.truth_shield import SYSTEM_INSTRUCTION
+from aura.kernel.truth_shield import SYSTEM_INSTRUCTION, get_dynamic_system_instruction
 from aura.tools.registry import registry
 from aura.kernel.skill_loader import skill_registry
 from aura.kernel.task_manager import task_manager
@@ -59,23 +59,25 @@ class AuraAgent:
                 self.gemini_client = None
 
         self.session_id = f"sess_{int(time.time())}"
+        dynamic_instruction = get_dynamic_system_instruction()
         self.messages: List[Dict[str, Any]] = [
-            {"role": "system", "content": SYSTEM_INSTRUCTION}
+            {"role": "system", "content": dynamic_instruction}
         ]
         self.gemini_chat = None
         self._init_gemini_chat()
 
     def _init_gemini_chat(self):
-        """Initializes multi-turn chat session with 1M token context and all registered native tools."""
+        """Initializes multi-turn chat session with 1M token context, live Antigravity memory, and all registered native tools."""
         if self.gemini_client:
             try:
                 from google.genai import types
                 native_tools = list(registry._tools.values())
+                dynamic_instruction = get_dynamic_system_instruction()
                 self.gemini_chat = self.gemini_client.chats.create(
                     model="gemini-3.5-flash-lite",
                     config=types.GenerateContentConfig(
                         tools=native_tools,
-                        system_instruction=SYSTEM_INSTRUCTION
+                        system_instruction=dynamic_instruction
                     )
                 )
             except Exception:
