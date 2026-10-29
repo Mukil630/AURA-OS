@@ -53,6 +53,62 @@ COORDINATES: Dict[str, Dict[str, Any]] = {
         "state": "Tamil Nadu",
         "elevation_m": 265,
         "hub_type": "Yarn Processing & Lock Industry"
+    },
+    "salem": {
+        "lat": 11.6643,
+        "lon": 78.1460,
+        "district": "Salem",
+        "state": "Tamil Nadu",
+        "elevation_m": 278,
+        "hub_type": "Steel & Sago Hub"
+    },
+    "trichy": {
+        "lat": 10.7905,
+        "lon": 78.7047,
+        "district": "Tiruchirappalli",
+        "state": "Tamil Nadu",
+        "elevation_m": 88,
+        "hub_type": "Industrial & Central Educational Hub"
+    },
+    "madurai": {
+        "lat": 9.9252,
+        "lon": 78.1198,
+        "district": "Madurai",
+        "state": "Tamil Nadu",
+        "elevation_m": 136,
+        "hub_type": "Temple City & Commercial Trade Hub"
+    },
+    "chennai": {
+        "lat": 13.0827,
+        "lon": 80.2707,
+        "district": "Chennai",
+        "state": "Tamil Nadu",
+        "elevation_m": 6,
+        "hub_type": "State Capital & IT Corridor"
+    },
+    "bangalore": {
+        "lat": 12.9716,
+        "lon": 77.5946,
+        "district": "Bengaluru",
+        "state": "Karnataka",
+        "elevation_m": 920,
+        "hub_type": "Silicon Valley of India"
+    },
+    "ooty": {
+        "lat": 11.4102,
+        "lon": 76.6950,
+        "district": "Nilgiris",
+        "state": "Tamil Nadu",
+        "elevation_m": 2240,
+        "hub_type": "Hill Station & Tea Plantations"
+    },
+    "kodaikanal": {
+        "lat": 10.2381,
+        "lon": 77.4892,
+        "district": "Dindigul Hills",
+        "state": "Tamil Nadu",
+        "elevation_m": 2133,
+        "hub_type": "Princess of Hill Stations"
     }
 }
 
