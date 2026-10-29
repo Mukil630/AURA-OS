@@ -1448,7 +1448,7 @@
       "7. Final Response: High-energy executive synthesis with streaming tokens"
     ]
   },
-  "last_sync": "2026-10-29T13:35:00+05:30",
+  "last_sync": "2026-10-29T15:12:38.165503",
   "telegram_voice_agent_status": {
     "status": "OPERATIONAL_24_7",
     "voice_model": "gemini-3.8-flash-tts",
@@ -1475,5 +1475,42 @@
       "5_CORE_OPERATIONAL_WORKFLOW_DECISION_PIPELINES"
     ],
     "tool": "query_master_knowledge"
-  }
+  },
+  "system_refresh_status": {
+    "refreshed_at": "2026-10-29T13:40:53.695671",
+    "status": "100% OPERATIONAL & VERIFIED",
+    "sgc_integrity": "100% GREEN (Checksum 8673c0651ca6029f)",
+    "telegram_daemon": "LIVE_POLLING_HTTP_200",
+    "master_knowledge_vault": "LOCKED_IN_KERNEL",
+    "active_bot_token": "8738700204:AAGjn... (SECURE)",
+    "conversational_anaphora_engine": "ACTIVE"
+  },
+  "telemetry": {
+    "battery_percent": 72,
+    "power_plugged": false,
+    "charging_status": "DISCHARGING_ON_BATTERY",
+    "cpu_percent": 9.9,
+    "ram_percent": 71.7,
+    "disk_free_gb": 61.61,
+    "checked_at": "2026-10-29T15:12:38.165503"
+  },
+  "weather_live_snapshot": {
+    "location": "Karur, Tamil Nadu",
+    "temperature_c": 33.5,
+    "humidity_percent": 41,
+    "rain_prob_6h": 0,
+    "drying_verdict": "OPTIMAL_RAPID_SUN_DRYING"
+  },
+  "upcoming_schedule_blocks": [
+    {
+      "time": "04:30 PM - 06:00 PM",
+      "activity": "SGC Business Operations & Mill Collections",
+      "status": "UPCOMING"
+    },
+    {
+      "time": "06:00 PM - 07:30 PM",
+      "activity": "Gym Workout -> Upper Body (Shoulders & Arms)",
+      "status": "UPCOMING"
+    }
+  ]
 }
