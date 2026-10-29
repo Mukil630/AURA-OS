@@ -33,6 +33,19 @@ from tools.gemini_voice_router import synthesize_persona_voice, send_voice_to_te
 
 logger = logging.getLogger("morning_routine_daemon")
 
+
+def play_through_speakers(audio_path: str):
+    """Plays audio through PC room speakers so Mukil is woken up out loud."""
+    try:
+        import pygame
+        if not pygame.mixer.get_init():
+            pygame.mixer.init()
+        pygame.mixer.music.load(str(audio_path))
+        pygame.mixer.music.play()
+    except Exception as e:
+        logger.warning(f"Speaker playback notice: {e}")
+
+
 WEEKLY_WORKOUT_SPLIT_OORU = {
     "Monday": "செஸ்ட் அண்ட் ட்ரைசெப்ஸ் (Push Day) மாப்ள! பென்ச் பிரஸ், lateral raises போட்டு புஷ் பண்ணலாம்.",
     "Tuesday": "பேக் அண்ட் பைசெப்ஸ் (Pull Day) மாப்ள! லேட் புல்டவுன், சீட்டட் ரோவ்ஸ், அப்புறம் hammer curls போட்டு தெறிக்க விடலாம்.",
@@ -59,6 +72,7 @@ def run_6am_touchpoint(dispatch_audio: bool = True) -> dict:
     if dispatch_audio:
         ok, audio_file = synthesize_persona_voice(speech_text, persona_type="MORNING_WAKEUP")
         if ok:
+            play_through_speakers(audio_file)
             sent = send_voice_to_telegram(audio_file, caption="🌅 06:00 AM Morning Intel (Stark Wakeup)")
             audio_res = {"file": audio_file, "telegram_sent": sent}
 
@@ -77,6 +91,7 @@ def run_605am_touchpoint(dispatch_audio: bool = True) -> dict:
     if dispatch_audio:
         ok, audio_file = synthesize_persona_voice(speech_text, persona_type="WORKOUT_BEAST")
         if ok:
+            play_through_speakers(audio_file)
             sent = send_voice_to_telegram(audio_file, caption="⚡ 06:05 AM Workout Alert (Beast Mode)")
             audio_res = {"file": audio_file, "telegram_sent": sent}
 
@@ -99,6 +114,7 @@ def run_700am_touchpoint(dispatch_audio: bool = True, force_run: bool = False) -
     if dispatch_audio:
         ok, audio_file = synthesize_persona_voice(speech_text, persona_type="BUSINESS_FINANCE")
         if ok:
+            play_through_speakers(audio_file)
             sent = send_voice_to_telegram(audio_file, caption="📊 07:00 AM Month-End GST Audit (Co-Founder)")
             audio_res = {"file": audio_file, "telegram_sent": sent}
 
