@@ -303,6 +303,16 @@ class AuraAgent:
 
         yield ("error", "No active AI engine available. Please check GEMINI_API_KEY or GROQ_API_KEY in .env.")
 
+    def chat(self, user_prompt: str) -> str:
+        """Synchronously executes the full ReAct cognitive reasoning loop and returns final synthesized response."""
+        tokens = []
+        for event_type, val in self.chat_stream(user_prompt):
+            if event_type == "token":
+                tokens.append(val)
+            elif event_type == "error":
+                return val
+        return "".join(tokens).strip()
+
     def reset(self):
         """Resets the conversation context."""
         self.messages = [{"role": "system", "content": SYSTEM_INSTRUCTION}]
