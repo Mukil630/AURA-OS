@@ -1,21 +1,72 @@
 {
   "status": "RUNNING",
-  "started_at": "2026-10-29T09:23:58.807198",
-  "registered_jobs": [
+  "engine": "STATE_AWARE_CATCHUP",
+  "last_heartbeat": "2026-10-29T15:23:27.610617",
+  "routines": [
     {
-      "time": "06:00",
+      "id": "morning_wakeup",
+      "name": "06:00 AM Morning Intel & Stark Wakeup",
+      "target_time": "06:00",
+      "enabled": true,
       "persona": "MORNING_WAKEUP",
-      "desc": "Karur Weather & Yarn Drying"
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 180,
+      "last_executed_date": "2026-10-29",
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call."
     },
     {
-      "time": "06:05",
+      "id": "workout_beast",
+      "name": "06:05 AM Gym Beast Mode & Daily Split",
+      "target_time": "06:05",
+      "enabled": true,
       "persona": "WORKOUT_BEAST",
-      "desc": "Workout Split & Gym Coach"
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 180,
+      "last_executed_date": "2026-10-29",
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio."
     },
     {
-      "time": "07:00",
+      "id": "sgc_monthly_gst",
+      "name": "07:00 AM Month-End SGC 5% GST Audit Infographic",
+      "target_time": "07:00",
+      "enabled": true,
       "persona": "BUSINESS_FINANCE",
-      "desc": "Monthly 1st SGC 5% GST Audit"
+      "schedule_type": "monthly",
+      "monthly_day": 1,
+      "catchup_grace_minutes": 720,
+      "last_executed_date": null,
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone."
+    },
+    {
+      "id": "night_wrapup",
+      "name": "22:00 PM Night Review & GitHub Green Streak",
+      "target_time": "22:00",
+      "enabled": true,
+      "persona": "CASUAL_COWBOY",
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 120,
+      "last_executed_date": null,
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification."
     }
   ]
 }

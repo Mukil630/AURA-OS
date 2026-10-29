@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "timezone": "Asia/Kolkata",
+  "description": "Dynamic State-Aware Schedule Blueprint for AURA-OS & JARVIS Prime. No hardcoding.",
+  "routines": [
+    {
+      "id": "morning_wakeup",
+      "name": "06:00 AM Morning Intel & Stark Wakeup",
+      "target_time": "06:00",
+      "enabled": true,
+      "persona": "MORNING_WAKEUP",
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 180,
+      "last_executed_date": "2026-10-29",
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call."
+    },
+    {
+      "id": "workout_beast",
+      "name": "06:05 AM Gym Beast Mode & Daily Split",
+      "target_time": "06:05",
+      "enabled": true,
+      "persona": "WORKOUT_BEAST",
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 180,
+      "last_executed_date": "2026-10-29",
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio."
+    },
+    {
+      "id": "sgc_monthly_gst",
+      "name": "07:00 AM Month-End SGC 5% GST Audit Infographic",
+      "target_time": "07:00",
+      "enabled": true,
+      "persona": "BUSINESS_FINANCE",
+      "schedule_type": "monthly",
+      "monthly_day": 1,
+      "catchup_grace_minutes": 720,
+      "last_executed_date": null,
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone."
+    },
+    {
+      "id": "night_wrapup",
+      "name": "22:00 PM Night Review & GitHub Green Streak",
+      "target_time": "22:00",
+      "enabled": true,
+      "persona": "CASUAL_COWBOY",
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 120,
+      "last_executed_date": null,
+      "channels": {
+        "local_speaker": true,
+        "telegram_voice": true,
+        "phone_call": false
+      },
+      "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification."
+    }
+  ]
+}
