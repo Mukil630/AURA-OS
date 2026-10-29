@@ -69,10 +69,12 @@ def main():
         prompt = " ".join(sys.argv[1:])
         print(f"{Fore.CYAN}[AURA Processing Task]:{Style.RESET_ALL} {prompt}\n")
         for event_type, content in agent.chat_stream(prompt):
-            if event_type == "tool_call":
-                print(f"\n{Fore.YELLOW}⚙️  {content}{Style.RESET_ALL}")
-            elif event_type == "tool_result":
-                print(f"{Fore.LIGHTBLACK_EX}   {content}{Style.RESET_ALL}\n")
+            if event_type == "thought":
+                print(f"\n{Fore.MAGENTA}🧠 [Planning & Reasoning]: {content}{Style.RESET_ALL}")
+            elif event_type == "tool_call":
+                print(f"\n{Fore.YELLOW}⚙️  [Tool Selection & Action]: {content}{Style.RESET_ALL}")
+            elif event_type in ["observation", "tool_result"]:
+                print(f"{Fore.LIGHTBLACK_EX}👁️  [Observation]: {content}{Style.RESET_ALL}\n")
             elif event_type == "token":
                 sys.stdout.write(f"{Fore.WHITE}{content}{Style.RESET_ALL}")
                 sys.stdout.flush()
@@ -164,10 +166,12 @@ def main():
             print(f"\n{Fore.CYAN}AURA > {Style.RESET_ALL}", end="", flush=True)
             full_response = []
             for event_type, content in agent.chat_stream(user_input):
-                if event_type == "tool_call":
-                    print(f"\n{Fore.YELLOW}⚙️  {content}{Style.RESET_ALL}")
-                elif event_type == "tool_result":
-                    print(f"{Fore.LIGHTBLACK_EX}   {content}{Style.RESET_ALL}\n{Fore.CYAN}AURA > {Style.RESET_ALL}", end="", flush=True)
+                if event_type == "thought":
+                    print(f"\n{Fore.MAGENTA}🧠 [Planning & Reasoning]: {content}{Style.RESET_ALL}")
+                elif event_type == "tool_call":
+                    print(f"\n{Fore.YELLOW}⚙️  [Tool Selection & Action]: {content}{Style.RESET_ALL}")
+                elif event_type in ["observation", "tool_result"]:
+                    print(f"{Fore.LIGHTBLACK_EX}👁️  [Observation]: {content}{Style.RESET_ALL}\n{Fore.CYAN}AURA > {Style.RESET_ALL}", end="", flush=True)
                 elif event_type == "token":
                     sys.stdout.write(content)
                     sys.stdout.flush()

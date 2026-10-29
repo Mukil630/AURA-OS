@@ -142,11 +142,13 @@ class AuraAgent:
                                 if fc:
                                     fn_name = getattr(fc, "name", str(fc))
                                     args = getattr(fc, "args", {})
-                                    yield ("tool_call", f"[Executing Tool: {fn_name}({str(args)[:60]})]")
+                                    yield ("tool_call", f"{fn_name}({str(args)[:60]})")
                                 fr = getattr(part, "function_response", None)
                                 if fr:
                                     fr_name = getattr(fr, "name", str(fr))
-                                    yield ("tool_result", f"[Result from {fr_name}]")
+                                    res_val = str(getattr(fr, "response", ""))[:120].replace('\n', ' ')
+                                    yield ("observation", f"[{fr_name} Output]: {res_val}")
+                                    yield ("tool_result", f"[Result from {fr_name}: {res_val}]")
 
                     text = response.text or ""
                     brain_store.log_turn(self.session_id, "assistant", text)
@@ -227,6 +229,10 @@ class AuraAgent:
                 msg = response.choices[0].message
                 
                 if msg.tool_calls:
+                    # 1. Planning & Reasoning (Thought emitted before acting)
+                    if msg.content and msg.content.strip():
+                        yield ("thought", msg.content.strip())
+
                     self.messages.append(msg.to_dict())
                     for tool_call in msg.tool_calls:
                         fn_name = tool_call.function.name
@@ -237,7 +243,10 @@ class AuraAgent:
                             args = {}
                             
                         arg_preview = str(args)[:60]
-                        yield ("tool_call", f"[Executing Tool: {fn_name}({arg_preview})]")
+                        # 2. Tool Selection (Action)
+                        yield ("tool_call", f"{fn_name}({arg_preview})")
+                        
+                        # 3. Execution & Result
                         result = registry.execute(fn_name, args)
                         
                         # Guard tool result length to strictly protect TPM limit
@@ -245,8 +254,9 @@ class AuraAgent:
                         if len(safe_result_str) > 3000:
                             safe_result_str = safe_result_str[:3000] + f"\n\n[... Truncated {len(safe_result_str) - 3000} chars to protect token budget ...]"
                         
-                        res_preview = safe_result_str[:100].replace('\n', ' ')
-                        yield ("tool_result", f"[Result from {fn_name}: {res_preview}...]")
+                        res_preview = safe_result_str[:120].replace('\n', ' ')
+                        # 4. Observation Processing
+                        yield ("observation", f"[{fn_name} Output]: {res_preview}")
                         
                         self.messages.append({
                             "role": "tool",
@@ -254,6 +264,7 @@ class AuraAgent:
                             "name": fn_name,
                             "content": safe_result_str
                         })
+                    # 5. Done Check: Tool executed -> continue cognitive loop until model produces final content!
                     continue
 
                 final_content = msg.content or ""
