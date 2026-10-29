@@ -229,7 +229,17 @@ def jarvis_send_voice_memo(text: str, custom_voice: str = "") -> str:
         
     try:
         from tools.tts_generator import generate_voice_audio
-        audio_path = asyncio.run(generate_voice_audio(text, custom_voice=custom_voice if custom_voice else None))
+        import concurrent.futures
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+            
+        if loop and loop.is_running():
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                audio_path = pool.submit(asyncio.run, generate_voice_audio(text, custom_voice=custom_voice if custom_voice else None)).result(timeout=25)
+        else:
+            audio_path = asyncio.run(generate_voice_audio(text, custom_voice=custom_voice if custom_voice else None))
         
         if not os.path.exists(audio_path):
             return f"❌ Error: Generated voice file not found at {audio_path}"

@@ -1,5 +1,9 @@
 import os
 import sys
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, 'w', encoding='utf-8')
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, 'w', encoding='utf-8')
 import re
 import asyncio
 import logging
@@ -1591,9 +1595,23 @@ async def send_voice_reply_guaranteed(update: Update, text: str, caption: str = 
 
 async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
     """
-    Executes prompt through the Cloud Antigravity Cognitive Brain (ServerRouter + Groq/Gemini).
-    Zero physical PC access, zero local disk blocking, pure online cloud execution.
+    Executes prompt through the AURA OS Supreme Cognitive Brain (AuraAgent ReAct Loop).
+    Bridges live Karur Weather Radar, SGC Billing, Turso Cloud DB, and persistent context.
+    Cascades gracefully to Central Orchestrator and ServerRouter.
     """
+    # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + 36 Tools + Dynamic Context)
+    try:
+        aura_dir = r"C:\Users\mukil\aura-os"
+        if aura_dir not in sys.path:
+            sys.path.insert(0, aura_dir)
+        from aura.kernel.agent import AuraAgent
+        aura_agent = AuraAgent()
+        aura_reply = await asyncio.to_thread(aura_agent.chat, prompt)
+        if aura_reply and len(aura_reply.strip()) > 0:
+            return aura_reply.strip()
+    except Exception as aura_err:
+        logger.warning(f"AuraAgent execution notice: {aura_err}. Cascading to Central Orchestrator...")
+
     # 1. Primary Cognitive & Task Plane: Central Orchestrator (Gemini + SQLite Durability)
     try:
         from app.orchestrator.central_orchestrator import central_orchestrator
@@ -1858,7 +1876,7 @@ def main():
     while True:
         try:
             app = build_app()
-            app.run_polling(drop_pending_updates=True, bootstrap_retries=-1, timeout=20)
+            app.run_polling(drop_pending_updates=True, bootstrap_retries=-1, timeout=20, stop_signals=None)
             time.sleep(3)
         except (KeyboardInterrupt, SystemExit):
             break
