@@ -9,7 +9,7 @@ import sys
 import os
 import json
 import time
-from typing import List, Dict, Any, Generator, Tuple
+from typing import List, Dict, Any, Generator, Tuple, Optional
 
 # Fix Windows console UTF-8 output
 if sys.platform == "win32":
@@ -38,7 +38,7 @@ def _safe_prune_messages(messages: List[Dict[str, Any]], keep_count: int = 8) ->
 
 
 class AuraAgent:
-    def __init__(self, model: str = "openai/gpt-oss-20b"):
+    def __init__(self, model: str = "openai/gpt-oss-20b", session_id: Optional[str] = None):
         self.model = model
         self.groq_client = None
         self.gemini_client = None
@@ -58,13 +58,21 @@ class AuraAgent:
             except Exception:
                 self.gemini_client = None
 
-        self.session_id = f"sess_{int(time.time())}"
+        self.session_id = session_id or f"sess_{int(time.time())}"
         dynamic_instruction = get_dynamic_system_instruction()
         self.messages: List[Dict[str, Any]] = [
             {"role": "system", "content": dynamic_instruction}
         ]
         self.gemini_chat = None
         self._init_gemini_chat()
+
+    def load_history(self, history: List[Dict[str, Any]]):
+        """Loads prior conversational context into active memory to maintain multi-turn coherence."""
+        for turn in history:
+            role = turn.get("role") or ("user" if turn.get("sender") not in ["JARVIS", "Antigravity", "AURA", "assistant"] else "assistant")
+            content = turn.get("content") or turn.get("text") or ""
+            if content and role in ["user", "assistant"]:
+                self.messages.append({"role": role, "content": content})
 
     def _init_gemini_chat(self):
         """Initializes multi-turn chat session with 1M token context, live Antigravity memory, and all registered native tools."""
