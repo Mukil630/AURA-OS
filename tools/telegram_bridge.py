@@ -1086,6 +1086,13 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Swatch photo processing error: {e}", exc_info=True)
         await update.message.reply_text(f"❌ Error analyzing swatch photo: {e}")
 
+async def clear_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Resets active conversational context memory for fresh topics."""
+    global global_telegram_aura_agent
+    if global_telegram_aura_agent:
+        global_telegram_aura_agent.reset()
+    await update.message.reply_text("🧹 Context reset panniten Boss! Pudhu topic start pannalaam! 🚀")
+
 async def menu_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Full Command Center Menu."""
     menu_text = (
@@ -1593,19 +1600,34 @@ async def send_voice_reply_guaranteed(update: Update, text: str, caption: str = 
     except Exception as e:
         logger.error(f"❌ Failed to deliver guaranteed voice reply: {e}")
 
-async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
-    """
-    Executes prompt through the AURA OS Supreme Cognitive Brain (AuraAgent ReAct Loop).
-    Bridges live Karur Weather Radar, SGC Billing, Turso Cloud DB, and persistent context.
-    Cascades gracefully to Central Orchestrator and ServerRouter.
-    """
-    # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + 36 Tools + Dynamic Context)
-    try:
+global_telegram_aura_agent = None
+
+def get_or_create_aura_agent():
+    global global_telegram_aura_agent
+    if global_telegram_aura_agent is None:
         aura_dir = r"C:\Users\mukil\aura-os"
         if aura_dir not in sys.path:
             sys.path.insert(0, aura_dir)
         from aura.kernel.agent import AuraAgent
-        aura_agent = AuraAgent()
+        global_telegram_aura_agent = AuraAgent(session_id="telegram_mukil_session")
+        try:
+            recent_turns = mem.get_recent_conversations(limit=6)
+            if recent_turns and hasattr(global_telegram_aura_agent, "load_history"):
+                global_telegram_aura_agent.load_history(recent_turns)
+        except Exception as e:
+            logger.warning(f"Failed to bootstrap history into AuraAgent: {e}")
+    return global_telegram_aura_agent
+
+async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
+    """
+    Executes prompt through the AURA OS Supreme Cognitive Brain (AuraAgent ReAct Loop).
+    Bridges live Karur Weather Radar, SGC Billing, Turso Cloud DB, and persistent context.
+    Retains multi-turn conversation memory for flawless co-reference & pronoun resolution.
+    Cascades gracefully to Central Orchestrator and ServerRouter.
+    """
+    # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + Multi-Turn Memory + 36 Tools)
+    try:
+        aura_agent = get_or_create_aura_agent()
         aura_reply = await asyncio.to_thread(aura_agent.chat, prompt)
         if aura_reply and len(aura_reply.strip()) > 0:
             return aura_reply.strip()
@@ -1853,6 +1875,8 @@ def build_app():
     add_cmd("fundmycrazy", fund_cmd)
     add_cmd("menu", menu_cmd)
     add_cmd("help", menu_cmd)
+    add_cmd("clear", clear_cmd)
+    add_cmd("reset", clear_cmd)
     app.add_handler(CallbackQueryHandler(gst_callback_handler, pattern="^gst_"))
     app.add_handler(MessageHandler(filters.PHOTO | filters.Document.IMAGE, photo_handler))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_handler))
