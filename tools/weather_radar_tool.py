@@ -112,7 +112,7 @@ def get_live_weather_radar(location: str = "karur", manual_override: Dict[str, A
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={lat}&longitude={lon}&"
-        f"current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&"
+        f"current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_gusts_10m,uv_index,is_day&"
         f"hourly=precipitation_probability"
     )
 
@@ -123,9 +123,14 @@ def get_live_weather_radar(location: str = "karur", manual_override: Dict[str, A
 
         curr = data.get("current", {})
         temp = curr.get("temperature_2m", 32.0)
+        apparent_temp = curr.get("apparent_temperature", temp)
         humidity = curr.get("relative_humidity_2m", 50)
         precip = curr.get("precipitation", 0.0)
         wind = curr.get("wind_speed_10m", 10.0)
+        gusts = curr.get("wind_gusts_10m", wind)
+        cloud_cov = curr.get("cloud_cover", 20)
+        uv = curr.get("uv_index", 3.0)
+        is_day = curr.get("is_day", 1)
 
         # Get max rain probability in next 6 hours
         hourly_probs = data.get("hourly", {}).get("precipitation_probability", [0])[:6]
@@ -135,10 +140,13 @@ def get_live_weather_radar(location: str = "karur", manual_override: Dict[str, A
         if manual_override:
             if manual_override.get("temperature_c") is not None:
                 temp = float(manual_override["temperature_c"])
+                apparent_temp = temp + 1.5
             if manual_override.get("humidity_pct") is not None:
                 humidity = int(manual_override["humidity_pct"])
             if manual_override.get("rain_prob_pct") is not None:
                 max_rain_prob = int(manual_override["rain_prob_pct"])
+            if manual_override.get("cloud_cover_pct") is not None:
+                cloud_cov = int(manual_override["cloud_cover_pct"])
 
         # Assess Hank Drying Suitability
         if precip > 0 or max_rain_prob > 35:
@@ -158,14 +166,19 @@ def get_live_weather_radar(location: str = "karur", manual_override: Dict[str, A
             "success": True,
             "location": location.capitalize(),
             "temperature_c": temp,
+            "apparent_temperature_c": apparent_temp,
             "relative_humidity_pct": humidity,
+            "cloud_cover_pct": cloud_cov,
+            "uv_index": uv,
+            "is_day": is_day,
             "current_precipitation_mm": precip,
             "next_6h_rain_probability_pct": max_rain_prob,
             "wind_speed_kmh": wind,
+            "wind_gusts_kmh": gusts,
             "safe_for_outdoor_drying": safe_for_outdoor,
             "drying_operational_status": drying_status,
             "recommendation_tanglish": (
-                f"☀️ Maapla, {location.capitalize()}-la {temp}°C veyil irukku, rain chance only {max_rain_prob}%. "
+                f"☀️ Maapla, {location.capitalize()}-la {temp}°C veyil irukku (feels like {apparent_temp}°C), rain chance only {max_rain_prob}%. "
                 f"Dhaaralama hank yarn-a kaya vaikalaam!" if safe_for_outdoor else
                 f"⚠️ Maapla, {location.capitalize()}-la {max_rain_prob}% rain chance irukku. Hank yarn-a veliya kaya vaikaatheenga!"
             )
@@ -178,6 +191,72 @@ def get_live_weather_radar(location: str = "karur", manual_override: Dict[str, A
             "location": location.capitalize(),
             "fallback_note": "Could not reach Open-Meteo API. Check local weather radar."
         }
+
+
+def generate_human_sensory_weather_speech(w: Dict[str, Any]) -> str:
+    """
+    Synthesizes a realistic, living human-spoken weather observation in Kongu Tanglish.
+    Speaks like a real brother/co-founder who just stepped out onto the terrace.
+    Never sounds like a robotic bot reading numbers.
+    """
+    loc = w.get("location", "Karur")
+    temp = w.get("temperature_c", 33.0)
+    apparent = w.get("apparent_temperature_c", temp)
+    humidity = w.get("relative_humidity_pct", 40)
+    cloud = w.get("cloud_cover_pct", 20)
+    rain_p = w.get("next_6h_rain_probability_pct", 0)
+    gusts = w.get("wind_gusts_kmh", 15.0)
+
+    # 1. Primary: Dynamic LLM Generation for organic human speech
+    try:
+        from groq import Groq
+        import config
+        client = Groq(api_key=config.GROQ_API_KEY)
+        prompt = (
+            f"You are Mukil's close brother, friend, and executive partner living in {loc}, Tamil Nadu.\n"
+            f"You just stepped onto the terrace and felt the atmosphere.\n"
+            f"Real Metrics:\n"
+            f"- City: {loc}\n"
+            f"- Heat: {temp}°C, Feels-like {apparent}°C on skin\n"
+            f"- Sky: {cloud}% cloud cover, Rain chance: {rain_p}%\n"
+            f"- Air: {humidity}% humidity, Wind gusts: {gusts} km/h\n"
+            f"Write a 3-4 sentence natural spoken Tanglish message to Mukil.\n"
+            f"Guidelines:\n"
+            f"- DO NOT read numbers or sound like a robot.\n"
+            f"- Describe how the sky looks, how the wind feels, and how the heat feels on the head/skin.\n"
+            f"- Give brotherly care (sunglass/cap/tender coconut/water) and practical advice for SGC hank yarn sun-drying.\n"
+            f"- Use natural friendly Kongu/Tamil brotherly slang ('Mapla', 'Boss', 'velila paathen')."
+        )
+        r = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=200
+        )
+        msg = r.choices[0].message.content.strip()
+        if msg:
+            return msg
+    except Exception as e:
+        logger.warning(f"LLM sensory speech fallback: {e}")
+
+    # 2. Resilient Sensory Fallback
+    if rain_p > 35:
+        return (
+            f"Mapla, velila terrace-la poi paathen, karumegham koodi irukku! Kaathum jillunu adikkudhu, "
+            f"mazhai vara mari oru puzhukkam theriyudhu. SGC hank yarn-a velila potrundha odane shed-kulla maatha sollunga, "
+            f"nananjita dyeing lot waste aagidum. Velila poradha irundha raincoat eduthuko mapla!"
+        )
+    elif temp >= 32:
+        return (
+            f"Mapla, velila paathen, nalla thalayila suttu adikira veyil! {temp}°C thaan, aana kaathula puzhudhi yerudhu, "
+            f"feels-like {apparent}°C thalavali vara madhiri irukku. SGC hank yarn-a velila potrundha indha veyilukku sarakunu "
+            f"super-ah kaanjirum! Aana nee velila bike-la poradha irundha cap or sunglass pottuko, nalla elaneer illa thanni kudi mapla!"
+        )
+    else:
+        return (
+            f"Mapla, velila weather semma pleasant-ah irukku! Veyilum perusa illa, nalla cool breeze veesudhu. "
+            f"Yarn drying-ku konjam slow-ah thaan aagum, aana velila un work mudikka idhu romba comfortable climate. Super-ah enjoy pannu mapla!"
+        )
 
 
 if __name__ == "__main__":

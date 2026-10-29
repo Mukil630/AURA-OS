@@ -27,7 +27,7 @@ JARVIS_DIR = Path(__file__).resolve().parent.parent
 if str(JARVIS_DIR) not in sys.path:
     sys.path.insert(0, str(JARVIS_DIR))
 
-from tools.weather_radar_tool import get_live_weather_radar
+from tools.weather_radar_tool import get_live_weather_radar, generate_human_sensory_weather_speech
 from tools.sgc_monthly_gst_infographic import run_monthly_gst_audit
 from tools.gemini_voice_router import synthesize_persona_voice, send_voice_to_telegram
 
@@ -59,14 +59,8 @@ WEEKLY_WORKOUT_SPLIT_OORU = {
 
 def run_6am_touchpoint(dispatch_audio: bool = True) -> dict:
     weather = get_live_weather_radar("karur")
-    temp = weather.get("temperature_c", 31.0)
-    rain_prob = weather.get("next_6h_rain_probability_pct", 0)
-
-    convo_lines = (
-        f"கரூர்ல இன்னைக்கு {temp}°C வெயில் சும்மா கொளுத்துது மாப்ள! மழை எல்லாம் ஒன்னும் வராது, sky ஃபுல் க்ளியர். "
-        f"SGC யார்ன் காய போட இன்னைக்கு செம நாளு! வெளில போறப்ப sunglasses மாட்டிக்கோங்க, வெயிலுக்கு தண்ணி நெறைய குடிச்சுக்கோங்க மாப்ள!"
-    )
-    speech_text = f"Hello Boss! Good morning! {convo_lines}"
+    convo_lines = generate_human_sensory_weather_speech(weather)
+    speech_text = f"Good morning Boss! {convo_lines}"
 
     audio_res = None
     if dispatch_audio:
