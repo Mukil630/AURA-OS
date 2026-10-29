@@ -130,7 +130,22 @@ class AuraAgent:
                 self._init_gemini_chat()
             if self.gemini_chat:
                 try:
+                    history_before = len(self.gemini_chat.get_history()) if hasattr(self.gemini_chat, "get_history") else 0
                     response = self.gemini_chat.send_message(user_prompt)
+                    
+                    if hasattr(self.gemini_chat, "get_history"):
+                        for turn in self.gemini_chat.get_history()[history_before:]:
+                            for part in getattr(turn, "parts", []):
+                                fc = getattr(part, "function_call", None)
+                                if fc:
+                                    fn_name = getattr(fc, "name", str(fc))
+                                    args = getattr(fc, "args", {})
+                                    yield ("tool_call", f"[Executing Tool: {fn_name}({str(args)[:60]})]")
+                                fr = getattr(part, "function_response", None)
+                                if fr:
+                                    fr_name = getattr(fr, "name", str(fr))
+                                    yield ("tool_result", f"[Result from {fr_name}]")
+
                     text = response.text or ""
                     brain_store.log_turn(self.session_id, "assistant", text)
                     for char in text:
@@ -142,7 +157,20 @@ class AuraAgent:
                     if "getaddrinfo" in err_str or "Connection" in err_str or "timed out" in err_str:
                         time.sleep(1.2)
                         try:
+                            history_before = len(self.gemini_chat.get_history()) if hasattr(self.gemini_chat, "get_history") else 0
                             response = self.gemini_chat.send_message(user_prompt)
+                            if hasattr(self.gemini_chat, "get_history"):
+                                for turn in self.gemini_chat.get_history()[history_before:]:
+                                    for part in getattr(turn, "parts", []):
+                                        fc = getattr(part, "function_call", None)
+                                        if fc:
+                                            fn_name = getattr(fc, "name", str(fc))
+                                            args = getattr(fc, "args", {})
+                                            yield ("tool_call", f"[Executing Tool: {fn_name}({str(args)[:60]})]")
+                                        fr = getattr(part, "function_response", None)
+                                        if fr:
+                                            fr_name = getattr(fr, "name", str(fr))
+                                            yield ("tool_result", f"[Result from {fr_name}]")
                             text = response.text or ""
                             brain_store.log_turn(self.session_id, "assistant", text)
                             for char in text:
