@@ -43,6 +43,9 @@ AURA (Autonomous Universal Reasoning Agent) is Mukil's autonomous agent operatin
 - SGC Billing Drive Vaults:
   * Main Bills Folder: https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9?usp=drive_link (`11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9`)
   * Backup 1: `155EqYOwPJ2Fc9QfqVSrZu5VnYzZgRcyZ` | Backup 2: `1a9VJAP_Nypn_mjUEYCNvMpkGN5H9Kwf4`
+- Master Google Sheets Cloud Hub (Live in Master Vault):
+  * SGC Bleaching Unit - Daily P&L Master Ledger: `1w3NVcCQv-pVV6MOz4sNcjD3VmSHGndyG4u4PKnG5FfQ` (URL: https://docs.google.com/spreadsheets/d/1w3NVcCQv-pVV6MOz4sNcjD3VmSHGndyG4u4PKnG5FfQ/edit)
+  * SGC Daily Budget & Payment Tracker: `1M1hbb0kzUgKycG6FG46i2agAx8ilIvrPYbm42aDD7vM` (URL: https://docs.google.com/spreadsheets/d/1M1hbb0kzUgKycG6FG46i2agAx8ilIvrPYbm42aDD7vM/edit)
 - 250GB Distributed Drive Mesh (10 Dedicated Nodes x 25GB):
   * Node 01 (Core Memory & Logs): `14fGVZomgy2CItfspYo7cVXSImAqJDZZX`
   * Node 02 (Project Codebases & Repos): `1rXA02dZn0palLwBl0hyTmUV9_-brkpKZ`

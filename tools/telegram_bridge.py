@@ -287,6 +287,16 @@ async def drive_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Drive portal error: {e}")
         await update.message.reply_text(f"❌ Error fetching drive portal: {e}")
 
+async def sheets_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Lists Mukil's Master Google Sheets Cloud Hub with 1-click links."""
+    try:
+        from tools.cloud_sheet_hub import format_sheets_hub_message
+        msg = format_sheets_hub_message()
+        await update.effective_message.reply_text(msg, parse_mode="Markdown", disable_web_page_preview=True)
+    except Exception as e:
+        logger.error(f"Sheets cmd error: {e}")
+        await update.effective_message.reply_text(f"❌ Error fetching sheets hub: {e}")
+
 async def find_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Searches across all 90GB cloud nodes instantly."""
     if not context.args:
@@ -1237,6 +1247,25 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
         await update.effective_message.reply_text(msg, parse_mode="Markdown", disable_web_page_preview=True)
         return True
 
+    # 0.1 Detection for Google Sheet URLs
+    sheet_url_match = re.search(r'docs\.google\.com/spreadsheets/d/([a-zA-Z0-9-_]+)', text)
+    if sheet_url_match:
+        sheet_id = sheet_url_match.group(1)
+        from tools.cloud_sheet_hub import get_all_registered_sheets
+        registered = get_all_registered_sheets()
+        matched = next((s for s in registered if s.get("id") == sheet_id), None)
+        if matched:
+            reply_txt = (
+                f"Mapla! Idhu namma *{matched.get('title')}* sheet dhaan! 📊\n\n"
+                f"• *Category*: {matched.get('category')}\n"
+                f"• *Details*: {matched.get('description')}\n"
+                f"• *Sheet ID*: `{sheet_id}`\n\n"
+                f"🔗 [Open Live Sheet in Google Sheets]({matched.get('url')})\n\n"
+                f"Namma bleaching production, chemical expenses, and daily profit ellam idhula dhaan cloud-la live-ah track panrom mapla! 🚀"
+            )
+            await update.effective_message.reply_text(reply_txt, parse_mode="Markdown", disable_web_page_preview=True)
+            return True
+
     # 1. Explicit Bill creation shortcut (bill: or /bill only)
     if t_lower.startswith("bill:") or t_lower.startswith("/bill"):
         clean_prompt = text.replace("bill:", "").replace("/bill", "").strip()
@@ -1717,6 +1746,8 @@ def build_app():
     add_cmd("diagnose", diagnose_cmd)
     add_cmd("vitals", diagnose_cmd)
     add_cmd("drive", drive_cmd)
+    add_cmd("sheet", sheets_cmd)
+    add_cmd("sheets", sheets_cmd)
     add_cmd("find", find_cmd)
     add_cmd("search", find_cmd)
     add_cmd("apply", apply_cmd)
