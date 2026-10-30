@@ -1,0 +1,63 @@
+name: AURA-OS Cloud Daily Routine Trigger
+
+on:
+  schedule:
+    # 00:30 UTC = 06:00 AM IST (Morning Intel Wakeup)
+    - cron: '30 0 * * *'
+    # 00:35 UTC = 06:05 AM IST (Workout Beast Mode)
+    - cron: '35 0 * * *'
+    # 01:30 UTC = 07:00 AM IST (SGC Month-End GST - Runs on 1st of month)
+    - cron: '30 1 1 * *'
+    # 16:30 UTC = 22:00 PM IST (Night Review & Retrospective)
+    - cron: '30 16 * * *'
+  workflow_dispatch:
+    inputs:
+      routine_id:
+        description: 'Routine to trigger (morning_wakeup, workout_beast, sgc_monthly_gst, night_wrapup)'
+        required: true
+        default: 'morning_wakeup'
+
+jobs:
+  trigger-routine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine Target Routine
+        id: select-routine
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ROUTINE="${{ github.event.inputs.routine_id }}"
+          else
+            HOUR=$(date -u +%H)
+            MIN=$(date -u +%M)
+            DAY=$(date -u +%d)
+            echo "Current UTC Time: $HOUR:$MIN, Day: $DAY"
+
+            if [ "$HOUR" = "00" ] && [ "$MIN" -ge "25" ] && [ "$MIN" -le "33" ]; then
+              ROUTINE="morning_wakeup"
+            elif [ "$HOUR" = "00" ] && [ "$MIN" -ge "34" ] && [ "$MIN" -le "42" ]; then
+              ROUTINE="workout_beast"
+            elif [ "$HOUR" = "01" ] && [ "$DAY" = "01" ]; then
+              ROUTINE="sgc_monthly_gst"
+            elif [ "$HOUR" = "16" ]; then
+              ROUTINE="night_wrapup"
+            else
+              ROUTINE="morning_wakeup"
+            fi
+          fi
+          echo "Selected Routine: $ROUTINE"
+          echo "routine=$ROUTINE" >> $GITHUB_OUTPUT
+
+      - name: Dispatch Cloud Routine to Render
+        run: |
+          ROUTINE="${{ steps.select-routine.outputs.routine }}"
+          URL="https://aura-os-jarvis.onrender.com/api/v1/routines/trigger/${ROUTINE}?secret=mukil-aura-pc-bridge-secret-2026"
+          echo "Dispatched trigger for '$ROUTINE' to $URL"
+          
+          # Retry up to 3 times to ensure container wakes if cold
+          curl --retry 3 --retry-delay 15 --max-time 90 -s -f -X POST "$URL" || {
+            echo "Direct API post returned non-zero. Attempting fallback wake-up..."
+            curl -s --max-time 30 "https://aura-os-jarvis.onrender.com/health"
+            sleep 10
+            curl -f -X POST "$URL"
+          }
+          echo "✅ Successfully triggered routine: $ROUTINE"

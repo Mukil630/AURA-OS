@@ -21,6 +21,7 @@ from app.api.v1.routes.gmail import router as gmail_router
 from app.api.v1.routes.call_hub import router as call_hub_router
 from app.api.v1.routes.vision import router as vision_router
 from app.api.v1.routes.orchestrator import router as orchestrator_router
+from app.api.v1.routes.routines import router as routines_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(health_router)
@@ -44,6 +45,4 @@ api_v1_router.include_router(gmail_router)
 api_v1_router.include_router(call_hub_router)
 api_v1_router.include_router(vision_router)
 api_v1_router.include_router(orchestrator_router)
-
-
-
+api_v1_router.include_router(routines_router)

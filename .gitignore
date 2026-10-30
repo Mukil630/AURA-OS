@@ -109,3 +109,8 @@ logs/
 
 *.apk
 server_dist/
+
+# Voice samples cache
+storage/voice_samples/active_cache/
+*.wav
+*.ogg

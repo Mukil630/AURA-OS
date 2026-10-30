@@ -306,8 +306,23 @@ def evaluate_state_aware_routines(dispatch_audio: bool = True) -> list:
     return results
 
 
+def prevent_windows_sleep():
+    """Prevents Windows from entering Modern Standby / Sleep while daemon is active."""
+    try:
+        import ctypes
+        ES_CONTINUOUS = 0x80000000
+        ES_SYSTEM_REQUIRED = 0x00000001
+        ES_AWAYMODE_REQUIRED = 0x00000040
+        flags = ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED
+        ctypes.windll.kernel32.SetThreadExecutionState(flags)
+        logger.info("Windows OS Sleep Prevention Lock Active")
+    except Exception as e:
+        logger.warning(f"Could not set Windows execution state: {e}")
+
+
 def start_scheduler_loop():
     """Starts the 24/7 continuous State-Aware Catch-Up loop."""
+    prevent_windows_sleep()
     import time
 
     logger.info("[*] Starting State-Aware Dynamic Routine Daemon...")

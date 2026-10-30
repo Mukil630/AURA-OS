@@ -1,7 +1,7 @@
 {
   "status": "RUNNING",
   "engine": "STATE_AWARE_CATCHUP",
-  "last_heartbeat": "2026-10-29T15:54:07.660054",
+  "last_heartbeat": "2026-10-30T07:17:44.720362",
   "routines": [
     {
       "id": "morning_wakeup",
@@ -11,13 +11,15 @@
       "persona": "MORNING_WAKEUP",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-10-29",
+      "last_executed_date": "2026-10-30",
       "channels": {
         "local_speaker": true,
         "telegram_voice": true,
         "phone_call": false
       },
-      "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call."
+      "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call.",
+      "last_executed_at": "2026-10-30T07:15:58.779019+05:30",
+      "last_execution_type": "TRIGGERED"
     },
     {
       "id": "workout_beast",
@@ -27,13 +29,15 @@
       "persona": "WORKOUT_BEAST",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-10-29",
+      "last_executed_date": "2026-10-30",
       "channels": {
         "local_speaker": true,
         "telegram_voice": true,
         "phone_call": false
       },
-      "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio."
+      "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio.",
+      "last_executed_at": "2026-10-30T07:17:42.842359+05:30",
+      "last_execution_type": "TRIGGERED"
     },
     {
       "id": "sgc_monthly_gst",
