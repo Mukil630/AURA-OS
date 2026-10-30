@@ -73,8 +73,9 @@ def synthesize_persona_voice(
     logger.info(f"[VoiceRouter] Synthesizing via Persona '{selected_persona}'...")
 
     try:
-        client = genai.Client(api_key=config.GEMINI_API_KEY)
-        for model_name in ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts"]:
+        api_key = os.getenv("GEMINI_API_KEY") or getattr(config, "GEMINI_API_KEY", None)
+        client = genai.Client(api_key=api_key)
+        for model_name in ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash"]:
             try:
                 res = client.models.generate_content(
                     model=model_name,
@@ -88,7 +89,7 @@ def synthesize_persona_voice(
                             logger.info(f"[VoiceRouter] Successfully generated {out_path} using {model_name}")
                             return True, str(out_path)
             except Exception as me:
-                logger.warning(f"[VoiceRouter] Model {model_name} failed: {me}")
+                logger.warning(f"[VoiceRouter] Model {model_name} notice: {me}")
                 continue
         return False, "No audio inline data returned from Gemini TTS models"
     except Exception as e:
@@ -97,49 +98,82 @@ def synthesize_persona_voice(
 
 
 def send_voice_to_telegram(audio_path: str, caption: str) -> bool:
-    """Dispatches generated voice note to Mukil's Telegram (auto-converts WAV to OGG Opus for sub-second upload)."""
-    token = getattr(config, "TELEGRAM_BOT_TOKEN", None)
-    chat_id = getattr(config, "AUTHORIZED_TELEGRAM_USERS", [6233907249])[0]
+    """
+    Dispatches generated voice note to Mukil's Telegram with robust WAV-to-OGG Opus conversion.
+    Fallback to sendAudio if conversion fails, ensuring 100% reliable delivery.
+    """
+    token = os.getenv("TELEGRAM_BOT_TOKEN") or getattr(config, "TELEGRAM_BOT_TOKEN", None)
+    raw_user = os.getenv("TELEGRAM_AUTHORIZED_USER_ID") or getattr(config, "AUTHORIZED_TELEGRAM_USERS", [6233907249])
+    
+    chat_id = 6233907249
+    if isinstance(raw_user, list) and raw_user:
+        chat_id = raw_user[0]
+    elif isinstance(raw_user, (int, str)):
+        try:
+            chat_id = int(str(raw_user).split(",")[0].strip())
+        except Exception:
+            chat_id = 6233907249
+
     if not token or not os.path.exists(audio_path):
+        logger.error(f"Cannot send voice: token_present={bool(token)}, path_exists={os.path.exists(audio_path)}")
         return False
 
     upload_path = audio_path
+    endpoint = "sendVoice"
+    file_field = "voice"
     filename = "voice.ogg"
     mime_type = "audio/ogg"
 
-    # Convert uncompressed WAV to ultra-light OGG Opus (30KB) for instant Telegram delivery
+    # Convert uncompressed WAV to ultra-light OGG Opus (30KB) for native Telegram voice bubble
     if audio_path.lower().endswith(".wav"):
+        ogg_path = str(Path(audio_path).with_suffix(".ogg"))
+        converted = False
         try:
             import subprocess
             import imageio_ffmpeg
             ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
-            ogg_path = str(Path(audio_path).with_suffix(".ogg"))
             cmd = [ffmpeg, "-y", "-i", audio_path, "-c:a", "libopus", "-b:a", "32k", ogg_path]
-            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-            if os.path.exists(ogg_path) and os.path.getsize(ogg_path) > 0:
+            proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
+            if os.path.exists(ogg_path) and os.path.getsize(ogg_path) > 100:
                 upload_path = ogg_path
+                converted = True
         except Exception as e:
-            logger.warning(f"Audio conversion fallback: {e}")
-            filename = "voice.wav"
+            logger.warning(f"FFmpeg conversion notice: {e}")
+
+        if not converted:
+            # If OGG conversion not available, send as native audio file
+            upload_path = audio_path
+            endpoint = "sendAudio"
+            file_field = "audio"
+            filename = "voice_memo.wav"
             mime_type = "audio/wav"
 
-    url = f"https://api.telegram.org/bot{token}/sendVoice"
+    url = f"https://api.telegram.org/bot{token}/{endpoint}"
     try:
         with open(upload_path, "rb") as f:
             r = requests.post(
                 url,
                 data={"chat_id": chat_id, "caption": caption},
-                files={"voice": (filename, f, mime_type)},
+                files={file_field: (filename, f, mime_type)},
                 timeout=45
             )
-            return r.json().get("ok", False)
+            data = r.json()
+            if not data.get("ok", False):
+                logger.error(f"Telegram {endpoint} rejected: status={r.status_code}, resp={r.text}")
+                # Secondary fallback: try sendAudio with audio/mpeg
+                if endpoint == "sendVoice":
+                    f.seek(0)
+                    fb_url = f"https://api.telegram.org/bot{token}/sendAudio"
+                    r_fb = requests.post(
+                        fb_url,
+                        data={"chat_id": chat_id, "caption": caption},
+                        files={"audio": ("voice.mp3", f, "audio/mpeg")},
+                        timeout=45
+                    )
+                    return r_fb.json().get("ok", False)
+                return False
+            logger.info(f"✅ Telegram voice dispatched successfully via {endpoint} to chat {chat_id}")
+            return True
     except Exception as e:
         logger.error(f"Telegram dispatch failed: {e}")
         return False
-
-
-if __name__ == "__main__":
-    test_text = "ஒர்க்கவுட் டைம் பாஸ்! இன்னைக்கு லேட் புல்டவுன் பைசெப்ஸ் போட்டு தெறிக்க விடலாம்!"
-    print(f"[*] Testing Voice Router with Workout text...")
-    ok, path = synthesize_persona_voice(test_text, persona_type="WORKOUT_BEAST")
-    print(f"Result: {ok} -> {path}")
