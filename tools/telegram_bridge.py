@@ -1230,10 +1230,11 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
     """
     t_lower = text.lower().strip()
 
-    # 0. Explicit Google Sheet shortcut (/sheet or /sheets or "sheet link")
-    if t_lower in ["/sheet", "/sheets", "sheet", "sheet link", "bleaching sheet", "bleaching sheet link"]:
-        from aura.tools.bleaching_tools import get_bleaching_sheet_link
-        await update.effective_message.reply_text(get_bleaching_sheet_link(), parse_mode=None)
+    # 0. Explicit Google Sheets Hub shortcut (/sheet or /sheets or "sheets")
+    if t_lower in ["/sheet", "/sheets", "sheet", "sheets", "sheet link", "my sheets", "all sheets", "bleaching sheet", "bleaching sheet link"]:
+        from tools.cloud_sheet_hub import format_sheets_hub_message
+        msg = format_sheets_hub_message()
+        await update.effective_message.reply_text(msg, parse_mode="Markdown", disable_web_page_preview=True)
         return True
 
     # 1. Explicit Bill creation shortcut (bill: or /bill only)

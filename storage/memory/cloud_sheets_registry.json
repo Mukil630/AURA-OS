@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1M1hbb0kzUgKycG6FG46i2agAx8ilIvrPYbm42aDD7vM",
+    "title": "SGC Daily Budget & Payment Tracker",
+    "category": "Finance & Cashflow",
+    "url": "https://docs.google.com/spreadsheets/d/1M1hbb0kzUgKycG6FG46i2agAx8ilIvrPYbm42aDD7vM/edit?usp=drivesdk",
+    "description": "Daily client collections, budget allocation, vendor payments (Lakshmi Chem, TNEB, Labour wages)",
+    "created_at": "2026-10-30T13:52:00"
+  },
+  {
+    "id": "1w3NVcCQv-pVV6MOz4sNcjD3VmSHGndyG4u4PKnG5FfQ",
+    "title": "SGC Bleaching Unit - Daily P&L Master Ledger",
+    "category": "Bleaching Production & P&L",
+    "url": "https://docs.google.com/spreadsheets/d/1w3NVcCQv-pVV6MOz4sNcjD3VmSHGndyG4u4PKnG5FfQ/edit?usp=drivesdk",
+    "description": "KGs bleached, batch logs, chemical and EB expenses, daily gross margin and net profit",
+    "created_at": "2026-10-30T12:00:00"
+  }
+]
