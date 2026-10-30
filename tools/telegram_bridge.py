@@ -992,21 +992,11 @@ async def color_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             res = solve_swatch_full_solution(target, fabric_kg=fabric_kg)
 
         report = format_color_solution_telegram(res)
-        await _send_reply_safely(update, report)
-
-        if ALWAYS_VOICE_REPLY:
-            p_name = res["best_pantone_match"]["name"]
-            p_code = res["best_pantone_match"]["code"]
-            cost = res["industrial_batch_recipe"]["financials"]["cost_per_kg_fabric_inr"]
-            voice_text = f"Maapla, colour find panniten! Closest match Pantone {p_name} ({p_code}). Chemical recipe calculation ready, cost around {cost} rupees per kg."
-            try:
-                voice_path = await generate_voice_audio(voice_text)
-                if os.path.exists(voice_path):
-                    with open(voice_path, "rb") as v:
-                        await update.message.reply_voice(voice=v, caption="🎨 Color Match Voice Note")
-                    os.remove(voice_path)
-            except Exception:
-                pass
+        p_name = res["best_pantone_match"]["name"]
+        p_code = res["best_pantone_match"]["code"]
+        cost = res["industrial_batch_recipe"]["financials"]["cost_per_kg_fabric_inr"]
+        voice_text = f"Maapla, colour find panniten! Closest match Pantone {p_name} ({p_code}). Chemical recipe calculation ready, cost around {cost} rupees per kg."
+        await _send_reply_safely(update, report, custom_voice_text=voice_text, voice_caption="🎨 Color Match Voice Note")
 
     except Exception as e:
         logger.error(f"Color finder error: {e}")
@@ -1050,37 +1040,12 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         from tools.sgc_color_finder import solve_swatch_full_solution, format_color_solution_telegram
         res = solve_swatch_full_solution(save_path, fabric_kg=fabric_kg)
         report = format_color_solution_telegram(res)
-
-        await _send_reply_safely(update, report)
-
-        # Log to memory
-        p = res["best_pantone_match"]
-        c = res["extracted_color"]
-        mem.log_task("SWATCH_COLOR_MATCH", f"Analyzed swatch photo. Matched: {p['name']} ({p['code']}), Hex: {c['hex']}, Lot: {fabric_kg}kg")
-        mem.update_context({
-            "latest_swatch_match": {
-                "hex": c["hex"],
-                "pantone": f"{p['name']} ({p['code']})",
-                "delta_e": p["delta_e"],
-                "fabric_kg": fabric_kg,
-                "timestamp": datetime.now().isoformat()
-            }
-        })
-
-        if ALWAYS_VOICE_REPLY:
-            cost = res["industrial_batch_recipe"]["financials"]["cost_per_kg_fabric_inr"]
-            voice_summary = (
-                f"Maapla, unga swatch photo-va analyze panniten! Indha color Pantone {p['name']} kooda match aagudhu. "
-                f"Delta E romba accurate-ah irukku. {fabric_kg} kg lot-ku full chemical recipe calculation anuppitten. Cost {cost} rupees per kg!"
-            )
-            try:
-                voice_path = await generate_voice_audio(voice_summary)
-                if os.path.exists(voice_path):
-                    with open(voice_path, "rb") as v:
-                        await update.message.reply_voice(voice=v, caption="🎙️ Swatch Analysis Summary")
-                    os.remove(voice_path)
-            except Exception:
-                pass
+        cost = res["industrial_batch_recipe"]["financials"]["cost_per_kg_fabric_inr"]
+        voice_summary = (
+            f"Maapla, unga swatch photo-va analyze panniten! Indha color Pantone {p['name']} kooda match aagudhu. "
+            f"Delta E romba accurate-ah irukku. {fabric_kg} kg lot-ku full chemical recipe calculation anuppitten. Cost {cost} rupees per kg!"
+        )
+        await _send_reply_safely(update, report, custom_voice_text=voice_summary, voice_caption="🎙️ Swatch Analysis Summary")
 
     except Exception as e:
         logger.error(f"Swatch photo processing error: {e}", exc_info=True)
@@ -1317,24 +1282,16 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
             rep = format_verified_bills_report(target_m)
             metrics = get_ledger_metrics(target_m)
 
-        await _send_reply_safely(update, rep)
-        if ALWAYS_VOICE_REPLY:
-            try:
-                p_name = metrics.get('period_name', 'target month')
-                if is_tax_specific and wants_dual:
-                    this_m = get_ledger_metrics("current")
-                    voice_msg = f"Mapla, Previous month total tax Rs.{metrics['total_gst']:,.0f}, and this month running tax Rs.{this_m['total_gst']:,.0f}."
-                elif is_tax_specific:
-                    voice_msg = f"Mapla, {p_name} total 5% tax amount Rs.{metrics['total_gst']:,.0f} across {metrics['period_bills_count']} bills."
-                else:
-                    voice_msg = f"Mapla, database-la irundhu live report pull panniten. Total {metrics['period_bills_count']} bills irukku. Total amount Rs.{metrics['total_gross']:,.0f}."
-                voice_path = await generate_voice_audio(voice_msg)
-                if os.path.exists(voice_path):
-                    with open(voice_path, "rb") as v:
-                        await update.message.reply_voice(voice=v, caption="🧾 SGC Verified Ledger")
-                    os.remove(voice_path)
-            except Exception:
-                pass
+        p_name = metrics.get('period_name', 'target month')
+        if is_tax_specific and wants_dual:
+            this_m = get_ledger_metrics("current")
+            voice_msg = f"Mapla, Previous month total tax Rs.{metrics['total_gst']:,.0f}, and this month running tax Rs.{this_m['total_gst']:,.0f}."
+        elif is_tax_specific:
+            voice_msg = f"Mapla, {p_name} total 5% tax amount Rs.{metrics['total_gst']:,.0f} across {metrics['period_bills_count']} bills."
+        else:
+            voice_msg = f"Mapla, database-la irundhu live report pull panniten. Total {metrics['period_bills_count']} bills irukku. Total amount Rs.{metrics['total_gross']:,.0f}."
+
+        await _send_reply_safely(update, rep, custom_voice_text=voice_msg, voice_caption="🧾 SGC Verified Ledger")
         return True
 
     # 1C. Mark Bill Paid shortcut
@@ -1435,16 +1392,13 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
                 f"<i>JARVIS will send you an urgent notification & voice alert when time is up!</i>\n"
                 f"To cancel: <code>/cancelremind {reminder['reminder_id']}</code>"
             )
-            await update.message.reply_text(reply_msg, parse_mode="HTML")
-            if ALWAYS_VOICE_REPLY:
-                try:
-                    voice_path = await generate_voice_audio(f"Maapla, {reminder['message']} ku reminder set panniten at {target_ist.strftime('%I:%M %p')}!")
-                    if os.path.exists(voice_path):
-                        with open(voice_path, "rb") as v:
-                            await update.message.reply_voice(voice=v, caption="⏰ Reminder Confirmed")
-                        os.remove(voice_path)
-                except Exception:
-                    pass
+            await _send_reply_safely(
+                update,
+                reply_msg,
+                parse_mode="HTML",
+                custom_voice_text=f"Maapla, {reminder['message']} ku reminder set panniten at {target_ist.strftime('%I:%M %p')}!",
+                voice_caption="⏰ Reminder Confirmed"
+            )
             return True
         except Exception as ex:
             logger.info(f"Natural reminder parse fell through to Antigravity: {ex}")
@@ -1545,9 +1499,63 @@ async def _send_pdf_if_present(update: Update, text: str):
         except Exception as pdf_err:
             logger.error(f"Error sending PDF: {pdf_err}")
 
-async def _send_reply_safely(update: Update, text: str, send_voice: bool = True, parse_mode: Optional[str] = "Markdown"):
-    """Safely sends replies splitting chunks >4000 chars and falling back if Markdown/HTML fails.
-    Automatically generates and replays with Gemini Native Neural Voice note for ALL requests when ALWAYS_VOICE_REPLY is True."""
+async def background_voice_agent(
+    bot,
+    chat_id: int,
+    text: str,
+    reply_to_message_id: Optional[int] = None,
+    caption: str = "🎙️ AURA Spoken Voice"
+):
+    """
+    Independent Asynchronous Background Voice Agent (Agent 2).
+    Generates neural voice memo and uploads native circular voice bubble (.ogg Opus)
+    completely detached in the background so text generation (Agent 1)
+    and subsequent incoming inputs from Mukil are NEVER blocked!
+    """
+    if not text or not bot or not chat_id:
+        return
+    try:
+        # Clean text for speech: remove code blocks, tables, URLs, markdown symbols
+        clean = re.sub(r'```[\s\S]*?```', 'Code snippet attached.', text)
+        clean = re.sub(r'`[^`]*`', '', clean)
+        clean = re.sub(r'\|[^\n]+\|', '', clean)  # remove markdown tables
+        clean = re.sub(r'[\*\#\_\[\]\(\)\~\>\-]', '', clean)
+        clean = re.sub(r'http\S+', '', clean)
+        clean = re.sub(r'[\U00010000-\U0010ffff]', '', clean)
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        spoken_text = clean[:320]
+        if not spoken_text:
+            return
+
+        audio_path = await generate_voice_audio(spoken_text)
+        if audio_path and os.path.exists(audio_path):
+            with open(audio_path, "rb") as voice_out:
+                await bot.send_voice(
+                    chat_id=chat_id,
+                    voice=voice_out,
+                    caption=caption,
+                    reply_to_message_id=reply_to_message_id
+                )
+            try:
+                os.remove(audio_path)
+            except Exception:
+                pass
+            logger.info(f"✅ Background Voice Agent delivered voice memo: {spoken_text[:50]}")
+    except Exception as e:
+        logger.error(f"❌ Background Voice Agent delivery error: {e}")
+
+async def _send_reply_safely(
+    update: Update,
+    text: str,
+    send_voice: bool = True,
+    parse_mode: Optional[str] = "Markdown",
+    custom_voice_text: Optional[str] = None,
+    voice_caption: str = "🎙️ AURA Spoken Voice"
+):
+    """
+    Agent 1 (Cognitive Text Agent): Safely and immediately dispatches markdown/text replies.
+    Hands off voice synthesis asynchronously to Agent 2 (Background Voice Agent) without blocking!
+    """
     if not text or not update or not update.effective_message:
         return
     chunks = [text[i:i+4000] for i in range(0, len(text), 4000)]
@@ -1565,40 +1573,27 @@ async def _send_reply_safely(update: Update, text: str, send_voice: bool = True,
             except Exception as ex:
                 logger.error(f"Error delivering Telegram message: {ex}")
 
+    # Immediately delegate voice generation to Background Voice Agent (Non-blocking Task)
     if ALWAYS_VOICE_REPLY and send_voice:
         try:
-            await send_voice_reply_guaranteed(update, text, caption="🎙️ AURA Spoken Voice")
+            bot = update.get_bot() if hasattr(update, "get_bot") else None
+            chat_id = update.effective_chat.id if update.effective_chat else None
+            msg_id = update.effective_message.message_id if update.effective_message else None
+            voice_script = custom_voice_text or text
+            if bot and chat_id:
+                asyncio.create_task(
+                    background_voice_agent(
+                        bot=bot,
+                        chat_id=chat_id,
+                        text=voice_script,
+                        reply_to_message_id=msg_id,
+                        caption=voice_caption
+                    )
+                )
         except Exception as ve:
-            logger.error(f"Voice replay error: {ve}")
+            logger.error(f"Voice background dispatch error: {ve}")
 
-async def send_voice_reply_guaranteed(update: Update, text: str, caption: str = "🔊 JARVIS Spoken Voice"):
-    """Guarantees a high-quality Neural Voice Note reply back to Telegram."""
-    if not text or not update.message:
-        return
-    try:
-        await update.effective_chat.send_action("record_voice")
-        # Clean text for speech: remove code blocks, tables, URLs, markdown symbols
-        clean = re.sub(r'```[\s\S]*?```', 'Code snippet attached.', text)
-        clean = re.sub(r'`[^`]*`', '', clean)
-        clean = re.sub(r'\|[^\n]+\|', '', clean)  # remove markdown tables
-        clean = re.sub(r'[\*\#\_\[\]\(\)\~\>\-]', '', clean)
-        clean = re.sub(r'http\S+', '', clean)
-        clean = re.sub(r'[\U00010000-\U0010ffff]', '', clean)
-        clean = re.sub(r'\s+', ' ', clean).strip()
-        spoken_text = clean[:320]
-        if not spoken_text:
-            spoken_text = "Task executed successfully Boss!"
-        audio_path = await generate_voice_audio(spoken_text)
-        if audio_path and os.path.exists(audio_path):
-            with open(audio_path, "rb") as voice_out:
-                await update.message.reply_voice(voice=voice_out, caption=caption)
-            try:
-                os.remove(audio_path)
-            except Exception:
-                pass
-            logger.info(f"✅ Guaranteed voice reply delivered: {spoken_text[:50]}")
-    except Exception as e:
-        logger.error(f"❌ Failed to deliver guaranteed voice reply: {e}")
+cognitive_lock = asyncio.Lock()
 
 global_telegram_aura_agent = None
 
@@ -1624,58 +1619,60 @@ async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
     Bridges live Karur Weather Radar, SGC Billing, Turso Cloud DB, and persistent context.
     Retains multi-turn conversation memory for flawless co-reference & pronoun resolution.
     Cascades gracefully to Central Orchestrator and ServerRouter.
+    Protected by cognitive_lock so concurrent inputs execute with clean conversational integrity.
     """
-    # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + Multi-Turn Memory + 36 Tools)
-    try:
-        aura_agent = get_or_create_aura_agent()
-        aura_reply = await asyncio.to_thread(aura_agent.chat, prompt)
-        if aura_reply and len(aura_reply.strip()) > 0:
-            return aura_reply.strip()
-    except Exception as aura_err:
-        logger.warning(f"AuraAgent execution notice: {aura_err}. Cascading to Central Orchestrator...")
+    async with cognitive_lock:
+        # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + Multi-Turn Memory + 36 Tools)
+        try:
+            aura_agent = get_or_create_aura_agent()
+            aura_reply = await asyncio.to_thread(aura_agent.chat, prompt)
+            if aura_reply and len(aura_reply.strip()) > 0:
+                return aura_reply.strip()
+        except Exception as aura_err:
+            logger.warning(f"AuraAgent execution notice: {aura_err}. Cascading to Central Orchestrator...")
 
-    # 1. Primary Cognitive & Task Plane: Central Orchestrator (Gemini + SQLite Durability)
-    try:
-        from app.orchestrator.central_orchestrator import central_orchestrator
-        orch_res = await asyncio.to_thread(
-            central_orchestrator.process_request,
-            raw_message=prompt,
-            user_id="mukil",
-            channel="TELEGRAM"
-        )
-        if orch_res and orch_res.get("reply"):
-            return orch_res["reply"]
-    except Exception as orch_err:
-        logger.warning(f"Central Orchestrator execution notice: {orch_err}. Falling back to ServerRouter...")
+        # 1. Primary Cognitive & Task Plane: Central Orchestrator (Gemini + SQLite Durability)
+        try:
+            from app.orchestrator.central_orchestrator import central_orchestrator
+            orch_res = await asyncio.to_thread(
+                central_orchestrator.process_request,
+                raw_message=prompt,
+                user_id="mukil",
+                channel="TELEGRAM"
+            )
+            if orch_res and orch_res.get("reply"):
+                return orch_res["reply"]
+        except Exception as orch_err:
+            logger.warning(f"Central Orchestrator execution notice: {orch_err}. Falling back to ServerRouter...")
 
-    # 2. Fallback: ServerRouter (Groq function declarations)
-    try:
-        history = mem.get_recent_conversations(limit=6)
-        history_formatted = [
-            {"role": "user" if h.get("sender") != "JARVIS" else "assistant", "content": h.get("text", "")}
-            for h in history
-        ]
-        router_resp = await asyncio.to_thread(
-            server_router.handle_message,
-            prompt,
-            conversation_history=history_formatted,
-            user_name=user_name
-        )
-        if router_resp and hasattr(router_resp, "reply") and router_resp.reply:
-            return router_resp.reply
-    except Exception as e:
-        logger.error(f"Cloud brain execution error: {e}")
+        # 2. Fallback: ServerRouter (Groq function declarations)
+        try:
+            history = mem.get_recent_conversations(limit=6)
+            history_formatted = [
+                {"role": "user" if h.get("sender") != "JARVIS" else "assistant", "content": h.get("text", "")}
+                for h in history
+            ]
+            router_resp = await asyncio.to_thread(
+                server_router.handle_message,
+                prompt,
+                conversation_history=history_formatted,
+                user_name=user_name
+            )
+            if router_resp and hasattr(router_resp, "reply") and router_resp.reply:
+                return router_resp.reply
+        except Exception as e:
+            logger.error(f"Cloud brain execution error: {e}")
 
-    # Fallback directly to Cloud Twin Gemini cascade
-    try:
-        from cloud.cloud_twin_agent import cloud_twin
-        tw = cloud_twin.process_prompt(prompt)
-        if tw and tw.get("reply"):
-            return tw["reply"]
-    except Exception as tw_err:
-        logger.error(f"Cloud Twin fallback error: {tw_err}")
+        # Fallback directly to Cloud Twin Gemini cascade
+        try:
+            from cloud.cloud_twin_agent import cloud_twin
+            tw = cloud_twin.process_prompt(prompt)
+            if tw and tw.get("reply"):
+                return tw["reply"]
+        except Exception as tw_err:
+            logger.error(f"Cloud Twin fallback error: {tw_err}")
 
-    return "Mapla! Naan online-la active-aa irukken. Unga request receive aayiduchu Boss. Enna task execute pannanum nu sollunga! 🚀"
+        return "Mapla! Naan online-la active-aa irukken. Unga request receive aayiduchu Boss. Enna task execute pannanum nu sollunga! 🚀"
 
 async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update):
@@ -1801,7 +1798,7 @@ async def bot_post_shutdown(application):
 
 def build_app():
     req = HTTPXRequest(
-        connection_pool_size=8,
+        connection_pool_size=16,
         read_timeout=30.0,
         write_timeout=30.0,
         connect_timeout=30.0,
@@ -1811,13 +1808,14 @@ def build_app():
         ApplicationBuilder()
         .token(TELEGRAM_BOT_TOKEN)
         .request(req)
+        .concurrent_updates(True)
         .post_init(bot_post_init)
         .post_shutdown(bot_post_shutdown)
         .build()
     )
     
     def add_cmd(name, fn):
-        app.add_handler(CommandHandler(name, auth_guard(fn)))
+        app.add_handler(CommandHandler(name, auth_guard(fn), block=False))
 
     add_cmd("start", start)
     add_cmd("call", call_cmd)
@@ -1877,10 +1875,10 @@ def build_app():
     add_cmd("help", menu_cmd)
     add_cmd("clear", clear_cmd)
     add_cmd("reset", clear_cmd)
-    app.add_handler(CallbackQueryHandler(gst_callback_handler, pattern="^gst_"))
-    app.add_handler(MessageHandler(filters.PHOTO | filters.Document.IMAGE, photo_handler))
-    app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_handler))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_handler))
+    app.add_handler(CallbackQueryHandler(gst_callback_handler, pattern="^gst_", block=False))
+    app.add_handler(MessageHandler(filters.PHOTO | filters.Document.IMAGE, photo_handler, block=False))
+    app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_handler, block=False))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_handler, block=False))
     app.add_error_handler(global_error_handler)
     return app
 
