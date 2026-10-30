@@ -29,31 +29,29 @@ PERSONA_PROMPTS = {
 DEFAULT_PERSONA = "MORNING_WAKEUP"
 
 
-def convert_wav_to_ogg(wav_path: str) -> str:
-    """Compresses uncompressed WAV to ultra-light OGG Opus for sub-second Telegram dispatch."""
-    ogg_path = wav_path.rsplit(".", 1)[0] + ".ogg"
+def convert_wav_to_ogg(input_path: str) -> str:
+    """Compresses WAV or MP3 to ultra-light OGG Opus for sub-second Telegram dispatch."""
+    ogg_path = input_path.rsplit(".", 1)[0] + ".ogg"
     try:
         import imageio_ffmpeg
         ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
-        cmd = [ffmpeg, "-y", "-i", wav_path, "-c:a", "libopus", "-b:a", "32k", ogg_path]
+        cmd = [ffmpeg, "-y", "-i", input_path, "-c:a", "libopus", "-b:a", "32k", ogg_path]
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
         if os.path.exists(ogg_path) and os.path.getsize(ogg_path) > 0:
             try:
-                os.remove(wav_path)
+                os.remove(input_path)
             except Exception:
                 pass
             return ogg_path
     except Exception as e:
         logger.warning(f"FFmpeg OGG conversion error: {e}")
-    return wav_path
+    return input_path
 
 
 def detect_language_and_voice(text: str) -> str:
     """Detects whether text contains Tamil script or English/Tanglish and picks the best fallback voice."""
-    tamil_chars = re.findall(r'[\u0B80-\u0BFF]', text)
-    if len(tamil_chars) > 3:
-        return "ta-IN-ValluvarNeural"
-    return "en-IN-PrabhatNeural"
+    # ta-IN-ValluvarNeural is our locked authentic Tamil male voice with warm, brotherly tone
+    return "ta-IN-ValluvarNeural"
 
 
 def clean_text_for_speech(text: str) -> str:
@@ -77,6 +75,25 @@ def clean_text_for_speech(text: str) -> str:
     return text[:450]
 
 
+def convert_tanglish_to_spoken_tamil(tanglish_text: str, gemini_key: str) -> str:
+    """Converts Roman Tanglish into natural colloquial spoken Tamil script so Neural TTS pronounces authentic Kongu/Stark slang."""
+    try:
+        from google import genai
+        client = genai.Client(api_key=gemini_key)
+        prompt = (
+            "Convert this Tanglish response into natural spoken Tamil script for a brotherly voice note (Tony Stark / Mapla style). "
+            "Keep English technical words (like Excel, Google Drive, Profit, P&L, Bill, Sheet, Status) in simple English or transliterated Tamil:\n"
+            f"Input: {tanglish_text}\n"
+            "Output ONLY the spoken Tamil text:"
+        )
+        res = client.models.generate_content(model="gemini-3.5-flash-lite", contents=prompt)
+        if res.text and len(res.text.strip()) > 0:
+            return res.text.strip()
+    except Exception as e:
+        logger.warning(f"Tanglish to Tamil conversion notice: {e}")
+    return tanglish_text
+
+
 async def generate_voice_audio(
     text: str,
     custom_voice: Optional[str] = None,
@@ -84,8 +101,8 @@ async def generate_voice_audio(
 ) -> str:
     """
     Generates an audio voice note file from text.
-    Primary: Google Gemini 3.8 Flash Lite Native Audio (Authentic Tony Stark Brotherly Slang)
-    Fallback: Microsoft Edge-TTS Neural Voice
+    Primary: Google Gemini Native Audio (Tony Stark Brotherly Slang)
+    Secondary Fallback: Microsoft Edge-TTS ta-IN-ValluvarNeural with spoken Tamil script conversion.
     """
     clean_text = clean_text_for_speech(text)
     if not clean_text:
@@ -97,22 +114,25 @@ async def generate_voice_audio(
     temp_dir = tempfile.gettempdir()
     audio_path = os.path.join(temp_dir, f"jarvis_voice_{os.getpid()}_{abs(hash(clean_text)) % 100000}.wav")
 
-    # 1. Primary: Gemini Native Audio
+    # 1. Primary: Gemini Native Audio (when daily quota is available)
     gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if gemini_key:
         for model_name in [
-            "gemini-3.8-flash-lite-tts",
-            "gemini-3.8-flash-tts",
             "gemini-2.5-flash-preview-tts",
-            "gemini-3.1-flash-tts-preview"
+            "gemini-3.8-flash-lite-tts",
+            "gemini-3.8-flash-tts"
         ]:
             try:
                 from google import genai
+                from google.genai import types
                 client = genai.Client(api_key=gemini_key)
                 prompt = f"{directive}{clean_text}"
                 res = client.models.generate_content(
                     model=model_name,
-                    contents=prompt
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["AUDIO"]
+                    )
                 )
                 if res.candidates and res.candidates[0].content and res.candidates[0].content.parts:
                     for part in res.candidates[0].content.parts:
@@ -126,15 +146,21 @@ async def generate_voice_audio(
                 logger.warning(f"{model_name} TTS failed: {e}")
                 continue
 
-    # 2. Secondary Fallback: Edge-TTS
-    selected_voice = custom_voice or detect_language_and_voice(clean_text)
+    # 2. Secondary High-Fidelity Fallback: Edge-TTS ta-IN-ValluvarNeural with Spoken Tamil Script Conversion
+    tamil_chars_count = len([c for c in clean_text if '\u0B80' <= c <= '\u0BFF'])
+    spoken_text = clean_text
+    if tamil_chars_count < 5 and gemini_key:
+        spoken_text = convert_tanglish_to_spoken_tamil(clean_text, gemini_key)
+
+    selected_voice = custom_voice or detect_language_and_voice(spoken_text)
     audio_path_mp3 = audio_path.replace(".wav", ".mp3")
     try:
         import edge_tts
-        communicate = edge_tts.Communicate(clean_text, selected_voice)
+        communicate = edge_tts.Communicate(spoken_text, selected_voice, rate="+8%", pitch="+1Hz")
         await communicate.save(audio_path_mp3)
-        logger.info(f"Generated voice using Edge-TTS fallback ({selected_voice})")
-        return audio_path_mp3
+        logger.info(f"Generated authentic Tamil voice using Edge-TTS ({selected_voice})")
+        ogg_file = convert_wav_to_ogg(audio_path_mp3)
+        return ogg_file
     except Exception as ex:
         logger.error(f"Edge-TTS failed: {ex}")
         with open(audio_path_mp3, "wb") as f:
