@@ -1223,155 +1223,42 @@ async def delnote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Error deleting note: {e}")
 
 async def handle_direct_shortcuts(text: str, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
-    """Inspects raw user text/voice input for direct actions before calling Antigravity."""
+    """
+    Inspects user input for strict, explicit command shortcuts before calling Antigravity.
+    Guarded with strict command anchors so conversational messages and natural queries
+    flow 100% to the Cognitive Brain (AuraAgent) without getting hijacked by naive regexes.
+    """
     t_lower = text.lower().strip()
 
-    # 1. Bill creation shortcut
-    if t_lower.startswith("bill:") or t_lower.startswith("/bill") or ("kattu" in t_lower and "kazhi" in t_lower and any(w in t_lower for w in ["rate", "bill", "yarn"])):
+    # 1. Explicit Bill creation shortcut (bill: or /bill only)
+    if t_lower.startswith("bill:") or t_lower.startswith("/bill"):
         clean_prompt = text.replace("bill:", "").replace("/bill", "").strip()
         context.args = clean_prompt.split(",")
         await bill_cmd(update, context)
         return True
 
-    # 1B. SGC Ledger / Bills Query & Calculation shortcut (Anti-Hallucination Guard)
-    ledger_query_triggers = [
-        "bills amount", "calculate panni", "bill calculate", "how many bills",
-        "total bills", "bill count", "ethana bill", "yathana bill", "yethana bill",
-        "september month ku calculate", "september month bill", "sep month bill",
-        "bills calculate", "ledger calculate", "sgc bill status", "invoices count",
-        "how many invoices", "ethana bills", "yathana bills", "yethana bills",
-        "tax mattum", "tax calculate", "gst calculate", "5% tax", "tax evlo", "gst evlo",
-        "bills potu", "bill potu", "yathana bills eruku", "ethana bills eruku",
-        "bills irukku", "bills eruku"
-    ]
-    is_ledger_query = any(q in t_lower for q in ledger_query_triggers) or (
-        any(b in t_lower for b in ["bill", "invoice"]) and 
-        any(w in t_lower for w in [
-            "calculate", "amount", "total", "count", "ethana", "yathana", "yethana",
-            "evlo", "yavlo", "yavalo", "yevlo", "tax", "gst", "potu", "iruku", "eruku",
-            "irukku", "list", "summary", "status"
-        ])
-    )
-    is_tax_specific = any(k in t_lower for k in [
-        "tax mattum", "tax calculate", "5% tax", "gst mattum", "gst calculate",
-        "tax amount", "gst amount", "tax evlo", "gst evlo"
-    ]) or ("tax" in t_lower and any(w in t_lower for w in ["calculate", "add panni", "solla", "evlo", "yavlo", "yavalo", "total"]))
-
-    if is_ledger_query or is_tax_specific:
-        from tools.sgc_billing_query import format_verified_bills_report, format_verified_tax_report, format_dual_month_tax_report, get_ledger_metrics
-        
-        # Check if user wants both/dual months
-        wants_dual = any(k in t_lower for k in [
-            "this month and previous month", "both", "rendu", "two month", "all month gst",
-            "this and prev", "current and last", "previous and this"
-        ])
-
-        target_m = "current"
-        if "all" in t_lower or "overall" in t_lower or "total" in t_lower:
-            target_m = "all"
-        elif "prev" in t_lower or "last" in t_lower or "before" in t_lower:
-            target_m = "prev"
-
-        if is_tax_specific and wants_dual:
-            rep = format_dual_month_tax_report()
-            metrics = get_ledger_metrics("prev")
-        elif is_tax_specific:
-            rep = format_verified_tax_report(target_m)
-            metrics = get_ledger_metrics(target_m)
-        else:
-            rep = format_verified_bills_report(target_m)
-            metrics = get_ledger_metrics(target_m)
-
-        p_name = metrics.get('period_name', 'target month')
-        if is_tax_specific and wants_dual:
-            this_m = get_ledger_metrics("current")
-            voice_msg = f"Mapla, Previous month total tax Rs.{metrics['total_gst']:,.0f}, and this month running tax Rs.{this_m['total_gst']:,.0f}."
-        elif is_tax_specific:
-            voice_msg = f"Mapla, {p_name} total 5% tax amount Rs.{metrics['total_gst']:,.0f} across {metrics['period_bills_count']} bills."
-        else:
-            voice_msg = f"Mapla, database-la irundhu live report pull panniten. Total {metrics['period_bills_count']} bills irukku. Total amount Rs.{metrics['total_gross']:,.0f}."
-
-        await _send_reply_safely(update, rep, custom_voice_text=voice_msg, voice_caption="🧾 SGC Verified Ledger")
-        return True
-
-    # 1C. Mark Bill Paid shortcut
-    paid_match = re.search(r'(?:mark\s+)?(?:bill\s*#?\s*|invoice\s*#?\s*)(\d+)\s*(?:is\s*)?paid', t_lower)
+    # 2. Explicit Mark Bill Paid shortcut (e.g. "bill 5 paid" or "mark bill 5 paid")
+    paid_match = re.search(r'^(?:mark\s+)?(?:bill|invoice)\s*#?\s*(\d+)\s*(?:is\s*)?paid$', t_lower)
     if not paid_match:
-        paid_match = re.search(r'paid\s*(?:bill\s*#?\s*)?(\d+)', t_lower)
+        paid_match = re.search(r'^paid\s*(?:bill|invoice)?\s*#?\s*(\d+)$', t_lower)
     if paid_match:
         bill_num = paid_match.group(1)
         context.args = [bill_num]
         await paid_cmd(update, context)
         return True
 
-    # 1D. Customer Ledger history shortcut
-    if t_lower.startswith("ledger:") or t_lower.startswith("/ledger") or ("ledger" in t_lower and any(w in t_lower for w in ["history", "summary", "party", "customer", "kudu", "sollu"])):
-        clean_ledger = text.replace("ledger:", "").replace("/ledger", "").replace("ledger", "").replace("history", "").replace("summary", "").replace("kudu", "").replace("sollu", "").strip()
+    # 3. Explicit Customer Ledger history shortcut (ledger: or /ledger only)
+    if t_lower.startswith("ledger:") or t_lower.startswith("/ledger"):
+        clean_ledger = text.replace("ledger:", "").replace("/ledger", "").strip()
         if clean_ledger:
             context.args = clean_ledger.split()
             await ledger_cmd(update, context)
             return True
 
-    # 1E. Party / Customer GST & Details lookup shortcut
-    gst_triggers = ["gst number", "gst numbe", "gstin", "gst no", "party details", "customer details"]
-    is_gst_lookup = any(k in t_lower for k in gst_triggers) or (
-        any(w in t_lower for w in ["party", "customer", "mill", "client"]) and 
-        any(w in t_lower for w in ["gst", "number", "numbe", "details", "contact"])
-    )
-    if is_gst_lookup:
-        from tools.sgc_billing_query import format_customer_details, load_all_customers
-        customers = load_all_customers()
-        matched_party = None
-        for c in customers:
-            name_parts = c.get("name", "").lower().split()
-            if any(part in t_lower for part in name_parts if len(part) > 3):
-                matched_party = c.get("name")
-                break
-        if not matched_party:
-            clean_q = re.sub(r'(?:party\s+name|party|customer|avanga|oda|details|solla|sollu|kudu|gst|number|numbe|\?)', ' ', t_lower).strip()
-            matched_party = clean_q.split()[0] if clean_q else "amsa"
-        rep = format_customer_details(matched_party)
-        await _send_reply_safely(update, rep)
-        return True
-
-    # 1F. Bill Download / PDF Send shortcut
-    download_triggers = [
-        "bill send", "send pannu", "send panva", "downloard", "download",
-        "download format", "pdf send", "bill pdf", "send bill", "first bill",
-        "second bill", "third bill", "1st bill", "2nd bill", "3rd bill"
-    ]
-    is_download_bill = (
-        any(k in t_lower for k in download_triggers) and 
-        any(w in t_lower for w in ["bill", "format", "send", "kudu", "pdf", "downloard", "download", "link"])
-    )
-    if is_download_bill:
-        from tools.sgc_billing_query import format_bill_download_reply
-        bill_num = 1
-        num_match = re.search(r'(?:bill\s*#?\s*)(\d+)', t_lower)
-        if num_match:
-            bill_num = int(num_match.group(1))
-        elif "first" in t_lower or "1st" in t_lower:
-            bill_num = 1
-        elif "second" in t_lower or "2nd" in t_lower:
-            bill_num = 2
-        elif "third" in t_lower or "3rd" in t_lower:
-            bill_num = 3
-        elif "fourth" in t_lower or "4th" in t_lower:
-            bill_num = 4
-        
-        rep = format_bill_download_reply(bill_num)
-        await _send_reply_safely(update, rep)
-        return True
-
-    # 2. Overdue Radar shortcut
-    if any(k in t_lower for k in ["overdue", "pending bill", "pending payment", "balance amount", "balance collection"]):
-        await overdue_cmd(update, context)
-        return True
-
-    # 3. Reminder / Alarm detection
-    reminder_keywords = ["remind me", "set reminder", "set a reminder", "set alarm", "set an alarm", "alarm veyyi", "timer veyyi", "reminder veyyi", "mani ku remind", "manikku remind"]
-    is_explicit_remind = any(k in t_lower for k in reminder_keywords)
-    is_timer_like = ("timer" in t_lower or "remind" in t_lower) and any(u in t_lower for u in ["min", "minute", "hour", "hr", "sec", "pm", "am", "mani", "m", "h", "s"])
+    # 4. Explicit Reminder / Alarm detection
+    reminder_keywords = ["remind me to", "remind me at", "remind me in", "set reminder for", "set a reminder for", "set alarm for", "alarm veyyi", "timer veyyi"]
+    is_explicit_remind = any(t_lower.startswith(k) for k in reminder_keywords)
+    is_timer_like = t_lower.startswith("timer ") and any(u in t_lower for u in ["min", "minute", "hour", "hr", "sec", "pm", "am", "mani", "m", "h", "s"])
 
     if is_explicit_remind or is_timer_like:
         try:
@@ -1403,7 +1290,7 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
         except Exception as ex:
             logger.info(f"Natural reminder parse fell through to Antigravity: {ex}")
 
-    # 4. Quick Note detection
+    # 5. Quick Note detection (note: or save note: only)
     if t_lower.startswith("note:") or t_lower.startswith("save note:"):
         note_txt = text.replace("save note:", "", 1).replace("Save note:", "", 1).replace("note:", "", 1).replace("Note:", "", 1).strip()
         if note_txt:
@@ -1411,7 +1298,7 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
             await note_cmd(update, context)
             return True
 
-    # 5. Master Resume auto-dispatch
+    # 6. Master Resume auto-dispatch
     if ("resume" in t_lower or "cv" in t_lower) and any(w in t_lower for w in ["send", "anuppu", "share", "kudu", "view", "check", "linked", "open"]):
         logger.info("Auto-dispatching Master Resume...")
         resume_path = r"C:\Users\mukil\jarvis-core\storage\Mukil_Master_Resume.pdf"
@@ -1428,16 +1315,14 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
             except Exception as resume_err:
                 logger.error(f"Failed to auto-send resume document: {resume_err}")
 
-    # 6. Smart Color Finder shortcut
-    hex_match = re.search(r'#([A-Fa-f0-9]{6})\b', text)
-    if hex_match or any(k in t_lower for k in ["color find", "colour find", "shade find", "color match", "match color", "pantone match"]):
-        if hex_match:
-            context.args = [f"#{hex_match.group(1)}"]
-        else:
-            context.args = text.split()
+    # 7. Exact Hex Color Finder shortcut
+    hex_match = re.search(r'^#([A-Fa-f0-9]{6})$', text.strip())
+    if hex_match:
+        context.args = [f"#{hex_match.group(1)}"]
         await color_cmd(update, context)
         return True
 
+    # All conversational, natural language questions flow 100% to Cognitive Brain (AuraAgent)!
     return False
 
 
