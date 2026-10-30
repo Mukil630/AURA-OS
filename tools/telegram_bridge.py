@@ -297,6 +297,26 @@ async def sheets_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Sheets cmd error: {e}")
         await update.effective_message.reply_text(f"❌ Error fetching sheets hub: {e}")
 
+async def skills_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Lists all progressive disclosure specialized skills."""
+    try:
+        from aura.kernel.skill_loader import skill_registry
+        msg = skill_registry.get_skills_telegram_summary()
+        await update.effective_message.reply_text(msg, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Skills cmd error: {e}")
+        await update.effective_message.reply_text(f"❌ Error fetching skills: {e}")
+
+async def agents_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Lists all autonomous swarm subagents and their attached skills."""
+    try:
+        from aura.kernel.swarm import subagent_swarm
+        msg = subagent_swarm.get_swarm_telegram_summary()
+        await update.effective_message.reply_text(msg, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Agents cmd error: {e}")
+        await update.effective_message.reply_text(f"❌ Error fetching agents: {e}")
+
 async def find_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Searches across all 90GB cloud nodes instantly."""
     if not context.args:
@@ -1266,6 +1286,15 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
             await update.effective_message.reply_text(reply_txt, parse_mode="Markdown", disable_web_page_preview=True)
             return True
 
+    # 0.2 Explicit Skills & Agents Swarm shortcuts
+    if t_lower in ["/skills", "/skill", "skills", "show skills", "list skills", "active skills"]:
+        await skills_cmd(update, context)
+        return True
+
+    if t_lower in ["/agents", "/swarm", "agents", "swarm", "show agents", "list agents", "active agents"]:
+        await agents_cmd(update, context)
+        return True
+
     # 1. Explicit Bill creation shortcut (bill: or /bill only)
     if t_lower.startswith("bill:") or t_lower.startswith("/bill"):
         clean_prompt = text.replace("bill:", "").replace("/bill", "").strip()
@@ -1748,6 +1777,10 @@ def build_app():
     add_cmd("drive", drive_cmd)
     add_cmd("sheet", sheets_cmd)
     add_cmd("sheets", sheets_cmd)
+    add_cmd("skills", skills_cmd)
+    add_cmd("skill", skills_cmd)
+    add_cmd("agents", agents_cmd)
+    add_cmd("swarm", agents_cmd)
     add_cmd("find", find_cmd)
     add_cmd("search", find_cmd)
     add_cmd("apply", apply_cmd)

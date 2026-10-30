@@ -74,10 +74,14 @@ class SkillRegistry:
         
         # Skill trigger keywords mapping
         triggers = {
-            "sgc-billing": ["sgc", "bill", "invoice", "overdue", "dyeing", "shade", "ledger", "mill balance"],
-            "washing-unit-operations": ["washing", "unit", "hub", "enzyme", "bio-polish", "silicon", "softener", "inward", "lot"],
+            "sgc-billing": ["sgc", "bill", "invoice", "overdue", "dyeing", "shade", "ledger", "mill balance", "gst"],
+            "washing-unit-operations": ["washing", "unit", "hub", "enzyme", "bio-polish", "silicon", "softener", "inward", "lot", "bleach", "bleaching"],
+            "google-sheets-cloud-hub": ["sheet", "sheets", "excel", "budget", "p&l", "profit", "salavu", "spreadsheet", "tracker"],
             "placement-ats-hunter": ["job", "placement", "resume", "tcs", "infinite", "zoho", "amazon", "accenture", "leetcode", "interview"],
-            "screen-vision-pilot": ["screen", "look at", "see my screen", "vision", "solve question", "tenses", "exam question"]
+            "screen-vision-pilot": ["screen", "look at", "see my screen", "vision", "solve question"],
+            "tenses-screen-solver": ["tenses", "exam", "assessment", "proctor", "versant", "mettl", "test solver"],
+            "web-scout-lead-hunter": ["mill", "spinning", "lead", "scrape", "b2b", "supplier", "cotton yarn"],
+            "memory-vault-mesh": ["vault", "drive mesh", "node", "backup", "restore", "context sync"]
         }
 
         for skill_name, keywords in triggers.items():
@@ -87,6 +91,19 @@ class SkillRegistry:
                     matched.append(self.skills[skill_name])
 
         return matched
+
+    def get_skills_telegram_summary(self) -> str:
+        """Returns a formatted list of all discovered skills for Telegram display."""
+        if not self.skills:
+            return "⚠️ No specialized skills currently registered."
+
+        lines = ["⚡ *AURA OS Autonomous Skills Registry*:\n"]
+        for idx, (name, s) in enumerate(self.skills.items(), start=1):
+            lines.append(f"{idx}. 🧩 *{s.name}*")
+            lines.append(f"   _{s.description}_\n")
+
+        lines.append("💡 *Directives*: Skills are loaded dynamically on demand whenever relevant keywords or tasks are triggered in chat!")
+        return "\n".join(lines)
 
 
 # Global Skill Registry Singleton
