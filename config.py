@@ -15,6 +15,7 @@ JARVIS_VOICE_SECRET_TOKEN = os.getenv('JARVIS_VOICE_SECRET_TOKEN', 'mukil-jarvis
 AURA_BRIDGE_HMAC_SECRET = os.getenv('AURA_BRIDGE_HMAC_SECRET', JARVIS_VOICE_SECRET_TOKEN)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN', '')
 AUTHORIZED_TELEGRAM_USERS = [int(x.strip()) for x in os.getenv('AUTHORIZED_TELEGRAM_USERS', '6233907249').split(',') if x.strip()]
+RENDER_DEPLOY_HOOK_URL = os.getenv('RENDER_DEPLOY_HOOK_URL', 'https://api.render.com/deploy/srv-daq7jgh42hec738k9c80?key=BTYP6BtH8yA')
 
 
 DRIVE_VAULT_URL = os.getenv('DRIVE_VAULT_URL', 'https://drive.google.com/drive/folders/1nGZG5-eIcxmkgQxBtZ7tjGTUoWWNY4m1?usp=sharing')
