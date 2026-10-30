@@ -288,6 +288,63 @@ def get_daily_summary(date_str: Optional[str] = None) -> Dict[str, Any]:
     }
 
 
+def pull_and_sync_ledger() -> Dict[str, Any]:
+    """
+    Downloads the live Google Sheet from Google Drive (capturing any edits Mukil made on phone/web),
+    re-calculates the Daily_PL_Summary for all recorded dates, saves locally, and syncs back to Drive.
+    """
+    try:
+        from google.oauth2.credentials import Credentials
+        from google.auth.transport.requests import Request
+        from googleapiclient.discovery import build
+
+        if not os.path.exists(TOKEN_PATH):
+            return {"status": "error", "message": "Google Drive token missing"}
+
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH)
+        if creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+
+        drive = build("drive", "v3", credentials=creds)
+        req = drive.files().export_media(
+            fileId=GOOGLE_SHEET_FILE_ID,
+            mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        content = req.execute()
+        with open(LOCAL_XLSX_PATH, "wb") as f:
+            f.write(content)
+
+        wb = openpyxl.load_workbook(LOCAL_XLSX_PATH)
+        all_dates = set()
+        if "Production_Revenue" in wb.sheetnames:
+            for r in wb["Production_Revenue"].iter_rows(min_row=2, values_only=True):
+                if r and r[0]:
+                    all_dates.add(str(r[0]).strip())
+        if "Daily_Expenses" in wb.sheetnames:
+            for r in wb["Daily_Expenses"].iter_rows(min_row=2, values_only=True):
+                if r and r[0]:
+                    all_dates.add(str(r[0]).strip())
+
+        for d in sorted(all_dates):
+            _update_daily_summary(wb, d)
+
+        wb.save(LOCAL_XLSX_PATH)
+        sync_to_google_drive()
+
+        latest_date = max(all_dates) if all_dates else datetime.now().strftime("%Y-%m-%d")
+        summary = get_daily_summary(latest_date)
+        return {
+            "status": "success",
+            "message": f"Successfully pulled live edits from Google Sheet and recalculated P&L for {len(all_dates)} dates.",
+            "latest_date": latest_date,
+            "summary": summary,
+            "sheet_url": GOOGLE_SHEET_URL
+        }
+    except Exception as e:
+        logger.error(f"Failed to pull and sync ledger: {e}")
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     print("Testing Bleaching Ledger Tool...")
     # Add test batch

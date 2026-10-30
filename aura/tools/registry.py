@@ -22,7 +22,8 @@ from aura.tools.bleaching_tools import (
     record_bleaching_production,
     record_bleaching_expense,
     get_bleaching_daily_summary,
-    get_bleaching_sheet_link
+    get_bleaching_sheet_link,
+    check_and_update_bleaching_sheet
 )
 from aura.tools.drive_mesh import get_drive_mesh_status, get_master_resume_link
 from aura.tools.github_tools import get_github_profile, list_github_repositories
@@ -68,6 +69,7 @@ class ToolRegistry:
         self.register("record_bleaching_expense", record_bleaching_expense)
         self.register("get_bleaching_daily_summary", get_bleaching_daily_summary)
         self.register("get_bleaching_sheet_link", get_bleaching_sheet_link)
+        self.register("check_and_update_bleaching_sheet", check_and_update_bleaching_sheet)
         
         # 3. 250GB Distributed Drive Mesh & Placement / GitHub Tools
         self.register("get_drive_mesh_status", get_drive_mesh_status)

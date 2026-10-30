@@ -81,6 +81,14 @@ class AuraAgent:
             except Exception:
                 self.gemini_chat = None
 
+    def chat(self, user_prompt: str) -> str:
+        """Synchronous chat execution returning the full accumulated response text."""
+        tokens = []
+        for kind, content in self.chat_stream(user_prompt):
+            if kind == "token":
+                tokens.append(content)
+        return "".join(tokens).strip()
+
     def chat_stream(self, user_prompt: str) -> Generator[Tuple[str, str], None, None]:
         """
         Runs the full AGY-style agentic loop with streaming output.

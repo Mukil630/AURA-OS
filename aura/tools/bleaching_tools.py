@@ -12,6 +12,7 @@ from tools.bleaching_ledger_tool import (
     record_production,
     record_expense,
     get_daily_summary,
+    pull_and_sync_ledger,
     GOOGLE_SHEET_URL
 )
 
@@ -89,3 +90,25 @@ def get_bleaching_daily_summary(date_str: str = "") -> str:
 def get_bleaching_sheet_link() -> str:
     """Returns the live Google Sheet URL for Mukil's Bleaching Unit Daily P&L Ledger."""
     return f"📱 SGC Bleaching Unit Master Google Sheet:\n{GOOGLE_SHEET_URL}"
+
+
+def check_and_update_bleaching_sheet() -> str:
+    """
+    Pulls any manual edits or new rows Mukil entered into the live Google Sheet from his phone/web,
+    recalculates daily profit & expenses across all dates, saves to the local ledger, and syncs back to Drive.
+    """
+    res = pull_and_sync_ledger()
+    if res.get("status") != "success":
+        return f"❌ Failed to sync Google Sheet: {res.get('message')}"
+
+    s = res.get("summary", {})
+    return (
+        f"✅ Google Sheet Live Sync Complete!\n"
+        f"• Status: Edits pulled & P&L recalculated\n"
+        f"• Latest Date: {res.get('latest_date')}\n"
+        f"• Total KGs: {s.get('total_kgs', 0):,.1f} KGs\n"
+        f"• Gross Revenue: ₹{s.get('gross_revenue', 0):,.2f}\n"
+        f"• Total Expenses: ₹{s.get('total_expenses', 0):,.2f}\n"
+        f"• Net Profit: ₹{s.get('net_profit', 0):,.2f} ({s.get('profit_margin', '0.0%')})\n"
+        f"🔗 Live Google Sheet: {GOOGLE_SHEET_URL}"
+    )
