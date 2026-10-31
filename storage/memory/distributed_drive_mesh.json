@@ -6,15 +6,15 @@
   "bleaching_bills_vault_id": "1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J",
   "bleaching_bills_vault_url": "https://drive.google.com/drive/folders/1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J",
   "status": "100%_LIVE_SYNCHRONIZED",
-  "last_synced": "2026-10-02T19:15:00+05:30",
+  "last_synced": "2026-10-31T16:50:00+05:30",
   "shared_with_primary": "mukilarasu55@gmail.com (Full Editor Access)",
   "authenticated_owner": "ganapathycolours1603@gmail.com",
   "allocated_pool_gb": 250,
   "nodes": {
     "node_01_core_memory": {
-      "id": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+      "id": "1gh8zeZiCTGlggSBYrOyCx8vPesrx0bm1",
       "name": "01_Core_Memory_Task_Logs",
-      "url": "https://drive.google.com/drive/folders/14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+      "url": "https://drive.google.com/drive/folders/1gh8zeZiCTGlggSBYrOyCx8vPesrx0bm1",
       "role": "Core Memory & Task Logs"
     },
     "node_02_project_codebases": {
@@ -24,15 +24,15 @@
       "role": "Project Codebases & Git Repos"
     },
     "node_03_placement_resumes": {
-      "id": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+      "id": "1crALd2118MYUPoEKokufVog_FgXrexks",
       "name": "03_Placement_ATS_Resumes",
-      "url": "https://drive.google.com/drive/folders/1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
+      "url": "https://drive.google.com/drive/folders/1crALd2118MYUPoEKokufVog_FgXrexks",
       "role": "Placement ATS Resumes & Portfolios"
     },
     "node_04_b2b_scraped_data": {
-      "id": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+      "id": "1RBj3i2QBdEAoquUN6uTQvO2QmYMKWoqi",
       "name": "04_B2B_Scraped_Data_Mill_CSVs",
-      "url": "https://drive.google.com/drive/folders/1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+      "url": "https://drive.google.com/drive/folders/1RBj3i2QBdEAoquUN6uTQvO2QmYMKWoqi",
       "role": "B2B Scraped Data & Mill CSVs"
     },
     "node_05_sgc_invoices": {
@@ -42,9 +42,9 @@
       "role": "SGC Main Invoices & Ledgers"
     },
     "node_06_media_proofs": {
-      "id": "1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+      "id": "1v17kqsJvTdiI3XNT0SvybwyxwoZ6mIvX",
       "name": "06_Visual_Verification_Screenshots",
-      "url": "https://drive.google.com/drive/folders/1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+      "url": "https://drive.google.com/drive/folders/1v17kqsJvTdiI3XNT0SvybwyxwoZ6mIvX",
       "role": "Visual Verification Screenshots"
     },
     "node_07_ai_model_weights": {

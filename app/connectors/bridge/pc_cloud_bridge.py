@@ -91,8 +91,9 @@ class CloudPCBridgeServer:
                 "message": "PC is currently in standby. Task has been queued in 5TB Drive Vault and will execute the moment your PC turns on, Boss!",
             }
 
-        # Pick the active worker
-        worker_id, ws = next(iter(self.active_connections.items()))
+        # Prioritize mukil_primary_pc worker if present
+        worker_id = "mukil_primary_pc" if "mukil_primary_pc" in self.active_connections else next(iter(self.active_connections.keys()))
+        ws = self.active_connections[worker_id]
         loop = asyncio.get_running_loop()
         fut = loop.create_future()
         self.pending_tasks[task_id] = fut
@@ -101,6 +102,15 @@ class CloudPCBridgeServer:
             await ws.send_json(payload)
             result = await asyncio.wait_for(fut, timeout=timeout_seconds)
             return result
+        except (WebSocketDisconnect, ConnectionResetError) as disc_err:
+            logger.warning(f"Worker '{worker_id}' disconnected during dispatch: {disc_err}")
+            self.disconnect_worker(worker_id)
+            # Re-queue or fallback
+            return {
+                "status": "DISCONNECTED",
+                "task_id": task_id,
+                "message": f"Worker '{worker_id}' disconnected during dispatch.",
+            }
         except asyncio.TimeoutError:
             logger.error(f"Task '{task_id}' timed out after {timeout_seconds}s.")
             return {

@@ -31,12 +31,12 @@ BILLS_DIR = STORAGE_DIR / "bills"
 DATA_DIR = BASE_DIR / "data"
 
 MESH_NODES = {
-    "node_01_core_memory": "14fGVZomgy2CItfspYo7cVXSImAqJDZZX",
+    "node_01_core_memory": "1gh8zeZiCTGlggSBYrOyCx8vPesrx0bm1",
     "node_02_project_codebases": "1Ef4CnQzdbYmc1kKUHeq4zZW0lFn5qXF1",
-    "node_03_placement_resumes": "1rl5EhQCcTiyyrVXp57l4P-4Bd76Q7YM2",
-    "node_04_b2b_scraped_data": "1ebinMnwlZFz6RhaRFYtVHhB2whzvPXDK",
+    "node_03_placement_resumes": "1crALd2118MYUPoEKokufVog_FgXrexks",
+    "node_04_b2b_scraped_data": "1RBj3i2QBdEAoquUN6uTQvO2QmYMKWoqi",
     "node_05_sgc_invoices": "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
-    "node_06_visual_screenshots": "1ckOQk0kLAlFr5S4xMkEZ3KXtm6hbSvjY",
+    "node_06_visual_screenshots": "1v17kqsJvTdiI3XNT0SvybwyxwoZ6mIvX",
     "node_07_ai_model_weights": "1s4YowqJvRiSEv8r1r_rc35ejVw1A05lU",
     "node_08_learning_materials": "18L9Q6MC1fiT_LIPg0FKpLlQ0OR052yyJ",
     "node_09_cloud_backups": "1SoZDnh1JPz59NaKxvnR72xtJSYWbL8uU",

@@ -5,6 +5,8 @@ Connects directly to Turso Cloud (AWS Mumbai) and local AppData fallback.
 Zero cross-contamination with SGC Dyeing data.
 """
 import os
+import re
+import difflib
 import sys
 import json
 import logging
@@ -24,6 +26,36 @@ try:
     HAS_TURSO = True
 except Exception:
     HAS_TURSO = False
+
+STOP_WORDS = {'fabrics', 'tex', 'textiles', 'exports', 'traders', 'dyeing', 'mills', 'handlooms', 'unit', 'colours', 'solution', 'sustainable', 'ms', 'sri', 'shri'}
+
+def normalize_name(s: str) -> str:
+    return re.sub(r'[^a-z0-9]', '', str(s).lower())
+
+def is_name_match(query_name: str, target_name: str) -> bool:
+    q_norm = normalize_name(query_name)
+    t_norm = normalize_name(target_name)
+    if not q_norm or not t_norm:
+        return False
+    if q_norm == t_norm:
+        return True
+    
+    q_words = [w.strip('.,/ ') for w in query_name.lower().split()]
+    t_words = [w.strip('.,/ ') for w in target_name.lower().split()]
+
+    q_tokens = [normalize_name(w) for w in q_words if normalize_name(w) not in STOP_WORDS and len(normalize_name(w)) > 1]
+    t_tokens = [normalize_name(w) for w in t_words if normalize_name(w) not in STOP_WORDS and len(normalize_name(w)) > 1]
+
+    for qt in q_tokens:
+        for tt in t_tokens:
+            if qt == tt:
+                return True
+            if (qt in tt or tt in qt) and (min(len(qt), len(tt)) / max(len(qt), len(tt)) >= 0.7):
+                return True
+            if len(qt) >= 4 and len(tt) >= 4:
+                if difflib.SequenceMatcher(None, qt, tt).ratio() >= 0.8:
+                    return True
+    return False
 
 def get_bleaching_local_db_path() -> Optional[Path]:
     """Finds active Bleaching billing database on Windows."""
@@ -82,6 +114,51 @@ async def query_turso_bills() -> List[Dict[str, Any]]:
         logger.warning(f"Turso bills query error: {e}")
         return []
 
+async def query_turso_customers() -> List[Dict[str, Any]]:
+    """Fetches all registered bleaching customers and GSTINs from Turso Cloud."""
+    if not HAS_TURSO:
+        return []
+    try:
+        client = get_db_client()
+        res = await client.execute("SELECT id, name, gst, phone, address FROM bleaching_customers;")
+        custs = []
+        for row in res.rows:
+            custs.append({
+                "id": row[0],
+                "name": str(row[1]),
+                "gstin": str(row[2] or ""),
+                "phone": str(row[3] or ""),
+                "address": str(row[4] or ""),
+            })
+        await client.close()
+        return custs
+    except Exception as e:
+        logger.warning(f"Turso customers query error: {e}")
+        return []
+
+def get_registered_customer(customer_name: str) -> Optional[Dict[str, Any]]:
+    """Synchronously retrieves customer from Turso Cloud bleaching_customers table."""
+    try:
+        import asyncio
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        if loop and loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                custs = pool.submit(asyncio.run, query_turso_customers()).result(timeout=4)
+        else:
+            custs = asyncio.run(query_turso_customers())
+        
+        c_low = customer_name.lower().strip()
+        for c in custs:
+            if is_name_match(customer_name, c["name"]):
+                return c
+    except Exception as e:
+        logger.warning(f"Error finding registered customer: {e}")
+    return None
+
 def get_bleaching_overview(bills: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Calculates overall Bleaching financial metrics."""
     total_invoiced = 0.0
@@ -119,7 +196,7 @@ def get_bleaching_ledger_for_customer(bills: List[Dict[str, Any]], customer_name
     c_lower = customer_name.lower().strip()
     matched = [
         b for b in bills
-        if c_lower in str(b.get("customer", "") or b.get("customer_name", "")).lower()
+        if is_name_match(customer_name, str(b.get("customer", "") or b.get("customer_name", "")))
     ]
 
     total_billed = sum(float(b.get("netAmount", 0) or b.get("net_amount", 0) or 0) for b in matched)

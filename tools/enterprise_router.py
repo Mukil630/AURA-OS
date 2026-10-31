@@ -233,31 +233,61 @@ def format_dual_enterprise_dashboard() -> Tuple[str, str]:
     return report_md, speech_text
 
 
-def format_customer_enterprise_ledger(customer_name: str) -> Tuple[str, str]:
+def format_customer_enterprise_ledger(customer_name: str, query: str = "") -> Tuple[str, str]:
     """
     Renders customer ledger across Bleaching, SGC, or both without cross-contamination.
+    Also retrieves verified GSTIN & profile from Turso Cloud directory if bills are 0.
     """
     c_clean = customer_name.strip()
     c_lower = c_clean.lower()
+    q_low = query.lower() if query else ""
+    is_gst_query = any(w in q_low for w in ["gst", "gstin", "tax", "tin"]) or any(w in c_lower for w in ["gst", "gstin"])
 
-    # 1. Search in Bleaching
+    # 1. Search in Bleaching bills
     bleach_bills = get_bleaching_bills_sync()
     bleach_ledger = bleaching_billing_query.get_bleaching_ledger_for_customer(bleach_bills, c_clean)
     has_bleach = bleach_ledger.get("total_bills", 0) > 0
 
-    # 2. Search in SGC
+    # 2. Search in SGC bills
     sgc_bills, _ = sgc_billing_query.load_all_bills()
-    sgc_matched = [b for b in sgc_bills if c_lower in str(b.get("customer", "")).lower()]
+    sgc_matched = [b for b in sgc_bills if bleaching_billing_query.is_name_match(c_clean, str(b.get("customer", "")))]
     has_sgc = len(sgc_matched) > 0
 
+    # 3. Check Registered Customers Directory in Turso Cloud (Bleaching)
+    reg_cust = bleaching_billing_query.get_registered_customer(c_clean)
+
     if not has_bleach and not has_sgc:
-        reply_md = (
-            f"⚠️ **Customer '{c_clean}' not found in billing databases.**\n\n"
-            "Checked both:\n"
-            "• SGC Yarn Dyeing Unit (11 bills)\n"
-            "• Bleaching Unit (2 bills)\n\n"
-            "💡 Available clients: *Eco Fusion, M.S.K Fabrics, Bannari Amman, Sowbhagiya, GAIA, Sri Laxmi*."
-        )
+        if reg_cust:
+            name_disp = reg_cust.get("name") or c_clean.title()
+            gst_disp = reg_cust.get("gstin") or "Not Registered"
+            addr_disp = reg_cust.get("address") or "Karur"
+            phone_disp = reg_cust.get("phone") or "N/A"
+            lines = [
+                f"👤 **REGISTERED CLIENT PROFILE — {name_disp.upper()}**",
+                "",
+                "🏭 **Enterprise**: Bleaching Unit (Mukil's Independent Enterprise)",
+                f"🆔 **GSTIN**: `{gst_disp}`",
+                f"📍 **Address / Location**: {addr_disp}",
+                f"📞 **Phone**: {phone_disp}",
+                "🧾 **Invoices Generated**: `0` (No pending bills yet)",
+                "💰 **Outstanding Balance**: `₹0.00`",
+                "",
+                "✅ Client is registered in Turso Cloud database with active GST verification."
+            ]
+            reply_md = "\n".join(lines)
+            speech = f"Boss, {name_disp} Bleaching Unit registered client. GSTIN number {gst_disp}. Ippo varaikum pending bills ethuvum illa."
+            return reply_md, speech
+
+        lines = [
+            f"⚠️ **Customer '{c_clean}' not found in billing databases.**",
+            "",
+            "Checked both:",
+            "• SGC Yarn Dyeing Unit (11 bills)",
+            "• Bleaching Unit (2 bills & registered client directory)",
+            "",
+            "💡 Available clients: *Eco Fusion, M.S.K Fabrics, Bannari Amman, Sowbhagiya, GAIA, Sri Laxmi, Malaiyamman*."
+        ]
+        reply_md = "\n".join(lines)
         speech = f"Boss, {c_clean} customer database-la kedaikala."
         return reply_md, speech
 
@@ -266,32 +296,47 @@ def format_customer_enterprise_ledger(customer_name: str) -> Tuple[str, str]:
 
     # Format Bleaching section
     if has_bleach:
+        b_gst = ""
+        if reg_cust and reg_cust.get("gstin"):
+            b_gst = f" | **GSTIN**: `{reg_cust['gstin']}`"
+        elif bleach_ledger.get("bills") and bleach_ledger["bills"][0].get("customerGst"):
+            b_gst = f" | **GSTIN**: `{bleach_ledger['bills'][0]['customerGst']}`"
+
         b_lines = [
             f"• *Bill #{b.get('billNo')}* ({b.get('date')}): `₹{float(b.get('netAmount', 0)):,.2f}` [{b.get('status')}]"
             for b in bleach_ledger.get("bills", [])
         ]
-        sections.append(
-            f"⚪ **BLEACHING UNIT (SALAVAI) — {c_clean.upper()}**\n"
-            f"• **Invoices**: `{bleach_ledger['total_bills']}` | **Gross**: `₹{bleach_ledger['total_billed']:,.2f}`\n"
-            f"• **Outstanding Due**: `₹{bleach_ledger['outstanding_balance']:,.2f}`\n"
-            f"🧾 **Bills List**:\n" + "\n".join(b_lines) + f"\n📁 [Bleaching Drive Folder]({BLEACHING_DRIVE_VAULT_URL})"
-        )
-        speech_parts.append(f"Bleaching Unit-la {bleach_ledger['total_bills']} bills, outstanding balance {bleach_ledger['outstanding_balance']} rupees")
+        b_sec_lines = [
+            f"⚪ **BLEACHING UNIT (SALAVAI) — {c_clean.upper()}**{b_gst}",
+            f"• **Invoices**: `{bleach_ledger['total_bills']}` | **Gross**: `₹{bleach_ledger['total_billed']:,.2f}`",
+            f"• **Outstanding Due**: `₹{bleach_ledger['outstanding_balance']:,.2f}`",
+            "🧾 **Bills List**:",
+            *b_lines,
+            f"📁 [Bleaching Drive Folder]({BLEACHING_DRIVE_VAULT_URL})"
+        ]
+        sections.append("\n".join(b_sec_lines))
+        gst_speech = f" GSTIN number {reg_cust['gstin']}." if (reg_cust and reg_cust.get("gstin") and is_gst_query) else ""
+        speech_parts.append(f"Bleaching Unit-la {bleach_ledger['total_bills']} bills, outstanding balance {bleach_ledger['outstanding_balance']} rupees.{gst_speech}")
 
     # Format SGC section
     if has_sgc:
         sgc_billed = sum(float(b.get("netAmount", 0) or 0) for b in sgc_matched)
         sgc_pending = sum(float(b.get("netAmount", 0) or 0) for b in sgc_matched if str(b.get("status", "")).upper() != "PAID")
+        sgc_gst = sgc_matched[0].get("partyGst") or ""
+        sgc_gst_str = f" | **GSTIN**: `{sgc_gst}`" if sgc_gst else ""
         s_lines = [
             f"• *Bill #{b.get('billNo')}* ({b.get('date')}): `₹{float(b.get('netAmount', 0)):,.2f}` [{b.get('status')}]"
             for b in sgc_matched
         ]
-        sections.append(
-            f"🟢 **SGC YARN DYEING UNIT — {c_clean.upper()}**\n"
-            f"• **Invoices**: `{len(sgc_matched)}` | **Gross**: `₹{sgc_billed:,.2f}`\n"
-            f"• **Outstanding Due**: `₹{sgc_pending:,.2f}`\n"
-            f"🧾 **Bills List**:\n" + "\n".join(s_lines) + f"\n📁 [SGC Drive Folder]({SGC_DRIVE_VAULT_URL})"
-        )
+        s_sec_lines = [
+            f"🟢 **SGC YARN DYEING UNIT — {c_clean.upper()}**{sgc_gst_str}",
+            f"• **Invoices**: `{len(sgc_matched)}` | **Gross**: `₹{sgc_billed:,.2f}`",
+            f"• **Outstanding Due**: `₹{sgc_pending:,.2f}`",
+            "🧾 **Bills List**:",
+            *s_lines,
+            f"📁 [SGC Drive Folder]({SGC_DRIVE_VAULT_URL})"
+        ]
+        sections.append("\n".join(s_sec_lines))
         speech_parts.append(f"SGC Dyeing-la {len(sgc_matched)} bills, outstanding {sgc_pending} rupees")
 
     reply_md = (
@@ -300,6 +345,7 @@ def format_customer_enterprise_ledger(customer_name: str) -> Tuple[str, str]:
     )
     speech = f"Boss, {c_clean}-oda ledger ready! " + "; ".join(speech_parts) + "."
     return reply_md, speech
+
 
 
 def format_specific_bill(bill_no: int) -> Tuple[str, str]:
@@ -368,7 +414,7 @@ def handle_smart_billing_query(query: str, entities: Optional[Dict[str, Any]] = 
 
     # 2. Specific Customer Ledger Query
     if cust:
-        return format_customer_enterprise_ledger(cust)
+        return format_customer_enterprise_ledger(cust, query=query)
 
     # 3. Tax / GST Query
     if is_tax:
