@@ -1634,6 +1634,17 @@ async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
     Protected by cognitive_lock so concurrent inputs execute with clean conversational integrity.
     """
     async with cognitive_lock:
+        # 0.0 Supreme Remote Bridge: Check if Mukil's Local PC Worker is Online!
+        try:
+            from app.connectors.bridge.pc_cloud_bridge import bridge_server
+            if bridge_server.is_pc_online():
+                logger.info("🟢 Mukil's PC is ONLINE! Dispatching prompt to local Antigravity PC Worker...")
+                res = await bridge_server.dispatch_task(command=prompt, task_type="EXECUTE_INTENT", timeout_seconds=45.0)
+                if res and res.get("status") == "COMPLETED" and res.get("output_text"):
+                    return res["output_text"]
+        except Exception as bridge_err:
+            logger.warning(f"PC Bridge dispatch notice: {bridge_err}")
+
         # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + Multi-Turn Memory + 36 Tools)
         try:
             aura_agent = get_or_create_aura_agent()
