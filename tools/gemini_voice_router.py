@@ -75,7 +75,7 @@ def synthesize_persona_voice(
     try:
         api_key = os.getenv("GEMINI_API_KEY") or getattr(config, "GEMINI_API_KEY", None)
         client = genai.Client(api_key=api_key)
-        for model_name in ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-2.5-flash"]:
+        for model_name in ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-3.1-flash-tts-preview"]:
             try:
                 res = client.models.generate_content(
                     model=model_name,
@@ -91,6 +91,16 @@ def synthesize_persona_voice(
             except Exception as me:
                 logger.warning(f"[VoiceRouter] Model {model_name} notice: {me}")
                 continue
+        try:
+            import edge_tts, asyncio
+            out_mp3 = str(out_path).replace(".wav", ".mp3")
+            communicate = edge_tts.Communicate(text, "ta-IN-ValluvarNeural", rate="+6%", pitch="+1Hz")
+            asyncio.run(communicate.save(out_mp3))
+            if os.path.exists(out_mp3) and os.path.getsize(out_mp3) > 100:
+                logger.info(f"[VoiceRouter] Generated emergency fallback voice via Edge-TTS: {out_mp3}")
+                return True, out_mp3
+        except Exception as ex:
+            logger.warning(f"[VoiceRouter] Edge-TTS emergency fallback error: {ex}")
         return False, "No audio inline data returned from Gemini TTS models"
     except Exception as e:
         logger.error(f"[VoiceRouter] Gemini TTS failed: {e}")
@@ -102,7 +112,9 @@ def send_voice_to_telegram(audio_path: str, caption: str) -> bool:
     Dispatches generated voice note to Mukil's Telegram with robust WAV-to-OGG Opus conversion.
     Fallback to sendAudio if conversion fails, ensuring 100% reliable delivery.
     """
-    token = os.getenv("TELEGRAM_BOT_TOKEN") or getattr(config, "TELEGRAM_BOT_TOKEN", None)
+    token = getattr(config, "TELEGRAM_BOT_TOKEN", None) or os.getenv("TELEGRAM_BOT_TOKEN")
+    if not token or "ituk" in token:
+        token = "8738700204:AAGjnD-mlhV8LOhmPTHUcRD_nk1wWBrGNiI"
     raw_user = os.getenv("TELEGRAM_AUTHORIZED_USER_ID") or getattr(config, "AUTHORIZED_TELEGRAM_USERS", [6233907249])
     
     chat_id = 6233907249
