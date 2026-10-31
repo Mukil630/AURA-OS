@@ -844,14 +844,14 @@ async def paid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _send_reply_safely(update, f"❌ {res.get('error', 'Error updating bill')}", send_voice=False, parse_mode="Markdown")
 
 async def ledger_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Fetches customer historical dossier & ledger."""
+    """Fetches customer historical dossier & ledger across SGC and Bleaching."""
     args = context.args
     if not args:
-        await _send_reply_safely(update, "Usage: `/ledger <Customer_Name>` (e.g. `/ledger Sri Laxmi`)", send_voice=False, parse_mode="Markdown")
+        await _send_reply_safely(update, "Usage: `/ledger <Customer_Name>` (e.g. `/ledger Sri Laxmi` or `/ledger Eco Fusion`)", send_voice=False, parse_mode="Markdown")
         return
     query = " ".join(args).strip()
-    from tools.sgc_billing_query import format_customer_ledger
-    rep = format_customer_ledger(query)
+    from tools.enterprise_router import format_customer_enterprise_ledger
+    rep, speech = format_customer_enterprise_ledger(query)
     await _send_reply_safely(update, rep, send_voice=True, parse_mode="Markdown")
 
 async def bleach_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):

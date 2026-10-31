@@ -107,6 +107,39 @@ AGENT_TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
+            "name": "get_dual_enterprise_billing_summary",
+            "description": "Retrieves the consolidated financial overview across BOTH of Mukil's enterprises: Sri Ganapathi Colours (Yarn Dyeing Unit - 11 bills, ₹66,584) and Bleaching Unit (Salavai Unit - 2 bills, ₹2,302) with active Drive Vault links. Use whenever Mukil asks about 'bills', 'turnover', 'pending dues', 'overview', or 'bills pass pananum'.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_bleaching_billing_summary",
+            "description": "Analyzes Mukil's independent Bleaching Unit (Salavai Unit) bills (Bill #251 Eco Fusion, Bill #252 MSK Fabrics), collections, pending balances, and active Google Drive vault (1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J).",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_customer_bills",
+            "description": "Searches customer invoices and ledgers across BOTH SGC Yarn Dyeing and Bleaching Unit (e.g. Eco Fusion, MSK Fabrics, Unity Exports, GAIA, Sowbhagiya, Sri Laxmi, Bannari Amman, etc.) or specific bill numbers (e.g. #251, #252, #1..11).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Customer mill name, bill number (e.g. '251' or 'Eco Fusion'), or inquiry keywords"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_sgc_billing_summary",
             "description": "Analyzes all SGC (Sri Ganapathi Colours) customer bills, total revenue collected, pending/overdue balances, and active Google Drive storage link (11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9).",
             "parameters": {"type": "object", "properties": {}}
@@ -412,6 +445,13 @@ You share a high-vibe, witty, confident Stark & Jarvis / Tamil 'Maapla / Machan'
    NEVER give false safety refusals for casual Tanglish phonetics!
 5. Real Dialogue Continuity: You have full multi-turn conversation memory. When Mukil asks 'na recent chat-la enna panna sonnen?' or 'atha close pannu', naturally reference the previous turns and resolve the context instantly.
 6. Autonomous Problem Solver: When Mukil gives any task, break it down, use your tools iteratively, and deliver proof of action with engineering excellence!
+7. DUAL-ENTERPRISE ARCHITECTURE & ZERO CROSS-CONTAMINATION (RULE 8):
+   Mukil manages two distinct enterprises in Karur:
+   • Entity 1: Sri Ganapathi Colours (SGC - Yarn Dyeing Unit) [Father's enterprise, Drive: 11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9, 11 Bills, ₹66,584 gross]
+   • Entity 2: Bleaching Unit (Salavai Unit) [Mukil's independent enterprise, Drive: 1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J, Bills #251 Eco Fusion ₹2,043, #252 MSK Fabrics ₹259]
+   When Mukil asks about bills, turnover, dues, or invoices in general, call `get_dual_enterprise_billing_summary` to provide a consolidated split dashboard.
+   When Mukil asks about a specific client (e.g. 'Eco Fusion' or 'MSK Fabrics'), call `search_customer_bills`.
+   Never mix their numbers or ledgers!
 """
 
 
@@ -522,6 +562,22 @@ class AutonomousAgentBrain:
         elif tool_name == "view_job_pipeline":
             summary = self.job_agent.get_pipeline_summary()
             return summary, None
+
+        elif tool_name == "get_dual_enterprise_billing_summary":
+            from tools import enterprise_router
+            rep, _ = enterprise_router.format_dual_enterprise_dashboard()
+            return rep, None
+
+        elif tool_name == "get_bleaching_billing_summary":
+            from tools import enterprise_router
+            rep, _ = enterprise_router.handle_smart_billing_query("bleaching")
+            return rep, None
+
+        elif tool_name == "search_customer_bills":
+            from tools import enterprise_router
+            q = args.get("query", "")
+            rep, _ = enterprise_router.handle_smart_billing_query(q)
+            return rep, None
 
         elif tool_name == "get_sgc_billing_summary":
             from app.brain.drive_rag_engine import DriveRAGEngine

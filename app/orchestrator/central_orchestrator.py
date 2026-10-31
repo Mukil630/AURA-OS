@@ -30,22 +30,25 @@ Your role is to understand user requests, extract structured intent, plan multi-
 USER PROFILE:
 - Boss: Mukil (AI Engineer & Textile Entrepreneur)
 - Tone: Crisp, executive, authentic Tanglish + English ('Boss' / 'Mapla' Stark dynamic).
-- Core Businesses: Sri Ganapathi Colours (Yarn Dyeing) & Industrial Washing Hub.
+- Core Enterprises (Dual-Enterprise Architecture):
+  1. Sri Ganapathi Colours (Yarn Dyeing Unit - Father's Enterprise)
+  2. Sri Ganapathi Colours - Bleaching Unit (Salavai Unit - Mukil's Independent Enterprise)
+  3. Industrial Washing Hub
 
 INSTRUCTION:
 Classify the user's intent into one of these categories:
 1. `SCHEDULE_REMINDER`: User wants an alarm, timer, or future follow-up.
-2. `SGC_BILLING_QUERY`: User asks about customer sales bills/invoices, which bills exist, turnover, GST, passing bills, or overdue debtors.
-   CRITICAL TEXTILE MILL DIRECTIVE: Phrases like 'bills pass pananum', 'bills pass pannanum', 'enna bills eruku', 'bills enna iruku', 'endha month bills', 'pending bills', 'invoices' are SGC customer sales bills! In Tamil textile business context, 'bills pass pananum' means clearing/passing sales bills or reviewing pending bills. ALWAYS classify these as `SGC_BILLING_QUERY`.
+2. `ENTERPRISE_BILLING_QUERY`: User asks about customer sales bills/invoices, which bills exist, turnover, GST, passing bills, customer ledgers, or overdue debtors across either SGC Yarn Dyeing Unit or Bleaching Unit (Salavai Unit).
+   TEXTILE BUSINESS DIRECTIVE: Phrases like 'bills pass pananum', 'bills pass pannanum', 'enna bills eruku', 'turnover evlo', 'dues evlo', 'pending bills', 'invoices', 'bill #251', 'Eco Fusion', 'Bannari' refer to Mukil's textile businesses. ALWAYS classify billing questions here!
 3. `BUSINESS_PAYABLES`: ONLY classify here if user explicitly asks about supplier purchases (e.g., Lakshmi Chemicals, Bannari, chemical vendors, raw material payables, EB commercial electricity bills).
 4. `WASHING_HUB_OPS`: User asks about industrial washing machine cycles, bio-polish enzymes, silicon finish, or garment lots.
-5. `BLEACHING_BILLING_QUERY`: User asks about Mukil's Bleaching Unit / Salavai unit bills, bleaching invoices, bleaching turnover, bleaching ledger, or mentions 'bleach', 'bleaching', 'salavai' in a billing context.
+5. `BLEACHING_BILLING_QUERY`: User asks specifically about Mukil's Bleaching Unit / Salavai unit bills, bleaching invoices, bleaching turnover, bleaching ledger, or mentions 'bleach', 'bleaching', 'salavai' in a billing context.
 6. `TASK_MANAGEMENT`: User asks to list tasks, check task status, or cancel a task.
 7. `GENERAL_CONVERSATION`: Conversational chat, advice, or technical queries.
 
 Analyze the user's request and respond strictly in valid JSON format:
 {
-  "intent": "SCHEDULE_REMINDER | SGC_BILLING_QUERY | BUSINESS_PAYABLES | WASHING_HUB_OPS | BLEACHING_BILLING_QUERY | TASK_MANAGEMENT | GENERAL_CONVERSATION",
+  "intent": "SCHEDULE_REMINDER | ENTERPRISE_BILLING_QUERY | SGC_BILLING_QUERY | BUSINESS_PAYABLES | WASHING_HUB_OPS | BLEACHING_BILLING_QUERY | TASK_MANAGEMENT | GENERAL_CONVERSATION",
   "task_description": "Brief summary of the action",
   "priority": "HIGH | NORMAL | URGENT",
   "reminder_time_expr": "e.g. 'tomorrow at 6 pm' or '10m' or null",
@@ -103,8 +106,10 @@ LIVE REAL-TIME CONTEXT:
 - Current Clock Time (Asia/Kolkata): {time_str}
 - Today's Date: {date_str}
 - Region: Karur, Tamil Nadu
-- Core Enterprise: Sri Ganapathi Colours (Yarn Dyeing) & Industrial Washing Hub
-- Verified Financials: 10 customer sales bills, ₹63,917.00 pending receivables (Bannari Amman Dyeing ₹30,000 overdue)
+- Core Enterprises (Dual-Enterprise Architecture):
+  1. Sri Ganapathi Colours (Yarn Dyeing Unit): 11 customer sales bills, ₹66,584.00 gross receivables (Drive: 11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)
+  2. Bleaching Unit (Salavai Unit - Mukil's Enterprise): 2 bills (#251 Eco Fusion ₹2,043, #252 MSK Fabrics ₹259), ₹2,302.00 gross (Drive: 1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J)
+  - Consolidated Group Turnover: ₹68,886.00 (13 Bills total)
 - Persona Directive: You are AURA (JARVIS Prime), Mukil's executive partner & brother ('Mapla' dynamic). Always give accurate real-time time, date, and operations facts in warm, high-energy Tanglish + English.
 """
 
@@ -161,7 +166,7 @@ LIVE REAL-TIME CONTEXT:
                 "entities": {"action_verb": "remind"},
                 "conversational_reply": f"Sure Boss! Reminder schedule pannidren: '{prompt}'."
             }
-        elif any(w in p for w in ["bill", "invoic", "turnover", "gst", "debtor", "pass pananum", "pass pannanum", "enna bills", "endha month"]):
+        elif any(w in p for w in ["bill", "invoic", "turnover", "gst", "debtor", "pass pananum", "pass pannanum", "enna bills", "endha month", "dues", "salavai", "bleach"]):
             target_m = None
             if "oct" in p:
                 target_m = "october"
@@ -172,12 +177,12 @@ LIVE REAL-TIME CONTEXT:
             elif "last month" in p or "prev" in p:
                 target_m = "previous"
             return {
-                "intent": "SGC_BILLING_QUERY",
-                "task_description": "Query SGC billing database",
+                "intent": "ENTERPRISE_BILLING_QUERY",
+                "task_description": "Query Dual-Enterprise billing databases",
                 "priority": "NORMAL",
                 "reminder_time_expr": None,
                 "entities": {"action_verb": "query_billing", "target_month": target_m},
-                "conversational_reply": "Checking live SGC billing database now..."
+                "conversational_reply": "Checking Dual-Enterprise billing intelligence..."
             }
         elif any(w in p for w in ["payable", "supplier", "lakshmi", "bannari", "eb", "cashflow"]):
             return {
@@ -328,12 +333,12 @@ LIVE REAL-TIME CONTEXT:
         intent = plan.get("intent", "GENERAL_CONVERSATION")
         priority = plan.get("priority", "NORMAL")
 
-        # Deterministic Guardrail for SGC Billing Queries:
+# Deterministic Guardrail for Dual-Enterprise Billing Queries:
         raw_low = clean_input.lower()
-        bill_indicators = ["bill", "invoic", "turnover", "gst", "debtor", "pass pananum", "pass pannanum", "enna bills", "endha month"]
-        supplier_indicators = ["lakshmi", "bannari", "supplier", "vendor", "eb bill", "electricity", "payable"]
+        bill_indicators = ["bill", "invoic", "turnover", "gst", "debtor", "pass pananum", "pass pannanum", "enna bills", "endha month", "dues", "salavai", "bleach", "eco fusion", "bannari"]
+        supplier_indicators = ["lakshmi chemicals", "chemical vendor", "eb bill", "electricity"]
         if any(w in raw_low for w in bill_indicators) and not any(w in raw_low for w in supplier_indicators):
-            intent = "SGC_BILLING_QUERY"
+            intent = "ENTERPRISE_BILLING_QUERY"
 
         # 2. Persist Task in SQLite
         task_record = durable_task_manager.create_task(
@@ -398,9 +403,11 @@ LIVE REAL-TIME CONTEXT:
                 speech_reply = f"Done Boss! {rem_res['trigger_time_ist']}-ku reminder schedule panniten!"
 
             # -------------------------------------------------------------
-            # DOMAIN B: SGC BILLING & OPERATIONS
             # -------------------------------------------------------------
-            elif intent == "SGC_BILLING_QUERY":
+            # DOMAIN B: DUAL-ENTERPRISE BILLING & OPERATIONS (SGC + BLEACHING)
+            # -------------------------------------------------------------
+            elif intent in ["ENTERPRISE_BILLING_QUERY", "SGC_BILLING_QUERY", "BLEACHING_BILLING_QUERY"]:
+                from tools import enterprise_router
                 from tools import sgc_billing_query
                 import re
 
@@ -417,15 +424,7 @@ LIVE REAL-TIME CONTEXT:
                         except Exception:
                             pass
 
-                # Extract Customer Name if specified
-                customer = entities.get("customer")
-                if not customer:
-                    for known in ["gaia", "sowbhagiya", "laxmi", "sri ganapathi"]:
-                        if known in raw_lower:
-                            customer = known
-                            break
-
-                # 1. Action: Mark Specific Bill as Paid
+                # Action: Mark Specific Bill as Paid
                 if ("paid" in raw_lower or "cleared" in raw_lower) and bill_no:
                     p_res = sgc_billing_query.mark_bill_paid(bill_no)
                     if p_res.get("success"):
@@ -442,92 +441,15 @@ LIVE REAL-TIME CONTEXT:
                         final_reply = f"⚠️ Could not mark bill #{bill_no} paid: {p_res.get('error')}"
                         speech_reply = f"Bill #{bill_no} update panna mudiyala Boss."
                         durable_task_manager.update_task_status(task_id, status="FAILED", error_message=p_res.get('error'))
-
-                # 2. Query Specific Bill Details
-                elif bill_no:
-                    b_rep = sgc_billing_query.format_bill_download_reply(int(bill_no))
-                    b_data = sgc_billing_query.get_bill_by_no(int(bill_no))
-                    final_reply = b_rep
-                    if b_data:
-                        speech_reply = f"Bill #{bill_no} {b_data.get('customer')}-ku ₹{float(b_data.get('netAmount', 0)):,.0f} net amount-la iruku Boss."
-                        durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bill #{bill_no} details fetched", result_data=b_data)
-                    else:
-                        speech_reply = f"Bill #{bill_no} database-la kedaikala Boss."
-                        durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bill #{bill_no} not found")
-
-                # 3. Query Specific Customer Ledger
-                elif customer:
-                    cust_ledger = sgc_billing_query.format_customer_ledger(customer)
-                    final_reply = cust_ledger
-                    speech_reply = f"{customer.capitalize()} customer ledger ready Boss!"
-                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Customer ledger for {customer}")
-
-                # 4. Query GST / Tax Report
-                elif any(w in raw_lower for w in ["tax", "gst", "cgst", "sgst", "gstr"]):
-                    target_m = entities.get("target_month")
-                    if target_m:
-                        final_reply = sgc_billing_query.format_verified_tax_report(target_m)
-                    else:
-                        final_reply = sgc_billing_query.format_dual_month_tax_report()
-                    speech_reply = "SGC 5% GST tax calculation report ready Boss!"
-                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary="SGC GST Tax report generated")
-
-                # 5. Query Overdue Debtors Recovery Radar
-                elif any(w in raw_lower for w in ["overdue", "debtor", "recovery", "who owes"]):
-                    try:
-                        from tools import sgc_overdue_radar
-                        final_reply = sgc_overdue_radar.generate_executive_radar_report()
-                    except Exception:
-                        final_reply = sgc_billing_query.format_verified_bills_report("all")
-                    speech_reply = "SGC overdue recovery radar ready Boss!"
-                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary="Overdue radar generated")
-
-                # 6. Month-wise Breakdown Dossier (All Months / Which Month / Bills to pass)
-                elif any(w in raw_lower for w in ["endha month", "which month", "all", "ella bills", "bills pass", "pass pananum", "pass pannanum", "breakdown", "across month", "enna bills"]) or entities.get("target_month") in ["all", "overall", "total"]:
-                    rep, sp = sgc_billing_query.format_month_wise_bills_dossier()
-                    final_reply = rep
-                    speech_reply = sp
-                    durable_task_manager.update_task_status(
-                        task_id, status="COMPLETED",
-                        result_summary="Generated month-wise SGC bills dossier",
-                        result_data={"bills_count": 9}
-                    )
-
-                # 7. Query Specific Single Month
-                elif entities.get("target_month") or any(m in raw_lower for m in ["september", "sep", "october", "oct", "last month", "this month"]):
-                    if "sep" in raw_lower or entities.get("target_month") == "september":
-                        m_term = "september"
-                    elif "oct" in raw_lower or entities.get("target_month") == "october":
-                        m_term = "october"
-                    elif "last month" in raw_lower or "prev" in raw_lower:
-                        m_term = "previous"
-                    else:
-                        m_term = entities.get("target_month") or "current"
-
-                    final_reply = sgc_billing_query.format_verified_bills_report(m_term)
-                    m = sgc_billing_query.get_ledger_metrics(m_term)
-                    if m.get("success"):
-                        p_name = m.get("period_name", m_term.capitalize())
-                        p_count = m.get("period_bills_count", 0)
-                        p_gross = m.get("total_gross", 0)
-                        p_gst = m.get("total_gst", 0)
-                        speech_reply = f"Boss, {p_name}-la exactly {p_count} bills potrukom. Total turnover ₹{p_gross:,.0f}, GST ₹{p_gst:,.0f}."
-                    else:
-                        speech_reply = f"{m_term.capitalize()} month bills breakdown ready Boss!"
-                    durable_task_manager.update_task_status(task_id, status="COMPLETED", result_summary=f"Bills for {m_term}: {m.get('period_bills_count', 0)} bills", result_data=m)
-
-                # 8. Default: Ground Truth Month-wise Dossier Overview
                 else:
-                    rep, sp = sgc_billing_query.format_month_wise_bills_dossier()
-                    final_reply = rep
-                    speech_reply = sp
+                    # Dynamic, Zero-Cross-Contamination Router
+                    final_reply, speech_reply = enterprise_router.handle_smart_billing_query(clean_input, entities=entities)
                     durable_task_manager.update_task_status(
                         task_id, status="COMPLETED",
-                        result_summary="Fetched SGC month-wise bills dossier",
-                        result_data={"status": "complete"}
+                        result_summary=speech_reply,
+                        result_data={"intent": intent, "reply": final_reply}
                     )
 
-            # -------------------------------------------------------------
             # DOMAIN C: BUSINESS PAYABLES & CASHFLOW RADAR
             # -------------------------------------------------------------
             elif intent == "BUSINESS_PAYABLES":
