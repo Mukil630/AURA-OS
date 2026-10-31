@@ -1693,7 +1693,7 @@ global_telegram_aura_agent = None
 def get_or_create_aura_agent():
     global global_telegram_aura_agent
     if global_telegram_aura_agent is None:
-        aura_dir = r"C:\Users\mukil\aura-os"
+        aura_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if aura_dir not in sys.path:
             sys.path.insert(0, aura_dir)
         from aura.kernel.agent import AuraAgent
@@ -1715,16 +1715,25 @@ async def query_antigravity(prompt: str, user_name: str = "Mukil") -> str:
     Protected by cognitive_lock so concurrent inputs execute with clean conversational integrity.
     """
     async with cognitive_lock:
-        # 0.0 Supreme Remote Bridge: Check if Mukil's Local PC Worker is Online!
+        # 0.0 Supreme Remote Bridge: Forward to Antigravity Local PC Worker via Inter-Process Loopback
         try:
-            from app.connectors.bridge.pc_cloud_bridge import bridge_server
-            if bridge_server.is_pc_online():
-                logger.info("🟢 Mukil's PC is ONLINE! Dispatching prompt to local Antigravity PC Worker...")
-                res = await bridge_server.dispatch_task(command=prompt, task_type="EXECUTE_INTENT", timeout_seconds=45.0)
-                if res and res.get("status") == "COMPLETED" and res.get("output_text"):
-                    return res["output_text"]
+            import httpx
+            port = os.getenv("PORT", "10000")
+            bridge_url = f"http://127.0.0.1:{port}/api/v1/bridge/dispatch"
+            async with httpx.AsyncClient(timeout=45.0) as client:
+                resp = await client.post(
+                    bridge_url,
+                    json={"command": prompt, "task_type": "EXECUTE_INTENT", "parameters": {}}
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("status") == "COMPLETED" and data.get("output_text"):
+                        logger.info("🟢 Task successfully executed on physical hardware via Antigravity Local PC Worker!")
+                        return data["output_text"]
+                    elif data.get("status") == "QUEUED_OFFLINE":
+                        logger.info("ℹ️ Local PC Worker is offline/standby. Falling back to Cloud Brain...")
         except Exception as bridge_err:
-            logger.warning(f"PC Bridge dispatch notice: {bridge_err}")
+            logger.warning(f"PC Bridge loopback dispatch notice: {bridge_err}")
 
         # 0. Supreme Cognitive Plane: AuraAgent (Full ReAct Loop + Multi-Turn Memory + 36 Tools)
         try:

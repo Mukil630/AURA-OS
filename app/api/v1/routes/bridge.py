@@ -28,6 +28,16 @@ async def get_bridge_status() -> Dict[str, Any]:
     }
 
 
+@router.get("/live-brain", summary="Get Latest Antigravity Live Brain Context")
+async def get_live_brain_context() -> Dict[str, Any]:
+    """Returns the latest live synchronized context from Antigravity PC Worker."""
+    return {
+        "status": "success",
+        "context": bridge_server.get_live_brain_context(),
+        "pc_online": bridge_server.is_pc_online(),
+    }
+
+
 @router.post("/dispatch", summary="Dispatch Task to Local PC from Cloud")
 async def dispatch_task_to_pc(payload: RemoteDispatchContract) -> Dict[str, Any]:
     """Sends a remote task to Mukil's PC and returns the output + screenshot verification."""

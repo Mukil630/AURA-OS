@@ -13,8 +13,19 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-JARVIS_CORE_DIR = Path("C:/Users/mukil/jarvis-core")
-MEMORY_DIR = JARVIS_CORE_DIR / "storage" / "memory"
+# Dynamic resolution: Check PC local path first, then Repo storage/memory, then Repo data/memory
+_LOCAL_JARVIS_DIR = Path("C:/Users/mukil/jarvis-core")
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+_REPO_MEMORY = _REPO_ROOT / "storage" / "memory"
+_DATA_MEMORY = _REPO_ROOT / "data" / "memory"
+
+if _LOCAL_JARVIS_DIR.exists() and (_LOCAL_JARVIS_DIR / "storage" / "memory").exists():
+    MEMORY_DIR = _LOCAL_JARVIS_DIR / "storage" / "memory"
+elif _REPO_MEMORY.exists():
+    MEMORY_DIR = _REPO_MEMORY
+else:
+    MEMORY_DIR = _DATA_MEMORY
+
 TASK_LEDGER = MEMORY_DIR / "living_task_ledger.json"
 TASK_LOG = MEMORY_DIR / "task_log.json"
 CONTEXT_FILE = MEMORY_DIR / "context.json"

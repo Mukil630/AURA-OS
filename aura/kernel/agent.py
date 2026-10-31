@@ -118,6 +118,26 @@ class AuraAgent:
             except Exception:
                 pass
 
+        # 2.5 Live Antigravity (AGY) Cognitive State Injection
+        try:
+            from app.connectors.bridge.pc_cloud_bridge import bridge_server
+            live_ctx = bridge_server.get_live_brain_context()
+            if live_ctx and isinstance(live_ctx, dict):
+                mission = live_ctx.get("active_mission", "")
+                dialogue = live_ctx.get("recent_dialogue_summary", "")
+                decisions = live_ctx.get("last_decisions", "")
+                voice = live_ctx.get("locked_voice_persona", "")
+                agy_text = (
+                    f"[LIVE ANTIGRAVITY (AGY) COGNITIVE STATE]\n"
+                    f"• Active Mission: {mission}\n"
+                    f"• Locked Voice: {voice}\n"
+                    f"• Live Decisions & Working Context: {decisions}\n"
+                    f"• Recent AGY Dialogue: {dialogue}"
+                )
+                self.messages.append({"role": "system", "content": agy_text})
+        except Exception:
+            pass
+
         # 3. Dynamic Progressive Disclosure Skills Injection
         matched_skills = skill_registry.match_skills(user_prompt)
         if matched_skills:

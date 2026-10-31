@@ -119,12 +119,41 @@ class CloudPCBridgeServer:
             self.pending_tasks.pop(task_id, None)
 
     def handle_worker_response(self, response_data: Dict[str, Any]) -> None:
-        """Processes task result received from the local PC worker."""
+        """Processes task result or live brain sync received from the local PC worker."""
+        msg_type = response_data.get("type")
+        if msg_type == "SYNC_BRAIN_CONTEXT":
+            ctx = response_data.get("context", {})
+            self.live_brain_context = ctx
+            try:
+                storage_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "storage", "memory", "agy_live_context.json"))
+                os.makedirs(os.path.dirname(storage_path), exist_ok=True)
+                with open(storage_path, "w", encoding="utf-8") as sf:
+                    json.dump(ctx, sf, indent=2, ensure_ascii=False)
+            except Exception as e:
+                logger.warning(f"Could not persist agy_live_context to disk: {e}")
+            logger.info("🟢 CloudPCBridge received and persisted live brain context sync from PC Worker!")
+            return
+
         task_id = response_data.get("task_id")
         if task_id and task_id in self.pending_tasks:
             fut = self.pending_tasks[task_id]
             if not fut.done():
                 fut.set_result(response_data)
+
+    def get_live_brain_context(self) -> Dict[str, Any]:
+        """Returns the latest live context received from PC Worker, or loads from disk storage."""
+        if hasattr(self, "live_brain_context") and self.live_brain_context:
+            return self.live_brain_context
+        try:
+            storage_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "storage", "memory", "agy_live_context.json"))
+            if os.path.exists(storage_path):
+                with open(storage_path, "r", encoding="utf-8") as sf:
+                    data = json.load(sf)
+                    self.live_brain_context = data
+                    return data
+        except Exception:
+            pass
+        return {}
 
 
 # Global singleton instance for Cloud Server

@@ -3,9 +3,21 @@ AURA OS 250GB Distributed Drive Mesh Tool
 10 Dedicated Nodes x 25GB = 250GB Unified Cloud Mesh
 """
 import json
+import os
 from pathlib import Path
 
-MESH_PATH = Path("C:/Users/mukil/jarvis-core/storage/memory/distributed_drive_mesh.json")
+# Dynamic resolution: PC local path -> Repo storage/memory -> Repo data/memory
+_LOCAL_MESH = Path("C:/Users/mukil/jarvis-core/storage/memory/distributed_drive_mesh.json")
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+_REPO_MESH = _REPO_ROOT / "storage" / "memory" / "distributed_drive_mesh.json"
+_DATA_MESH = _REPO_ROOT / "data" / "memory" / "distributed_drive_mesh.json"
+
+if _LOCAL_MESH.exists():
+    MESH_PATH = _LOCAL_MESH
+elif _REPO_MESH.exists():
+    MESH_PATH = _REPO_MESH
+else:
+    MESH_PATH = _DATA_MESH
 
 def get_drive_mesh_status() -> str:
     """

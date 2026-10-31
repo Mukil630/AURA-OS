@@ -10,10 +10,15 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("MemoryVault")
 
-MEMORY_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "memory")
+STORAGE_MEMORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "storage", "memory"))
+DATA_MEMORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "memory"))
+MEMORY_DIR = STORAGE_MEMORY if os.path.exists(STORAGE_MEMORY) else DATA_MEMORY
+
 PROFILE_FILE = os.path.join(MEMORY_DIR, "user_profile.json")
 CONTEXT_FILE = os.path.join(MEMORY_DIR, "context.json")
-CONVERSATIONS_FILE = os.path.join(MEMORY_DIR, "conversations.json")
+_conv_hist = os.path.join(MEMORY_DIR, "conversations_history.json")
+_conv_std = os.path.join(MEMORY_DIR, "conversations.json")
+CONVERSATIONS_FILE = _conv_hist if os.path.exists(_conv_hist) else _conv_std
 DOCUMENTS_FILE = os.path.join(MEMORY_DIR, "documents_vault.json")
 
 DEFAULT_PROFILE = {
@@ -72,10 +77,34 @@ class MemoryVault:
                 json.dump([], f, indent=2)
 
     def get_profile(self) -> Dict[str, Any]:
-        """Returns Mukil's master user profile."""
+        """Returns Mukil's master user profile, safely mapping nested storage/memory schema."""
         try:
             with open(PROFILE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                if "personal_details" in data:
+                    pd = data["personal_details"]
+                    mrp = data.get("master_resume_paths", {})
+                    sgc = data.get("sgc_billing_vault", {})
+                    return {
+                        "user_name": "Mukil",
+                        "full_name": pd.get("name", "MUKILARASU S"),
+                        "role": "AI Engineer / Full-Stack Developer & Entrepreneur",
+                        "college": f"{pd.get('college', '')} ({pd.get('degree', '')}, CGPA: {pd.get('cgpa', '')})",
+                        "master_resume_link": mrp.get("drive_link", DEFAULT_PROFILE["master_resume_link"]),
+                        "master_drive_vault_id": DEFAULT_PROFILE["master_drive_vault_id"],
+                        "shared_drive_vault_url": DEFAULT_PROFILE["shared_drive_vault_url"],
+                        "sgc_billing_vault_1": sgc.get("main_drive_folder_id", DEFAULT_PROFILE["sgc_billing_vault_1"]),
+                        "sgc_billing_vault_2": DEFAULT_PROFILE["sgc_billing_vault_2"],
+                        "github_portfolio": pd.get("github", DEFAULT_PROFILE["github_portfolio"]),
+                        "linkedin": pd.get("linkedin", ""),
+                        "telegram_chat_id": pd.get("telegram_chat_id", "6233907249"),
+                        "phone": pd.get("phone", "9080030538"),
+                        "location": pd.get("location", "Karur, Tamil Nadu"),
+                        "primary_skills": data.get("technical_skills", {}).get("languages", DEFAULT_PROFILE["primary_skills"]),
+                        "family_business": "Sri Ganapathi Colours (SGC) - Automated Billing & Invoicing",
+                        "tone": DEFAULT_PROFILE["tone"],
+                    }
+                return data
         except Exception:
             return DEFAULT_PROFILE
 

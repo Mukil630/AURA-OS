@@ -876,9 +876,35 @@ class AutonomousAgentBrain:
 
         memory_block = self.memory_vault.get_prompt_memory_context()
 
+        # Inject AGY Live Brain Context if available
+        agy_block = ""
+        try:
+            mem_dirs = [
+                os.path.join(os.path.dirname(__file__), "..", "..", "storage", "memory"),
+                os.path.join(os.path.dirname(__file__), "..", "..", "..", "storage", "memory"),
+                "C:/Users/mukil/jarvis-core/storage/memory",
+            ]
+            for md in mem_dirs:
+                af_path = os.path.join(md, "agy_live_context.json")
+                if os.path.exists(af_path):
+                    with open(af_path, "r", encoding="utf-8") as af:
+                        import json
+                        adata = json.load(af)
+                        agy_block = (
+                            f"\n[LIVE ANTIGRAVITY (AGY) COGNITIVE STATE]\n"
+                            f"• Active Mission: {adata.get('active_mission')}\n"
+                            f"• Locked Voice: {adata.get('locked_voice_persona')}\n"
+                            f"• Live Decisions & Working Context: {adata.get('last_decisions')}\n"
+                            f"• Recent Dialogue: {adata.get('recent_dialogue_summary')}\n"
+                        )
+                    break
+        except Exception:
+            pass
+
         live_system_prompt = (
             f"{SYSTEM_AGENT_PROMPT}\n\n"
-            f"{memory_block}\n\n"
+            f"{memory_block}\n"
+            f"{agy_block}\n\n"
             f"[LIVE REAL-TIME SYSTEM CONTEXT]\n"
             f"• Current Live Date & Time: {current_time_str}\n"
             f"• PC Battery Level: {batt_str} ({batt_plug})\n"

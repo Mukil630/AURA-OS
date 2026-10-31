@@ -12,11 +12,15 @@ from typing import Dict, Any, List, Optional
 
 
 def get_sgc_db_path() -> Optional[Path]:
-    """Finds the active physical SGC billing database on Windows."""
+    """Finds the active physical SGC billing database on Windows or Cloud Linux."""
+    repo_root = Path(__file__).resolve().parent.parent.parent
     candidates = [
         Path(os.environ.get("APPDATA", "C:/Users/mukil/AppData/Roaming")) / "sgc-billing" / "sgc-billing-data.json",
         Path.home() / "AppData" / "Roaming" / "sgc-billing" / "sgc-billing-data.json",
         Path("C:/Users/mukil/AppData/Roaming/sgc-billing/sgc-billing-data.json"),
+        repo_root / "storage" / "memory" / "sgc-billing-data.json",
+        repo_root / "data" / "sgc-billing-data.json",
+        repo_root / "data" / "memory" / "sgc-billing-data.json",
     ]
     for p in candidates:
         if p.exists() and p.is_file():
