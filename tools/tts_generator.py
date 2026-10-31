@@ -31,7 +31,7 @@ LOCKED_VOICES: Dict[str, Dict[str, Any]] = {
         "key": "STARK",
         "name": "Tony Stark Brotherly Tanglish",
         "directive": "Speak in a warm, natural, brotherly Tamil slang like Tony Stark talking to his best friend Mukil: ",
-        "prebuilt_voice": None,
+        "prebuilt_voice": "Puck",
         "caption": "🎙️ Gemini 3.8 Flash: Tony Stark Brotherly Tanglish",
         "description": "Warm, natural brotherly Kongu/Karur Tanglish slang (Default)"
     },
@@ -252,7 +252,7 @@ async def generate_voice_audio(
                 continue
 
     # 2. Resilient Fallback: Microsoft Edge-TTS Neural Voice
-    selected_voice = "ta-IN-ValluvarNeural" if (any('\u0B80' <= c <= '\u0BFF' for c in clean_text) or "mapla" in clean_text.lower() or "bro" in clean_text.lower() or "enna" in clean_text.lower()) else "en-IN-PrabhatNeural"
+    selected_voice = "ta-SG-AnbuNeural" if (any('\u0B80' <= c <= '\u0BFF' for c in clean_text) or "mapla" in clean_text.lower() or "bro" in clean_text.lower() or "enna" in clean_text.lower()) else "en-IN-PrabhatNeural"
     audio_path_mp3 = audio_path.replace(".wav", ".mp3")
     try:
         import edge_tts

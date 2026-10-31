@@ -1589,6 +1589,52 @@ async def _send_pdf_if_present(update: Update, text: str):
         except Exception as pdf_err:
             logger.error(f"Error sending PDF: {pdf_err}")
 
+def generate_spoken_voice_script(raw_text: str) -> str:
+    """Transforms raw markdown response into a natural, brotherly Kongu Tanglish voice script."""
+    if not raw_text or len(raw_text.strip()) == 0:
+        return "Work mudinjithu Boss!"
+
+    clean = re.sub(r'```[\s\S]*?```', '', raw_text)
+    clean = re.sub(r'`[^`]*`', '', clean)
+    clean = re.sub(r'\|[^\n]+\|', '', clean)
+    clean = re.sub(r'[*#_\[\]()~>-]', '', clean)
+    clean = re.sub(r'http\S+', '', clean)
+    clean = re.sub(r'[\U00010000-\U0010ffff]', '', clean)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    if len(clean) < 100 and ("mapla" in clean.lower() or "boss" in clean.lower()) and not any(k in clean.lower() for k in ["http", "table", "gst", "status:", "cpu:"]):
+        return clean
+
+    try:
+        completion = groq_client.chat.completions.create(
+            model="qwen/qwen3.8-27b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are JARVIS / Tony Stark speaking directly to Mukil (Boss / Mapla) in a natural voice note. "
+                        "Summarize the core answer below into 1 or 2 conversational sentences in natural Kongu/Karur Tanglish. "
+                        "Rules:\n"
+                        "- Speak like a real brother/partner (e.g. 'Boss, details eduthuten...', 'Mapla, task mudinjithu...').\n"
+                        "- Do NOT read markdown asterisks, bullets, table lines, or raw technical IDs.\n"
+                        "- Keep it concise, natural, confident, under 25 words.\n"
+                        "- Output ONLY the spoken text, nothing else."
+                    )
+                },
+                {"role": "user", "content": clean[:800]}
+            ],
+            temperature=0.2,
+            max_tokens=50
+        )
+        spoken = completion.choices[0].message.content.strip()
+        if spoken and len(spoken) > 5:
+            return spoken
+    except Exception as e:
+        logger.warning(f"Voice script transformation notice: {e}")
+
+    return clean[:180]
+
+
 async def background_voice_agent(
     bot,
     chat_id: int,
@@ -1605,15 +1651,7 @@ async def background_voice_agent(
     if not text or not bot or not chat_id:
         return
     try:
-        # Clean text for speech: remove code blocks, tables, URLs, markdown symbols
-        clean = re.sub(r'```[\s\S]*?```', 'Code snippet attached.', text)
-        clean = re.sub(r'`[^`]*`', '', clean)
-        clean = re.sub(r'\|[^\n]+\|', '', clean)  # remove markdown tables
-        clean = re.sub(r'[\*\#\_\[\]\(\)\~\>\-]', '', clean)
-        clean = re.sub(r'http\S+', '', clean)
-        clean = re.sub(r'[\U00010000-\U0010ffff]', '', clean)
-        clean = re.sub(r'\s+', ' ', clean).strip()
-        spoken_text = clean[:320]
+        spoken_text = generate_spoken_voice_script(text)
         if not spoken_text:
             return
 
