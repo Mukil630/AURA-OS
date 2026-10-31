@@ -56,8 +56,17 @@ async def cloud_vitals():
     except Exception:
         pass
 
+    import psutil
+    procs = []
+    for p in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            procs.append({"pid": p.info["pid"], "name": p.info["name"], "cmd": " ".join(p.info.get("cmdline") or [])})
+        except Exception:
+            pass
+
     return {
         "status": "online",
+        "running_processes": procs,
         "git_commit": git_hash,
         "verified_bills_in_db": bills_count,
         "telegram_bot_token_present": bool(tg_token),
