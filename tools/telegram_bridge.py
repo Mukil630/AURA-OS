@@ -848,6 +848,55 @@ async def ledger_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rep = format_customer_ledger(query)
     await _send_reply_safely(update, rep, send_voice=True, parse_mode="Markdown")
 
+async def bleach_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Fetches Bleaching Unit financial overview or customer ledger (Mukil's own enterprise)."""
+    args = context.args
+    try:
+        from tools.bleaching_billing_query import query_turso_bills, load_local_bills, get_bleaching_overview, get_bleaching_ledger_for_customer
+        bills = await query_turso_bills()
+        if not bills:
+            bills, _ = load_local_bills()
+
+        if not args:
+            overview = get_bleaching_overview(bills)
+            recent_lines = []
+            for b in bills[:5]:
+                recent_lines.append(f"• *Bill #{b.get('billNo')}* | {b.get('customer')} | `₹{b.get('netAmount', 0):,.2f}` | [{b.get('status')}]")
+            recent_str = "\n".join(recent_lines) if recent_lines else "_No bills generated yet._"
+
+            msg = (
+                "⚪ *SRI GANAPATHI COLOURS — BLEACHING UNIT DASHBOARD*\n"
+                "_(Mukil's Independent Enterprise)_\n\n"
+                f"• *Total Invoices Generated:* `{overview['total_bills']}`\n"
+                f"• *Gross Invoiced:* `₹{overview['total_invoiced']:,.2f}`\n"
+                f"• *Collections Cleared:* `₹{overview['total_collected']:,.2f}`\n"
+                f"• *Outstanding Balance:* `₹{overview['total_outstanding']:,.2f}`\n\n"
+                f"🧾 *Recent Bleaching Invoices:*\n{recent_str}\n\n"
+                f"📂 [Open Bleaching-Bills Drive Vault](https://drive.google.com/drive/folders/1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J)\n\n"
+                "💡 *Check client ledger:* `/bleach <Customer>` (e.g. `/bleach Eco Fusion`)"
+            )
+            await _send_reply_safely(update, msg, send_voice=True, parse_mode="Markdown")
+            return
+
+        query = " ".join(args).strip()
+        ledger = get_bleaching_ledger_for_customer(bills, query)
+        bill_lines = []
+        for b in ledger.get("bills", []):
+            bill_lines.append(f"• *Bill #{b.get('billNo')}* ({b.get('date')}): `₹{b.get('netAmount', 0):,.2f}` [{b.get('status')}]")
+        b_str = "\n".join(bill_lines) if bill_lines else "_No bills found for this customer._"
+
+        msg = (
+            f"⚪ *BLEACHING LEDGER: {ledger['customer'].upper()}*\n\n"
+            f"• *Total Bills:* `{ledger['total_bills']}`\n"
+            f"• *Total Invoiced:* `₹{ledger['total_billed']:,.2f}`\n"
+            f"• *Total Paid:* `₹{ledger['total_paid']:,.2f}`\n"
+            f"• *Outstanding Balance:* `₹{ledger['outstanding_balance']:,.2f}`\n\n"
+            f"🧾 *Customer Invoices:*\n{b_str}\n"
+        )
+        await _send_reply_safely(update, msg, send_voice=True, parse_mode="Markdown")
+    except Exception as e:
+        await _send_reply_safely(update, f"❌ Error retrieving bleaching ledger: {e}", send_voice=False, parse_mode="Markdown")
+
 async def drill_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetches a high-yield placement question (Zoho, TCS, Infosys, Cognizant)."""
     category = context.args[0] if context.args else "ALL"
@@ -1294,6 +1343,18 @@ async def handle_direct_shortcuts(text: str, update: Update, context: ContextTyp
 
     if t_lower in ["/agents", "/swarm", "agents", "swarm", "show agents", "list agents", "active agents"]:
         await agents_cmd(update, context)
+        return True
+
+    # 0.3 Direct Bleaching shortcuts (Bypasses LLM classification)
+    bleach_triggers = ["/bleach", "/bleaching", "bleach", "bleaching", "salavai", "bleaching bills", "salavai bills", "bleach bills"]
+    if t_lower in bleach_triggers or any(t_lower.startswith(k + " ") for k in ["/bleach", "/bleaching", "bleach", "bleaching", "salavai"]):
+        clean_bleach = text
+        for p in ["/bleaching", "/bleach", "bleaching", "bleach", "salavai"]:
+            if clean_bleach.lower().startswith(p):
+                clean_bleach = clean_bleach[len(p):].strip()
+                break
+        context.args = clean_bleach.split() if clean_bleach else []
+        await bleach_cmd(update, context)
         return True
 
     # 1. Explicit Bill creation shortcut (bill: or /bill only)
@@ -1825,6 +1886,8 @@ def build_app():
     add_cmd("swatch", color_cmd)
     add_cmd("tenses", tenses_cmd)
     add_cmd("sgc", sgc_cmd)
+    add_cmd("bleach", bleach_cmd)
+    add_cmd("bleaching", bleach_cmd)
     add_cmd("gst", gst_cmd)
     add_cmd("gstr", gst_cmd)
     add_cmd("fundmycrazy", fund_cmd)

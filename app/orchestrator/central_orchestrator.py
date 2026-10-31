@@ -39,12 +39,13 @@ Classify the user's intent into one of these categories:
    CRITICAL TEXTILE MILL DIRECTIVE: Phrases like 'bills pass pananum', 'bills pass pannanum', 'enna bills eruku', 'bills enna iruku', 'endha month bills', 'pending bills', 'invoices' are SGC customer sales bills! In Tamil textile business context, 'bills pass pananum' means clearing/passing sales bills or reviewing pending bills. ALWAYS classify these as `SGC_BILLING_QUERY`.
 3. `BUSINESS_PAYABLES`: ONLY classify here if user explicitly asks about supplier purchases (e.g., Lakshmi Chemicals, Bannari, chemical vendors, raw material payables, EB commercial electricity bills).
 4. `WASHING_HUB_OPS`: User asks about industrial washing machine cycles, bio-polish enzymes, silicon finish, or garment lots.
-5. `TASK_MANAGEMENT`: User asks to list tasks, check task status, or cancel a task.
-6. `GENERAL_CONVERSATION`: Conversational chat, advice, or technical queries.
+5. `BLEACHING_BILLING_QUERY`: User asks about Mukil's Bleaching Unit / Salavai unit bills, bleaching invoices, bleaching turnover, bleaching ledger, or mentions 'bleach', 'bleaching', 'salavai' in a billing context.
+6. `TASK_MANAGEMENT`: User asks to list tasks, check task status, or cancel a task.
+7. `GENERAL_CONVERSATION`: Conversational chat, advice, or technical queries.
 
 Analyze the user's request and respond strictly in valid JSON format:
 {
-  "intent": "SCHEDULE_REMINDER | SGC_BILLING_QUERY | BUSINESS_PAYABLES | WASHING_HUB_OPS | TASK_MANAGEMENT | GENERAL_CONVERSATION",
+  "intent": "SCHEDULE_REMINDER | SGC_BILLING_QUERY | BUSINESS_PAYABLES | WASHING_HUB_OPS | BLEACHING_BILLING_QUERY | TASK_MANAGEMENT | GENERAL_CONVERSATION",
   "task_description": "Brief summary of the action",
   "priority": "HIGH | NORMAL | URGENT",
   "reminder_time_expr": "e.g. 'tomorrow at 6 pm' or '10m' or null",
@@ -581,6 +582,51 @@ LIVE REAL-TIME CONTEXT:
                 )
                 final_reply = res.result.get("summary", "Washing Hub updated.")
                 speech_reply = "Washing Hub status ready, Boss!"
+
+            # -------------------------------------------------------------
+            # DOMAIN D.2: BLEACHING BILLING QUERY (Mukil's Independent Enterprise)
+            # -------------------------------------------------------------
+            elif intent == "BLEACHING_BILLING_QUERY":
+                import asyncio
+                from tools.bleaching_billing_query import query_turso_bills, load_local_bills, get_bleaching_overview, get_bleaching_ledger_for_customer
+                bills = asyncio.run(query_turso_bills())
+                if not bills:
+                    bills, _ = load_local_bills()
+
+                customer = entities.get("customer")
+                if customer:
+                    ledger = get_bleaching_ledger_for_customer(bills, customer)
+                    bill_lines = [f"• *Bill #{b.get('billNo')}* ({b.get('date')}): `₹{b.get('netAmount', 0):,.2f}` [{b.get('status')}]" for b in ledger.get("bills", [])]
+                    b_str = "\n".join(bill_lines) if bill_lines else "_No bills found for this customer._"
+                    final_reply = (
+                        f"⚪ **BLEACHING LEDGER: {ledger['customer'].upper()}**\n\n"
+                        f"• **Total Bills:** `{ledger['total_bills']}`\n"
+                        f"• **Total Invoiced:** `₹{ledger['total_billed']:,.2f}`\n"
+                        f"• **Total Paid:** `₹{ledger['total_paid']:,.2f}`\n"
+                        f"• **Outstanding Balance:** `₹{ledger['outstanding_balance']:,.2f}`\n\n"
+                        f"🧾 **Customer Invoices:**\n{b_str}\n"
+                    )
+                    speech_reply = f"Mukil, {customer}-oda Bleaching outstanding balance {ledger['outstanding_balance']} rupees."
+                else:
+                    overview = get_bleaching_overview(bills)
+                    recent_lines = [f"• *Bill #{b.get('billNo')}* | {b.get('customer')} | `₹{b.get('netAmount', 0):,.2f}` | [{b.get('status')}]" for b in bills[:5]]
+                    recent_str = "\n".join(recent_lines) if recent_lines else "_No bills generated yet._"
+                    final_reply = (
+                        "⚪ **SRI GANAPATHI COLOURS — BLEACHING UNIT DASHBOARD**\n"
+                        "_(Mukil's Independent Enterprise)_\n\n"
+                        f"• **Total Invoices Generated:** `{overview['total_bills']}`\n"
+                        f"• **Gross Invoiced:** `₹{overview['total_invoiced']:,.2f}`\n"
+                        f"• **Collections Cleared:** `₹{overview['total_collected']:,.2f}`\n"
+                        f"• **Outstanding Balance:** `₹{overview['total_outstanding']:,.2f}`\n\n"
+                        f"🧾 **Recent Bleaching Invoices:**\n{recent_str}\n\n"
+                        f"📂 [Open Bleaching-Bills Drive Vault](https://drive.google.com/drive/folders/1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J)\n\n"
+                        "💡 **Check client ledger:** `/bleach <Customer>` (e.g. `/bleach Eco Fusion`)"
+                    )
+                    speech_reply = f"Boss, Bleaching unit-la total {overview['total_bills']} bills iruku. Outstanding balance {overview['total_outstanding']} rupees."
+                durable_task_manager.update_task_status(
+                    task_id, status="COMPLETED",
+                    result_summary=final_reply
+                )
 
             # -------------------------------------------------------------
             # DOMAIN E: TASK MANAGEMENT LIST / STATUS

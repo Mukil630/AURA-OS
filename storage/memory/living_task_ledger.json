@@ -25,6 +25,14 @@
       "mission_type": "lookup",
       "status": "QUEUED_TO_ANTIGRAVITY",
       "timestamp": "2026-10-27T16:15:00+05:30"
+    },
+    {
+      "task_id": "agy_delegated_2",
+      "origin": "AURA_OS",
+      "goal": "1w3NVcCQv-pVV6MOz4sNcjD3VmSHGndyG4u4PKnG5FfQ Google Sheet link details and context",
+      "mission_type": "lookup",
+      "status": "QUEUED_TO_ANTIGRAVITY",
+      "timestamp": "2026-10-27T16:15:00+05:30"
     }
   ]
 }

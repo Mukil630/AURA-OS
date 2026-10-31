@@ -28,5 +28,15 @@
     "file_id": "1AXjtsBtTYyORJ2CqhZohc2pZBMYNzYCS",
     "size_kb": 182.81,
     "created_at": "2026-09-13 03:43 PM"
+  },
+  {
+    "id": "doc_4",
+    "file_name": "JARVIS_CORE_LATEST_BACKUP.zip",
+    "category": "code",
+    "node_id": "node_02_project_codebases",
+    "drive_url": "https://drive.google.com/file/d/1N3m05u4jfCYDywh7WwaGtssu8Oes1_Yc/view?usp=drivesdk",
+    "file_id": "1N3m05u4jfCYDywh7WwaGtssu8Oes1_Yc",
+    "size_kb": 19050.54,
+    "created_at": "2026-10-29 04:03 PM"
   }
 ]

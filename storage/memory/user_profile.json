@@ -5,8 +5,8 @@
     "phone": "9080030538",
     "location": "Karur, Tamil Nadu",
     "college": "VSB Engineering College, Karur",
-    "degree": "B.Tech – Information Technology",
-    "batch": "2023 – 2027",
+    "degree": "B.Tech \u2013 Information Technology",
+    "batch": "2023 \u2013 2027",
     "cgpa": "8.1 / 10",
     "hsc_percentage": "68.95%",
     "github": "https://github.com/Mukil630",
@@ -28,24 +28,42 @@
     "description": "Mukil's Master Main Drive Folder for Sri Ganapathi Colours (SGC) Bills & Invoices"
   },
   "technical_skills": {
-    "languages": ["Java", "Python", "JavaScript", "SQL"],
-    "frameworks_and_tools": ["Flask", "Node.js", "React", "Electron", "PostgreSQL", "MySQL", "Git", "GitHub", "Railway", "Postman", "Playwright", "Groq API"]
+    "languages": [
+      "Java",
+      "Python",
+      "JavaScript",
+      "SQL"
+    ],
+    "frameworks_and_tools": [
+      "Flask",
+      "Node.js",
+      "React",
+      "Electron",
+      "PostgreSQL",
+      "MySQL",
+      "Git",
+      "GitHub",
+      "Railway",
+      "Postman",
+      "Playwright",
+      "Groq API"
+    ]
   },
   "projects": [
-    "Botify – AI-Powered WhatsApp Bot SaaS",
-    "SGC Billing – Desktop Invoice Application (Electron + React + Google Drive Sync)",
+    "Botify \u2013 AI-Powered WhatsApp Bot SaaS",
+    "SGC Billing \u2013 Desktop Invoice Application (Electron + React + Google Drive Sync)",
     "AI Billing Automation Bot (Groq API + Telegram Bot)",
     "Agentic AI Workflow Automation Platform"
   ],
   "internships": [
-    "Hero MotoCorp Ltd. — Research & Development Intern (1 Month)",
-    "IBM — AI & Automation Weekend Internship (2026)"
+    "Hero MotoCorp Ltd. \u2014 Research & Development Intern (1 Month)",
+    "IBM \u2014 AI & Automation Weekend Internship (2026)"
   ],
   "certifications": [
-    "Infosys Certified Java Programmer – Infosys (2024)",
-    "AI Agents for Beginners – Simplilearn SkillUp (2026)",
-    "AI & ML Made Easy: From Basic to Advanced (2025) – Udemy",
-    "Demystifying Networking – NPTEL (2025)"
+    "Infosys Certified Java Programmer \u2013 Infosys (2024)",
+    "AI Agents for Beginners \u2013 Simplilearn SkillUp (2026)",
+    "AI & ML Made Easy: From Basic to Advanced (2025) \u2013 Udemy",
+    "Demystifying Networking \u2013 NPTEL (2025)"
   ],
   "career_blueprint": {
     "timeline": "Final Year Sprint -> 1-2 Years IT Corporate Exposure -> Family Business Modernization Takeover",
@@ -64,7 +82,7 @@
       "zero_data_leak": true,
       "local_first_storage": true,
       "credential_protection": "All tokens, credentials, sessions, and private resumes locked locally via .gitignore",
-      "oauth_direct": "Google Drive and Gmail direct authenticated OAuth only — zero third party transmission",
+      "oauth_direct": "Google Drive and Gmail direct authenticated OAuth only \u2014 zero third party transmission",
       "autonomous_execution_mode": "FULL_OPEN_PERMISSION",
       "voice_passcode_protocol": {
         "enabled": true,
@@ -80,5 +98,11 @@
       "status": "In Active 8-Day Sprint with Pair-Programming Partner Antigravity",
       "vision": "24/7 Cloud Brain + Phone App + Local PC Worker + 5TB Drive Vault + Placement & Business Automation"
     }
+  },
+  "bleaching_billing_vault": {
+    "main_drive_folder_id": "1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J",
+    "main_drive_url": "https://drive.google.com/drive/folders/1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J",
+    "turso_table": "bleaching_invoices",
+    "description": "Mukil's Independent Bleaching Unit (Salavai Unit) Dedicated Drive Vault & Cloud Ledger"
   }
 }
