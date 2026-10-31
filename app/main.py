@@ -38,6 +38,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from app.services.durable_scheduler import durable_scheduler
     await durable_scheduler.start()
 
+    # Start 24/7 Cloud Daily Routine Scheduler (06:00 AM, 06:05 AM, 22:00 PM IST)
+    from app.services.cloud_routine_scheduler import cloud_routine_scheduler
+    cloud_routine_scheduler.start()
+
     # Start 24/7 Telegram Bridge Daemon when deployed to Cloud / Production
     telegram_process = None
     from config import TELEGRAM_BOT_TOKEN
@@ -100,6 +104,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         except Exception:
             telegram_process.kill()
 
+    cloud_routine_scheduler.stop()
     await durable_scheduler.stop()
     keep_alive_engine.stop()
     logger.info(f"Shutting down {settings.APP_NAME}...")
