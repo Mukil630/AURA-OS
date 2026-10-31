@@ -18,7 +18,13 @@ from config import TELEGRAM_BOT_TOKEN, GROQ_API_KEY, DRIVE_VAULT_URL, AUTHORIZED
 from memory.memory_manager import MemoryManager
 from brain.agent_brain import AgentBrain
 from server_agent.router import server_router
-from tools.tts_generator import generate_voice_audio
+from tools.tts_generator import (
+    generate_voice_audio,
+    get_active_voice_key,
+    set_active_voice_key,
+    get_active_voice_config,
+    LOCKED_VOICES
+)
 from app.tools.reminder_scheduler import ReminderScheduler
 from groq import Groq
 
@@ -1138,6 +1144,78 @@ async def clear_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         global_telegram_aura_agent.reset()
     await update.message.reply_text("🧹 Context reset panniten Boss! Pudhu topic start pannalaam! 🚀")
 
+async def voice_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """View and lock one of the 3 official Gemini voices (Stark, Charon, Fenrir)."""
+    args = context.args if context and context.args else []
+    if args:
+        raw_choice = args[0].upper().strip()
+        new_cfg = set_active_voice_key(raw_choice)
+        msg = (
+            f"🎙️ *Voice Locked Successfully!* 🎯\n\n"
+            f"Active Voice: *{new_cfg['name']}*\n"
+            f"Tone: _{new_cfg['description']}_\n\n"
+            f"All future Telegram voice notes will use this exact voice, Boss! 🔥"
+        )
+        await update.message.reply_text(msg, parse_mode="Markdown")
+        sample_text = f"Maapla, voice permanently locked to {new_cfg['name']}! Ready for all requests!"
+        asyncio.create_task(background_voice_agent(context.bot, update.effective_chat.id, sample_text, caption=new_cfg['caption']))
+        return
+
+    active_key = get_active_voice_key()
+    active_cfg = get_active_voice_config()
+    stark_mark = "✅ " if active_key == "STARK" else ""
+    charon_mark = "✅ " if active_key == "CHARON" else ""
+    fenrir_mark = "✅ " if active_key == "FENRIR" else ""
+    keyboard = [
+        [
+            InlineKeyboardButton(f"{stark_mark}🎙️ Stark", callback_data="voice_set_STARK"),
+            InlineKeyboardButton(f"{charon_mark}🎬 Charon", callback_data="voice_set_CHARON"),
+            InlineKeyboardButton(f"{fenrir_mark}⚡ Fenrir", callback_data="voice_set_FENRIR")
+        ]
+    ]
+    menu_msg = (
+        f"🎙️ *AURA OS Fixed Gemini Voices*\n\n"
+        f"Current Active Voice: *{active_cfg['name']}*\n"
+        f"Tone: _{active_cfg['description']}_\n\n"
+        f"Choose your voice below or type:\n"
+        f"• `/voice stark` (Tony Stark Brotherly Tanglish)\n"
+        f"• `/voice charon` (Deep & Cinematic Stark)\n"
+        f"• `/voice fenrir` (Strong & Authoritative)"
+    )
+    await update.message.reply_text(menu_msg, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+async def voice_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles inline buttons for voice switching."""
+    query = update.callback_query
+    await query.answer()
+    data = query.data or ""
+    if data.startswith("voice_set_"):
+        key = data.replace("voice_set_", "").strip().upper()
+        new_cfg = set_active_voice_key(key)
+        stark_mark = "✅ " if key == "STARK" else ""
+        charon_mark = "✅ " if key == "CHARON" else ""
+        fenrir_mark = "✅ " if key == "FENRIR" else ""
+        keyboard = [
+            [
+                InlineKeyboardButton(f"{stark_mark}🎙️ Stark", callback_data="voice_set_STARK"),
+                InlineKeyboardButton(f"{charon_mark}🎬 Charon", callback_data="voice_set_CHARON"),
+                InlineKeyboardButton(f"{fenrir_mark}⚡ Fenrir", callback_data="voice_set_FENRIR")
+            ]
+        ]
+        msg = (
+            f"✅ *Voice Successfully Locked to: {new_cfg['name']}*\n\n"
+            f"Tone: _{new_cfg['description']}_\n"
+            f"Fixed for 100% of future Telegram voice requests! 🚀"
+        )
+        try:
+            await query.edit_message_text(msg, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        except Exception:
+            pass
+        sample_text = f"Maapla, voice locked to {new_cfg['name']}! Ready for your orders!"
+        asyncio.create_task(background_voice_agent(context.bot, update.effective_chat.id, sample_text, caption=new_cfg['caption']))
+
+
 async def menu_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Full Command Center Menu."""
     menu_text = (
@@ -1539,13 +1617,16 @@ async def background_voice_agent(
         if not spoken_text:
             return
 
+        active_cfg = get_active_voice_config()
+        effective_caption = caption if (caption and caption not in ["🎙️ AURA Spoken Voice", "AURA Spoken Voice"]) else active_cfg.get("caption", "🎙️ JARVIS Voice")
+
         audio_path = await generate_voice_audio(spoken_text)
         if audio_path and os.path.exists(audio_path):
             with open(audio_path, "rb") as voice_out:
                 await bot.send_voice(
                     chat_id=chat_id,
                     voice=voice_out,
-                    caption=caption,
+                    caption=effective_caption,
                     reply_to_message_id=reply_to_message_id
                 )
             try:
@@ -1904,9 +1985,13 @@ def build_app():
     add_cmd("fundmycrazy", fund_cmd)
     add_cmd("menu", menu_cmd)
     add_cmd("help", menu_cmd)
+    add_cmd("voice", voice_cmd)
+    add_cmd("voices", voice_cmd)
+    add_cmd("persona", voice_cmd)
     add_cmd("clear", clear_cmd)
     add_cmd("reset", clear_cmd)
     app.add_handler(CallbackQueryHandler(gst_callback_handler, pattern="^gst_", block=False))
+    app.add_handler(CallbackQueryHandler(voice_callback_handler, pattern="^voice_", block=False))
     app.add_handler(MessageHandler(filters.PHOTO | filters.Document.IMAGE, photo_handler, block=False))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, voice_handler, block=False))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_handler, block=False))

@@ -1,6 +1,7 @@
 {
-  "active_persona": "MORNING_WAKEUP",
+  "active_voice": "FENRIR",
+  "name": "Fenrir (Strong & Authoritative)",
   "engine": "gemini-3.8-flash-lite-tts",
-  "persona_name": "Tony Stark Brotherly Tamil Slang",
-  "locked": true
+  "prebuilt_voice": "Fenrir",
+  "last_updated": "2026-10-31"
 }
