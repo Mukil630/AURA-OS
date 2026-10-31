@@ -38,5 +38,125 @@
     "file_id": "1N3m05u4jfCYDywh7WwaGtssu8Oes1_Yc",
     "size_kb": 19050.54,
     "created_at": "2026-10-29 04:03 PM"
+  },
+  {
+    "id": "doc_5",
+    "file_name": "Bill_0007_Bannari Amman Spinning Mills.pdf",
+    "category": "bill",
+    "node_id": "node_05_sgc_invoices",
+    "drive_url": "https://drive.google.com/file/d/1tfWVFuKrTJ8h8XN8rnj4A4xDTvb_pUiG/view?usp=drivesdk",
+    "file_id": "1tfWVFuKrTJ8h8XN8rnj4A4xDTvb_pUiG",
+    "size_kb": 186.37,
+    "created_at": "2026-10-31 04:47 PM"
+  },
+  {
+    "id": "doc_6",
+    "file_name": "Bill_0008_Bannari Amman Spinning Mills.pdf",
+    "category": "bill",
+    "node_id": "node_05_sgc_invoices",
+    "drive_url": "https://drive.google.com/file/d/1UcFqYx0XqS4ur26CXVX5CWvaVx9ab7TE/view?usp=drivesdk",
+    "file_id": "1UcFqYx0XqS4ur26CXVX5CWvaVx9ab7TE",
+    "size_kb": 182.86,
+    "created_at": "2026-10-31 04:47 PM"
+  },
+  {
+    "id": "doc_7",
+    "file_name": "Bill_0009_Bannari Amman Spinning Mills.pdf",
+    "category": "bill",
+    "node_id": "node_05_sgc_invoices",
+    "drive_url": "https://drive.google.com/file/d/1HuQDgueBtU-8DSJrj9H8Kq5oM5UfCsXe/view?usp=drivesdk",
+    "file_id": "1HuQDgueBtU-8DSJrj9H8Kq5oM5UfCsXe",
+    "size_kb": 182.81,
+    "created_at": "2026-10-31 04:47 PM"
+  },
+  {
+    "id": "doc_8",
+    "file_name": "context.json",
+    "category": "memory",
+    "node_id": "node_01_core_memory",
+    "drive_url": "https://drive.google.com/file/d/1sC-dnGGlAxrScuPeiqe_FMYG3liF1FzI/view?usp=drivesdk",
+    "file_id": "1sC-dnGGlAxrScuPeiqe_FMYG3liF1FzI",
+    "size_kb": 81.17,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_9",
+    "file_name": "conversations_history.json",
+    "category": "memory",
+    "node_id": "node_01_core_memory",
+    "drive_url": "https://drive.google.com/file/d/1Ly3OBP7gJDecbnuy25ACOiQiTqykWLvv/view?usp=drivesdk",
+    "file_id": "1Ly3OBP7gJDecbnuy25ACOiQiTqykWLvv",
+    "size_kb": 24.53,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_10",
+    "file_name": "task_log.json",
+    "category": "memory",
+    "node_id": "node_01_core_memory",
+    "drive_url": "https://drive.google.com/file/d/1aWb0CmTnFfq9RZu7OdF1L_FGGmhCJLF6/view?usp=drivesdk",
+    "file_id": "1aWb0CmTnFfq9RZu7OdF1L_FGGmhCJLF6",
+    "size_kb": 33.79,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_11",
+    "file_name": "user_profile.json",
+    "category": "memory",
+    "node_id": "node_01_core_memory",
+    "drive_url": "https://drive.google.com/file/d/1Dp0UQMTef0gkPbSI2KC9FWRlTH_Ma9Lq/view?usp=drivesdk",
+    "file_id": "1Dp0UQMTef0gkPbSI2KC9FWRlTH_Ma9Lq",
+    "size_kb": 4.56,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_12",
+    "file_name": "reminders.json",
+    "category": "memory",
+    "node_id": "node_01_core_memory",
+    "drive_url": "https://drive.google.com/file/d/1frZrR33a7fZ_9d4sD5H-mxvO051PIMiJ/view?usp=drivesdk",
+    "file_id": "1frZrR33a7fZ_9d4sD5H-mxvO051PIMiJ",
+    "size_kb": 0.29,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_13",
+    "file_name": "Mukil_Master_Resume.pdf",
+    "category": "placement",
+    "node_id": "node_03_placement_resumes",
+    "drive_url": "https://drive.google.com/file/d/1qZADCtS-SRHBxnhaKxKY0nOWxaCnvOkI/view?usp=drivesdk",
+    "file_id": "1qZADCtS-SRHBxnhaKxKY0nOWxaCnvOkI",
+    "size_kb": 70.51,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_14",
+    "file_name": "Bill_0007_Bannari Amman Spinning Mills.pdf",
+    "category": "bill",
+    "node_id": "node_05_sgc_invoices",
+    "drive_url": "https://drive.google.com/file/d/1vkx41szRLDTEmZJFTTIuQ_-XtkOfyknb/view?usp=drivesdk",
+    "file_id": "1vkx41szRLDTEmZJFTTIuQ_-XtkOfyknb",
+    "size_kb": 186.37,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_15",
+    "file_name": "Bill_0008_Bannari Amman Spinning Mills.pdf",
+    "category": "bill",
+    "node_id": "node_05_sgc_invoices",
+    "drive_url": "https://drive.google.com/file/d/1EGuSZ1REE-bve3rySAOKiClmxdkztXHM/view?usp=drivesdk",
+    "file_id": "1EGuSZ1REE-bve3rySAOKiClmxdkztXHM",
+    "size_kb": 182.86,
+    "created_at": "2026-10-31 04:49 PM"
+  },
+  {
+    "id": "doc_16",
+    "file_name": "Bill_0009_Bannari Amman Spinning Mills.pdf",
+    "category": "bill",
+    "node_id": "node_05_sgc_invoices",
+    "drive_url": "https://drive.google.com/file/d/1pdm5S7WKEb4nR375jCCpcgdT0vG7ilWy/view?usp=drivesdk",
+    "file_id": "1pdm5S7WKEb4nR375jCCpcgdT0vG7ilWy",
+    "size_kb": 182.81,
+    "created_at": "2026-10-31 04:49 PM"
   }
 ]
