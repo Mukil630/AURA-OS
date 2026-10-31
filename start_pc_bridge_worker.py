@@ -81,7 +81,7 @@ async def run_pc_worker():
         sync_task = None
         try:
             logger.info(f"Connecting to Cloud Server at {CLOUD_SERVER_URL}...")
-            async with websockets.connect(ws_uri) as ws:
+            async with websockets.connect(ws_uri, ping_interval=20, ping_timeout=10) as ws:
                 logger.info("🟢 100% CONNECTED! Local PC Worker is listening for Cloud tasks...")
                 
                 # Start live brain sync in background
@@ -95,6 +95,33 @@ async def run_pc_worker():
                     if not command or not command.strip() or task.get("type") in ["PING", "HEARTBEAT"]:
                         continue
                     logger.info(f"⚡ Received Cloud Task [{task_id}]: '{command}'")
+
+                    task_type = task.get("task_type") or task.get("type")
+                    if task_type == "TRIGGER_PHONE_CALL" or (command.lower().startswith("call") and "phone" in command.lower()):
+                        calling_script = os.path.join(r"C:\Users\mukil\continuous-calling-agent", "call_mukil.py")
+                        if not os.path.exists(calling_script):
+                            calling_script = os.path.join(r"C:\Users\mukil\aura-os\voice_calling_agent", "call_mukil.py")
+                        
+                        call_res_text = ""
+                        try:
+                            import subprocess
+                            c_proc = subprocess.run([sys.executable, calling_script], capture_output=True, text=True, timeout=15)
+                            if c_proc.returncode == 0 and "SUCCESS" in c_proc.stdout:
+                                call_res_text = "📞 Incoming phone call successfully triggered on your Redmi Note 14 Pro+ 5G! Arc-Reactor Call HUD is ringing!"
+                            else:
+                                call_res_text = f"⚠️ Phone call intent attempted, but ADB notice: {c_proc.stdout.strip() or c_proc.stderr.strip()}"
+                        except Exception as ce:
+                            call_res_text = f"❌ Phone call trigger error: {ce}"
+                        
+                        response_payload = {
+                            "task_id": task_id,
+                            "status": "COMPLETED",
+                            "output_text": call_res_text,
+                            "photo_path": None,
+                        }
+                        await ws.send(json.dumps(response_payload))
+                        logger.info(f"✅ Finished Phone Call Task [{task_id}]")
+                        continue
 
                     # Execute task locally on PC via AutonomousAgentBrain
                     res_text, photo_path = await brain.process_user_intent(
