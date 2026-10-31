@@ -1,7 +1,7 @@
 {
   "status": "RUNNING",
   "engine": "STATE_AWARE_CATCHUP",
-  "last_heartbeat": "2026-10-31T16:06:29.290325",
+  "last_heartbeat": "2026-10-31T16:44:30.754730",
   "routines": [
     {
       "id": "morning_wakeup",

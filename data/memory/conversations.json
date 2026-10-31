@@ -1,53 +1,5 @@
 [
   {
-    "timestamp": "2026-08-29T08:04:50.547353+00:00",
-    "sender": "Mukil",
-    "channel": "Telegram",
-    "text": "notepad-a close pannu"
-  },
-  {
-    "timestamp": "2026-08-29T08:04:50.593650+00:00",
-    "sender": "JARVIS",
-    "channel": "Telegram",
-    "text": "Closed notepad, Boss.\n\nClosed notepad, Boss.\n\nClosed notepad, Boss.\n\nClosed notepad, Boss."
-  },
-  {
-    "timestamp": "2026-08-29T08:04:50.708519+00:00",
-    "sender": "Mukil",
-    "channel": "Telegram",
-    "text": "Explain TCP vs UDP"
-  },
-  {
-    "timestamp": "2026-08-29T08:04:50.738617+00:00",
-    "sender": "JARVIS",
-    "channel": "Telegram",
-    "text": "TCP is connection-oriented while UDP is connectionless, Boss!"
-  },
-  {
-    "timestamp": "2026-08-29T08:06:26.721969+00:00",
-    "sender": "Mukil",
-    "channel": "Telegram",
-    "text": "notepad-a close pannu"
-  },
-  {
-    "timestamp": "2026-08-29T08:06:26.801333+00:00",
-    "sender": "JARVIS",
-    "channel": "Telegram",
-    "text": "Closed notepad, Boss.\n\nClosed notepad, Boss.\n\nClosed notepad, Boss.\n\nClosed notepad, Boss."
-  },
-  {
-    "timestamp": "2026-08-29T08:06:26.923879+00:00",
-    "sender": "Mukil",
-    "channel": "Telegram",
-    "text": "Explain TCP vs UDP"
-  },
-  {
-    "timestamp": "2026-08-29T08:06:26.956958+00:00",
-    "sender": "JARVIS",
-    "channel": "Telegram",
-    "text": "TCP is connection-oriented while UDP is connectionless, Boss!"
-  },
-  {
     "timestamp": "2026-08-29T08:08:03.721445+00:00",
     "sender": "Mukil",
     "channel": "Telegram",
@@ -598,5 +550,53 @@
     "sender": "JARVIS",
     "channel": "Telegram",
     "text": "TCP is connection-oriented while UDP is connectionless, Boss!"
+  },
+  {
+    "timestamp": "2026-10-31T11:10:38.069866+00:00",
+    "sender": "Mukil",
+    "channel": "Telegram",
+    "text": "bills pass pananum, enna bills iruku?"
+  },
+  {
+    "timestamp": "2026-10-31T11:10:38.088113+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "வணக்கம் Boss! All systems ready for your command."
+  },
+  {
+    "timestamp": "2026-10-31T11:10:47.797208+00:00",
+    "sender": "Mukil",
+    "channel": "Telegram",
+    "text": "bills pass pananum, enna bills iruku?"
+  },
+  {
+    "timestamp": "2026-10-31T11:10:49.400308+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "🏛️ **MUKIL'S DUAL-ENTERPRISE FINANCIAL RADAR**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n🟢 **ENTITY 1: SRI GANAPATHI COLOURS (YARN DYEING UNIT)**\n_(Father's Business • Main Dyeing Operations)_\n• **Gross Invoiced**: `₹66,584.00` (11 Bills)\n• **Outstanding Dues**: `₹66,584.00` (11 Unpaid)\n• **Settled Collections**: `₹0.00`\n• **Total GST (5%)**: `₹3,170.61`\n• **Top Overdue**: Bannari Amman Dyeing (`₹30,000.00`)\n📁 [Open SGC Bills Drive Vault](https://drive.google.com/drive/folders/11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9)\n\n⚪ **ENTITY 2: BLEACHING UNIT (SALAVAI UNIT)**\n_(Mukil's Independent Enterprise • Karur Yarn Hub)_\n• **Gross Invoiced**: `₹2,302.00` (2 Bills)\n• **Outstanding Dues**: `₹2,302.00` (2 Unpaid)\n• **Settled Collections**: `₹0.00`\n• **Recent Invoices**:\n  • *Bill #252* | M.S.K Fabrics | `₹259.00` [pending]\n  • *Bill #251* | M/s. Eco Fusion | `₹2,043.00` [PENDING]\n📁 [Open Bleaching-Bills Drive Vault](https://drive.google.com/drive/folders/1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J)\n\n━━━━━━━━━━━━━━━"
+  },
+  {
+    "timestamp": "2026-10-31T11:11:07.430558+00:00",
+    "sender": "Mukil",
+    "channel": "Telegram",
+    "text": "Eco Fusion bill evlo?"
+  },
+  {
+    "timestamp": "2026-10-31T11:11:08.696923+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "👤 **CUSTOMER LEDGER REPORT: ECO FUSION**\n\n⚪ **BLEACHING UNIT (SALAVAI) — ECO FUSION**\n• **Invoices**: `1` | **Gross**: `₹2,043.00`\n• **Outstanding Due**: `₹2,043.00`\n🧾 **Bills List**:\n• *Bill #251* (2026-10-27): `₹2,043.00` [PENDING]\n📁 [Bleaching Drive Folder](https://drive.google.com/drive/folders/1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J)"
+  },
+  {
+    "timestamp": "2026-10-31T11:12:02.951953+00:00",
+    "sender": "Mukil",
+    "channel": "Telegram",
+    "text": "What is the system battery and memory status?"
+  },
+  {
+    "timestamp": "2026-10-31T11:12:04.043452+00:00",
+    "sender": "JARVIS",
+    "channel": "Telegram",
+    "text": "🔋 **SYSTEM STATUS REPORT**\n\n*   **Battery**: `86%` (Plugged in & Charging ⚡)\n*   **RAM Usage**: `71.6%`\n*   **CPU Load**: `10.5%`\n\nSemma stable-aa irukku Boss! 🔥"
   }
 ]

@@ -1,7 +1,7 @@
 {
   "system_name": "MUKIL MASTER AGENT - Autonomous Agent Operating Plane",
   "user": "Mukil",
-  "last_updated": "2026-10-31T16:05:00+05:30",
+  "last_updated": "2026-10-31T16:45:00+05:30",
   "jarvis_master_mcp_and_pipelines": {
     "status": "LIVE_AND_OPERATIONAL",
     "mcp_server": "jarvis-mcp",
@@ -1581,11 +1581,88 @@
     }
   },
   "voice_system": {
-    "status": "OPERATIONAL_AUTHENTIC_TAMIL",
+    "status": "MULTI_ANGLE_VERIFIED_AND_LOCKED",
     "primary_tamil_voice": "ta-IN-ValluvarNeural",
     "primary_english_voice": "en-IN-PrabhatNeural",
     "tone": "Tony Stark Karur Brotherly Slang (Mapla / Boss)",
-    "render_deployment_commit": "bf5873f",
-    "last_updated": "2026-10-31T16:05:00+05:30"
+    "render_deployment_commit": "9833348",
+    "last_updated": "2026-10-31T16:05:00+05:30",
+    "primary_engine": "Google Gemini Native Audio (gemini-3.8-flash-lite-tts / gemini-3.8-flash-tts)",
+    "persona": "MORNING_WAKEUP (Tony Stark Brotherly Tanglish Slang)",
+    "options": [
+      "MORNING_WAKEUP",
+      "CINEMATIC_JARVIS",
+      "Puck",
+      "Charon",
+      "Fenrir"
+    ],
+    "resilient_fallback": "Microsoft Edge-TTS (ta-IN-ValluvarNeural)",
+    "active_voice": "STARK",
+    "locked_voices": {
+      "STARK": {
+        "name": "Tony Stark Brotherly Tanglish",
+        "engine": "gemini-3.8-flash-tts",
+        "persona": "MORNING_WAKEUP"
+      },
+      "CHARON": {
+        "name": "Charon (Deep & Cinematic Stark)",
+        "engine": "gemini-3.8-flash-tts",
+        "prebuilt": "Charon"
+      },
+      "FENRIR": {
+        "name": "Fenrir (Strong & Authoritative)",
+        "engine": "gemini-3.8-flash-tts",
+        "prebuilt": "Fenrir"
+      }
+    },
+    "telegram_commands": [
+      "/voice",
+      "/voice stark",
+      "/voice charon",
+      "/voice fenrir"
+    ],
+    "guarantee": "All Telegram requests automatically synthesize voice notes with the active locked Gemini voice.",
+    "verified_paths": [
+      "Telegram Text Messages -> Background Voice Memo (Agent 2)",
+      "Telegram Inbound Voice Notes -> Whisper Transcription -> Gemini Spoken Voice Reply",
+      "Daily Routine Engine -> 06:00 AM Wakeup / 06:05 AM Workout / 22:00 PM Wrapup",
+      "Timed Reminders & Alarms -> Immediate Voice Dispatch",
+      "Swatch Photo Analysis -> Voice Calculation Summary",
+      "Interactive Voice Switcher (/voice stark | charon | fenrir)"
+    ],
+    "audit_fixes_applied": [
+      "Sanitized TELEGRAM_BOT_TOKEN in gemini_voice_router to prevent 401 Unauthorized from stale Render env",
+      "Prioritized gemini-3.8-flash-tts over lite to bypass 10 req/day quota limit",
+      "Added resilient emergency Edge-TTS fallback in voice router so routines never drop",
+      "Locked STARK as default in repository persistent memory"
+    ]
+  },
+  "dual_enterprise_cognitive_router": {
+    "status": "LIVE_AND_OPERATIONAL",
+    "updated_at": "2026-10-31T16:45:00+05:30",
+    "engine": "tools/enterprise_router.py",
+    "rule_8_compliance": "Zero Cross-Contamination Guaranteed",
+    "entities": {
+      "entity_1": {
+        "name": "Sri Ganapathi Colours (Yarn Dyeing Unit)",
+        "nature": "Father's enterprise",
+        "drive_vault": "11KMBP0HHa2AFl30zjL8-a_-BQk9MgWM9",
+        "active_bills": 11,
+        "turnover": 66584.0
+      },
+      "entity_2": {
+        "name": "Sri Ganapathi Colours - Bleaching Unit (Salavai Unit)",
+        "nature": "Mukil's independent enterprise",
+        "drive_vault": "1Xb4gl8KvxlStlfWIIxRjIgWlIAupeg4J",
+        "active_bills": 2,
+        "turnover": 2302.0
+      }
+    },
+    "features": [
+      "Zero-hardcoded customer resolver (Eco Fusion, MSK Fabrics, Unity Exports, GAIA, Sowbhagiya, Sri Laxmi, etc.)",
+      "Dual-Enterprise Executive Dashboard covering both businesses simultaneously",
+      "Universal bill number router (Bill #251, #252 -> Bleaching; Bill #1..11 -> SGC)",
+      "Bi-directional sync across PC Worker Bridge (start_pc_bridge_worker.py) and Render Cloud Server"
+    ]
   }
 }
