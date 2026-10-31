@@ -2,22 +2,34 @@ name: Render 24/7 Always Awake Keep-Alive
 
 on:
   schedule:
-    # Trigger every 5 minutes 24/7 (Render free-tier sleeps after 15 min inactivity)
+    # Multiple distinct cron offsets to beat GitHub Actions runner queue congestion
     - cron: '*/5 * * * *'
+    - cron: '2-59/5 * * * *'
   workflow_dispatch:
 
 jobs:
   ping-render:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Render Health & Keep Container Awake
+      - name: Ping Render Cloud Service Endpoints to Prevent Sleep
         run: |
-          echo "Pinging AURA-OS Render Service to prevent cloud sleep..."
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://aura-os-jarvis.onrender.com/health")
-          echo "Received HTTP Status: $HTTP_STATUS"
-          if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "AURA-OS Render Container is LIVE and AWAKE 24/7!"
+          echo "⚡ Sending 24/7 Keep-Alive Inbound Requests to Render Container..."
+          
+          # 1. Primary Health Probe
+          HTTP_STATUS_1=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://aura-os-jarvis.onrender.com/health")
+          echo "Endpoint [/health] -> HTTP $HTTP_STATUS_1"
+          
+          # 2. Cloud Vitals Diagnostic Probe
+          HTTP_STATUS_2=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://aura-os-jarvis.onrender.com/api/v1/cloud-vitals")
+          echo "Endpoint [/api/v1/cloud-vitals] -> HTTP $HTTP_STATUS_2"
+
+          # 3. Cloud Routine Scheduler Probe (ensures clock awareness)
+          HTTP_STATUS_3=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://aura-os-jarvis.onrender.com/api/v1/routines/status")
+          echo "Endpoint [/api/v1/routines/status] -> HTTP $HTTP_STATUS_3"
+
+          if [ "$HTTP_STATUS_1" -eq 200 ] || [ "$HTTP_STATUS_2" -eq 200 ]; then
+            echo "✅ AURA-OS Render Container is 100% LIVE and AWAKE 24/7!"
           else
-            echo "Warning: Response status was $HTTP_STATUS, retrying wake-up call..."
+            echo "⚠️ Non-200 response, sending urgent recovery wakeup ping..."
             curl -f -s --max-time 45 "https://aura-os-jarvis.onrender.com/health" || true
           fi
