@@ -1,11 +1,13 @@
 """
 JARVIS Autonomous Speech Generator
 tools/tts_generator.py
-Powered by Google Gemini Native Audio (gemini-3.8-flash-lite-tts) with Edge-TTS Fallback.
-3 Calibrated Locked Personas:
-1. MORNING_WAKEUP  -> Tony Stark Brotherly Tamil Slang (Default)
-2. WORKOUT_BEAST   -> High-Energy Tamil Gym Coach
-3. BUSINESS_FINANCE-> Sharp Confident SGC Co-Founder
+Powered by Google Gemini Native Audio (gemini-3.8-flash-lite-tts / gemini-3.8-flash-tts) with Edge-TTS Fallback.
+Calibrated Personas:
+1. MORNING_WAKEUP   -> Warm, brotherly Tony Stark Kongu/Karur slang (Default)
+2. CINEMATIC_JARVIS -> Deep, authoritative Stark executive AI partner
+3. WORKOUT_BEAST    -> High-Energy Tamil Gym Coach
+4. BUSINESS_FINANCE -> Sharp Confident SGC Co-Founder
+5. CARING_FRIEND    -> Affectionate, caring Kongu Tamil best friend
 """
 import os
 import re
@@ -23,8 +25,11 @@ logger = logging.getLogger("tts_generator")
 
 PERSONA_PROMPTS = {
     "MORNING_WAKEUP": "Speak in a warm, natural, brotherly Tamil slang like Tony Stark talking to his best friend Mukil: ",
+    "CINEMATIC_JARVIS": "Speak in a deep, crisp, authoritative, cinematic executive AI partner tone: ",
+    "JARVIS": "Speak in a deep, crisp, authoritative, cinematic executive AI partner tone: ",
     "WORKOUT_BEAST": "Speak in an energetic, pumped-up workout motivation coach tone in Tamil slang: ",
     "BUSINESS_FINANCE": "Speak in a confident, sharp business executive partner tone in Tamil: ",
+    "CARING_FRIEND": "Speak in a caring, affectionate, friendly Kongu Tamil spoken tone: ",
 }
 DEFAULT_PERSONA = "MORNING_WAKEUP"
 
@@ -48,12 +53,6 @@ def convert_wav_to_ogg(input_path: str) -> str:
     return input_path
 
 
-def detect_language_and_voice(text: str) -> str:
-    """Detects whether text contains Tamil script or English/Tanglish and picks the best fallback voice."""
-    # ta-IN-ValluvarNeural is our locked authentic Tamil male voice with warm, brotherly tone
-    return "ta-IN-ValluvarNeural"
-
-
 def clean_text_for_speech(text: str) -> str:
     """Removes markdown symbols, tables, URLs, emojis, and code blocks for clean speech."""
     if not text:
@@ -75,25 +74,6 @@ def clean_text_for_speech(text: str) -> str:
     return text[:450]
 
 
-def convert_tanglish_to_spoken_tamil(tanglish_text: str, gemini_key: str) -> str:
-    """Converts Roman Tanglish into natural colloquial spoken Tamil script so Neural TTS pronounces authentic Kongu/Stark slang."""
-    try:
-        from google import genai
-        client = genai.Client(api_key=gemini_key)
-        prompt = (
-            "Convert this Tanglish response into natural spoken Tamil script for a brotherly voice note (Tony Stark / Mapla style). "
-            "Keep English technical words (like Excel, Google Drive, Profit, P&L, Bill, Sheet, Status) in simple English or transliterated Tamil:\n"
-            f"Input: {tanglish_text}\n"
-            "Output ONLY the spoken Tamil text:"
-        )
-        res = client.models.generate_content(model="gemini-3.5-flash-lite", contents=prompt)
-        if res.text and len(res.text.strip()) > 0:
-            return res.text.strip()
-    except Exception as e:
-        logger.warning(f"Tanglish to Tamil conversion notice: {e}")
-    return tanglish_text
-
-
 async def generate_voice_audio(
     text: str,
     custom_voice: Optional[str] = None,
@@ -101,52 +81,76 @@ async def generate_voice_audio(
 ) -> str:
     """
     Generates high-fidelity authentic voice note.
-    Primary: Microsoft Edge-TTS ta-IN-ValluvarNeural (Authentic Tamil Male Brotherly Slang).
-    Instant (<1s), zero robotic accent, perfect Tamil & Tanglish pronunciation.
+    Primary: Google Gemini Native Audio (gemini-3.8-flash-lite-tts / gemini-3.8-flash-tts)
+             with Tony Stark Brotherly Tamil / Cinematic JARVIS persona.
+    Fallback: Microsoft Edge-TTS (ta-IN-ValluvarNeural / en-IN-PrabhatNeural).
     """
     clean_text = clean_text_for_speech(text)
     if not clean_text:
         clean_text = "Task completed successfully, Maapla!"
 
+    active_persona = (persona or DEFAULT_PERSONA).upper()
+    directive = PERSONA_PROMPTS.get(active_persona, PERSONA_PROMPTS["MORNING_WAKEUP"])
+
     temp_dir = tempfile.gettempdir()
-    audio_path_mp3 = os.path.join(temp_dir, f"jarvis_voice_{os.getpid()}_{abs(hash(clean_text)) % 100000}.mp3")
+    audio_path = os.path.join(temp_dir, f"jarvis_voice_{os.getpid()}_{abs(hash(clean_text)) % 100000}.wav")
 
-    # 1. Primary: Authentic Edge-TTS Neural Voice
-    # ta-IN-ValluvarNeural for Tamil/Tanglish, en-IN-PrabhatNeural for pure English
-    has_tamil = any('\u0B80' <= c <= '\u0BFF' for c in clean_text)
-    selected_voice = custom_voice or ("ta-IN-ValluvarNeural" if has_tamil or "mapla" in clean_text.lower() or "bro" in clean_text.lower() or "enna" in clean_text.lower() else "en-IN-PrabhatNeural")
+    # 1. Primary: Google Gemini Native Audio
+    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if gemini_key:
+        for model_name in [
+            "gemini-3.8-flash-lite-tts",
+            "gemini-3.8-flash-tts",
+            "gemini-3.1-flash-tts-preview"
+        ]:
+            try:
+                from google import genai
+                from google.genai import types
+                client = genai.Client(api_key=gemini_key)
+                prompt = f"{directive}{clean_text}"
 
+                speech_cfg = None
+                if custom_voice and custom_voice in ["Puck", "Charon", "Fenrir", "Aoede", "Kore"]:
+                    speech_cfg = types.SpeechConfig(
+                        voice_config=types.VoiceConfig(
+                            prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=custom_voice)
+                        )
+                    )
+
+                config = types.GenerateContentConfig(
+                    response_modalities=["AUDIO"],
+                    speech_config=speech_cfg
+                ) if speech_cfg else types.GenerateContentConfig(response_modalities=["AUDIO"])
+
+                res = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config
+                )
+                if res.candidates and res.candidates[0].content and res.candidates[0].content.parts:
+                    for part in res.candidates[0].content.parts:
+                        if getattr(part, 'inline_data', None) and part.inline_data.data:
+                            with open(audio_path, "wb") as f:
+                                f.write(part.inline_data.data)
+                            logger.info(f"Generated voice using Gemini {model_name} ({active_persona})")
+                            ogg_file = convert_wav_to_ogg(audio_path)
+                            return ogg_file
+            except Exception as e:
+                logger.warning(f"Gemini {model_name} TTS notice: {e}")
+                continue
+
+    # 2. Resilient Fallback: Microsoft Edge-TTS Neural Voice
+    selected_voice = "ta-IN-ValluvarNeural" if (custom_voice == "ta-IN-ValluvarNeural" or any('\u0B80' <= c <= '\u0BFF' for c in clean_text) or "mapla" in clean_text.lower() or "bro" in clean_text.lower() or "enna" in clean_text.lower()) else "en-IN-PrabhatNeural"
+    audio_path_mp3 = audio_path.replace(".wav", ".mp3")
     try:
         import edge_tts
         communicate = edge_tts.Communicate(clean_text, selected_voice, rate="+6%", pitch="+1Hz")
         await communicate.save(audio_path_mp3)
-        logger.info(f"Generated authentic brotherly voice using Edge-TTS ({selected_voice})")
+        logger.info(f"Generated voice using Edge-TTS fallback ({selected_voice})")
         ogg_file = convert_wav_to_ogg(audio_path_mp3)
         return ogg_file
     except Exception as ex:
-        logger.warning(f"Primary Edge-TTS notice: {ex}")
-
-    # 2. Fallback to Gemini if Edge-TTS has network issue
-    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    if gemini_key:
-        try:
-            from google import genai
-            from google.genai import types
-            client = genai.Client(api_key=gemini_key)
-            res = client.models.generate_content(
-                model="gemini-3.8-flash-lite-tts",
-                contents=f"Speak in a natural brotherly tone: {clean_text}",
-                config=types.GenerateContentConfig(response_modalities=["AUDIO"])
-            )
-            if res.candidates and res.candidates[0].content and res.candidates[0].content.parts:
-                for part in res.candidates[0].content.parts:
-                    if getattr(part, 'inline_data', None) and part.inline_data.data:
-                        audio_path_wav = audio_path_mp3.replace(".mp3", ".wav")
-                        with open(audio_path_wav, "wb") as f:
-                            f.write(part.inline_data.data)
-                        return convert_wav_to_ogg(audio_path_wav)
-        except Exception as e:
-            logger.error(f"Fallback Gemini TTS failed: {e}")
+        logger.error(f"Edge-TTS fallback error: {ex}")
 
     with open(audio_path_mp3, "wb") as f:
         f.write(b"")
