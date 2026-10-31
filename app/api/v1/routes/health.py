@@ -96,3 +96,18 @@ async def system_diagnosis():
     diagnosis = analysis_engine.analyze(vitals, delta)
     return diagnosis
 
+
+
+@router.get("/telegram-logs")
+async def telegram_logs():
+    """Retrieve logs from background telegram_bridge process."""
+    import os
+    log_file = "/tmp/telegram_bridge.log"
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+                return {"status": "ok", "logs": content[-3000:]}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+    return {"status": "not_found", "logs": "No log file at /tmp/telegram_bridge.log"}

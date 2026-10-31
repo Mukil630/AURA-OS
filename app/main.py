@@ -68,7 +68,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                 import sys
                 sub_env = os.environ.copy()
                 sub_env["TELEGRAM_BOT_TOKEN"] = token
-                telegram_process = subprocess.Popen([sys.executable, "-u", bridge_script], env=sub_env)
+                sub_env["PYTHONUNBUFFERED"] = "1"
+                log_out = open("/tmp/telegram_bridge.log", "a", encoding="utf-8")
+                telegram_process = subprocess.Popen([sys.executable, "-u", bridge_script], env=sub_env, stdout=log_out, stderr=log_out)
                 logger.info(f"✅ Telegram Bridge Daemon running with PID: {telegram_process.pid}")
             except Exception as e:
                 logger.error(f"Failed to launch Telegram Bridge Daemon: {e}")

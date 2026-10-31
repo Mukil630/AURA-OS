@@ -1854,7 +1854,7 @@ def main():
     while True:
         try:
             app = build_app()
-            app.run_polling(drop_pending_updates=True, bootstrap_retries=-1, timeout=20, stop_signals=None)
+            app.run_polling(drop_pending_updates=False, bootstrap_retries=-1, timeout=20, stop_signals=None)
             time.sleep(3)
         except (KeyboardInterrupt, SystemExit):
             break
