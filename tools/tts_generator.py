@@ -176,16 +176,17 @@ def clean_text_for_speech(text: str) -> str:
 async def generate_voice_audio(
     text: str,
     custom_voice: Optional[str] = None,
-    persona: Optional[str] = None
+    persona: Optional[str] = None,
+    strict_gemini_only: bool = False
 ) -> str:
     """
     Generates high-fidelity authentic voice note.
-    Primary: Google Gemini Native Audio (gemini-3.8-flash-lite-tts / gemini-3.8-flash-tts)
+    Primary: Google Gemini Native Audio (gemini-3.8-flash-tts / gemini-3.8-flash-lite-tts)
              using Mukil's 3 locked voices:
-             - STARK  (Tony Stark Brotherly Tanglish)
-             - CHARON (Deep & Cinematic Stark)
-             - FENRIR (Strong & Authoritative)
-    Fallback: Microsoft Edge-TTS (ta-IN-ValluvarNeural / en-IN-PrabhatNeural).
+             - STARK  (Tony Stark Brotherly Tanglish - Puck)
+             - CHARON (Deep & Cinematic Stark - Charon)
+             - FENRIR (Strong & Authoritative - Fenrir)
+    Fallback: Microsoft Edge-TTS Neural Voice (Only when strict_gemini_only=False).
     """
     clean_text = clean_text_for_speech(text)
     if not clean_text:
@@ -206,13 +207,14 @@ async def generate_voice_audio(
     temp_dir = tempfile.gettempdir()
     audio_path = os.path.join(temp_dir, f"jarvis_voice_{os.getpid()}_{abs(hash(clean_text)) % 100000}.wav")
 
-    # 1. Primary: Google Gemini Native Audio
+    # 1. Primary: Google Gemini Native Audio (Exclusive AGY Path)
     gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if gemini_key:
         for model_name in [
-            "gemini-3.8-flash-tts",
             "gemini-3.8-flash-lite-tts",
-            "gemini-3.1-flash-tts-preview"
+            "gemini-3.8-flash-tts",
+            "gemini-3.1-flash-tts-preview",
+            "gemini-2.5-flash-preview-tts"
         ]:
             try:
                 from google import genai
@@ -220,19 +222,17 @@ async def generate_voice_audio(
                 client = genai.Client(api_key=gemini_key)
                 prompt = f"{directive}{clean_text}"
 
-                prebuilt = voice_cfg.get("prebuilt_voice")
-                speech_cfg = None
-                if prebuilt:
-                    speech_cfg = types.SpeechConfig(
-                        voice_config=types.VoiceConfig(
-                            prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=prebuilt)
-                        )
+                prebuilt = voice_cfg.get("prebuilt_voice", "Puck")
+                speech_cfg = types.SpeechConfig(
+                    voice_config=types.VoiceConfig(
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=prebuilt)
                     )
+                )
 
                 config = types.GenerateContentConfig(
                     response_modalities=["AUDIO"],
                     speech_config=speech_cfg
-                ) if speech_cfg else types.GenerateContentConfig(response_modalities=["AUDIO"])
+                )
 
                 res = client.models.generate_content(
                     model=model_name,
@@ -244,14 +244,18 @@ async def generate_voice_audio(
                         if getattr(part, 'inline_data', None) and part.inline_data.data:
                             with open(audio_path, "wb") as f:
                                 f.write(part.inline_data.data)
-                            logger.info(f"Generated voice using Gemini {model_name} [{voice_cfg['name']}]")
+                            logger.info(f"Generated voice using Gemini {model_name} [{voice_cfg['name']} - {prebuilt}]")
                             ogg_file = convert_wav_to_ogg(audio_path)
                             return ogg_file
             except Exception as e:
                 logger.warning(f"Gemini {model_name} TTS notice: {e}")
                 continue
 
-    # 2. Resilient Fallback: Microsoft Edge-TTS Neural Voice
+    if strict_gemini_only:
+        logger.error("[TTS] Strict Gemini Mode active: refusing fallback to robotic Edge-TTS!")
+        return ""
+
+    # 2. Resilient Fallback: Microsoft Edge-TTS Neural Voice (Only when permitted)
     selected_voice = "ta-SG-AnbuNeural" if (any('\u0B80' <= c <= '\u0BFF' for c in clean_text) or "mapla" in clean_text.lower() or "bro" in clean_text.lower() or "enna" in clean_text.lower()) else "en-IN-PrabhatNeural"
     audio_path_mp3 = audio_path.replace(".wav", ".mp3")
     try:
@@ -267,3 +271,90 @@ async def generate_voice_audio(
     with open(audio_path_mp3, "wb") as f:
         f.write(b"")
     return audio_path_mp3
+
+
+def generate_voice_audio_sync(
+    text: str,
+    custom_voice: Optional[str] = None,
+    persona: Optional[str] = None,
+    strict_gemini_only: bool = True
+) -> str:
+    """
+    Synchronous direct executor for Gemini Native Voice.
+    Guarantees 100% pure Gemini Native Audio without asyncio deadlocks.
+    """
+    clean_text = clean_text_for_speech(text)
+    if not clean_text:
+        clean_text = "Task completed successfully, Maapla!"
+
+    # Resolve active voice configuration
+    if custom_voice and custom_voice.upper() in LOCKED_VOICES:
+        voice_cfg = LOCKED_VOICES[custom_voice.upper()]
+    elif custom_voice and custom_voice.capitalize() in ["Charon", "Fenrir"]:
+        voice_cfg = LOCKED_VOICES.get(custom_voice.upper(), LOCKED_VOICES["STARK"])
+    else:
+        voice_cfg = get_active_voice_config()
+
+    directive = voice_cfg["directive"]
+    if persona and persona.upper() in PERSONA_PROMPTS:
+        directive = PERSONA_PROMPTS[persona.upper()]
+
+    temp_dir = tempfile.gettempdir()
+    audio_path = os.path.join(temp_dir, f"jarvis_voice_{os.getpid()}_{abs(hash(clean_text)) % 100000}.wav")
+
+    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if gemini_key:
+        for model_name in [
+            "gemini-3.8-flash-lite-tts",
+            "gemini-3.8-flash-tts",
+            "gemini-3.1-flash-tts-preview",
+            "gemini-2.5-flash-preview-tts"
+        ]:
+            try:
+                from google import genai
+                from google.genai import types
+                client = genai.Client(api_key=gemini_key)
+                prompt = f"{directive}{clean_text}"
+
+                prebuilt = voice_cfg.get("prebuilt_voice", "Puck")
+                speech_cfg = types.SpeechConfig(
+                    voice_config=types.VoiceConfig(
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=prebuilt)
+                    )
+                )
+
+                config = types.GenerateContentConfig(
+                    response_modalities=["AUDIO"],
+                    speech_config=speech_cfg
+                )
+
+                res = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config
+                )
+                if res.candidates and res.candidates[0].content and res.candidates[0].content.parts:
+                    for part in res.candidates[0].content.parts:
+                        if getattr(part, 'inline_data', None) and part.inline_data.data:
+                            with open(audio_path, "wb") as f:
+                                f.write(part.inline_data.data)
+                            logger.info(f"Generated voice using Gemini {model_name} [{voice_cfg['name']} - {prebuilt}]")
+                            ogg_file = convert_wav_to_ogg(audio_path)
+                            return ogg_file
+            except Exception as e:
+                logger.warning(f"Gemini {model_name} TTS notice: {e}")
+                continue
+
+    if strict_gemini_only:
+        logger.error("[TTS Sync] Strict Gemini Mode active: refusing fallback to robotic Edge-TTS!")
+        return ""
+
+    try:
+        import asyncio
+        loop = asyncio.new_event_loop()
+        res = loop.run_until_complete(generate_voice_audio(text, custom_voice, persona, strict_gemini_only=False))
+        loop.close()
+        return res
+    except Exception as e:
+        logger.error(f"Fallback synthesis error: {e}")
+        return ""
