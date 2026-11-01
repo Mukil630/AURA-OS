@@ -169,22 +169,23 @@ class CloudRoutineEngine:
         return {"success": False, "error": f"Routine '{routine_id}' not found"}
 
     def run_morning_wakeup(self, dispatch_audio: bool = True) -> dict:
-        """06:00 AM Karur Weather + Stark Tone Wakeup."""
-        weather = get_live_weather_radar("karur")
-        convo_lines = generate_human_sensory_weather_speech(weather)
-        speech_text = f"Good morning Boss Mukil! {convo_lines}"
+        """06:00 AM Karur Weather + Stark Tone Wakeup with Zero-Hallucination Truth Shield."""
+        from tools.truth_shield_engine import execute_grounded_voice_pipeline
+        from tools.weather_radar_tool import get_live_weather_radar
 
-        audio_res = None
-        if dispatch_audio:
-            ok, audio_file = synthesize_persona_voice(speech_text, persona_type="MORNING_WAKEUP")
-            if ok:
-                caption = f"🌅 *06:00 AM Morning Intel (Stark Wakeup)*\n\n{speech_text}"
-                sent = send_voice_to_telegram(audio_file, caption=caption)
-                audio_res = {"file": audio_file, "telegram_sent": sent}
-            else:
-                send_telegram_markdown_alert(f"🌅 *06:00 AM Morning Intel*\n\n{speech_text}")
-
-        return {"speech": speech_text, "audio": audio_res}
+        res = execute_grounded_voice_pipeline(
+            tool_fn=get_live_weather_radar,
+            tool_args=("karur",),
+            persona_type="MORNING_WAKEUP",
+            caption_title="06:00 AM Morning Intel (Stark Wakeup)",
+            dispatch_telegram=dispatch_audio
+        )
+        return {
+            "speech": res["final_speech"],
+            "audio": res.get("audio"),
+            "truth_shield_passed": res.get("truth_shield_passed"),
+            "validation_reason": res.get("validation_reason")
+        }
 
     def run_workout_beast(self, dispatch_audio: bool = True) -> dict:
         """06:05 AM Workout Beast Mode."""

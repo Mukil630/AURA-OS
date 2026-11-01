@@ -58,19 +58,22 @@ WEEKLY_WORKOUT_SPLIT_OORU = {
 
 
 def run_6am_touchpoint(dispatch_audio: bool = True) -> dict:
-    weather = get_live_weather_radar("karur")
-    convo_lines = generate_human_sensory_weather_speech(weather)
-    speech_text = f"Good morning Boss! {convo_lines}"
+    from tools.truth_shield_engine import execute_grounded_voice_pipeline
+    from tools.weather_radar_tool import get_live_weather_radar
 
-    audio_res = None
-    if dispatch_audio:
-        ok, audio_file = synthesize_persona_voice(speech_text, persona_type="MORNING_WAKEUP")
-        if ok:
-            play_through_speakers(audio_file)
-            sent = send_voice_to_telegram(audio_file, caption="🌅 06:00 AM Morning Intel (Stark Wakeup)")
-            audio_res = {"file": audio_file, "telegram_sent": sent}
-
-    return {"speech": speech_text, "audio": audio_res}
+    res = execute_grounded_voice_pipeline(
+        tool_fn=get_live_weather_radar,
+        tool_args=("karur",),
+        persona_type="MORNING_WAKEUP",
+        caption_title="06:00 AM Morning Intel (Stark Wakeup)",
+        dispatch_telegram=dispatch_audio,
+        play_speaker=True
+    )
+    return {
+        "speech": res["final_speech"],
+        "audio": res.get("audio"),
+        "truth_shield_passed": res.get("truth_shield_passed")
+    }
 
 
 def run_605am_touchpoint(dispatch_audio: bool = True) -> dict:
