@@ -11,15 +11,15 @@
       "persona": "MORNING_WAKEUP",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-10-31",
+      "last_executed_date": "2026-11-01",
       "channels": {
         "local_speaker": true,
         "telegram_voice": true,
         "phone_call": false
       },
-      "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call.",
-      "last_executed_at": "2026-10-30T07:15:58.779019+05:30",
-      "last_execution_type": "SKIPPED_PAST_GRACE_WINDOW"
+      "description": "Karur live weather radar, real-time temperature, Hank Yarn sun-drying report & Brotherly wake-up call.",
+      "last_executed_at": "2026-11-01T07:35:52.867532",
+      "last_execution_type": "CATCH_UP_95M_LATE"
     },
     {
       "id": "workout_beast",
@@ -29,15 +29,15 @@
       "persona": "WORKOUT_BEAST",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-10-31",
+      "last_executed_date": "2026-11-01",
       "channels": {
         "local_speaker": true,
         "telegram_voice": true,
         "phone_call": false
       },
       "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio.",
-      "last_executed_at": "2026-10-30T07:17:42.842359+05:30",
-      "last_execution_type": "SKIPPED_PAST_GRACE_WINDOW"
+      "last_executed_at": "2026-11-01T07:35:52.867532",
+      "last_execution_type": "CATCH_UP_90M_LATE"
     },
     {
       "id": "sgc_monthly_gst",
@@ -48,13 +48,15 @@
       "schedule_type": "monthly",
       "monthly_day": 1,
       "catchup_grace_minutes": 720,
-      "last_executed_date": null,
+      "last_executed_date": "2026-11-01",
       "channels": {
         "local_speaker": true,
         "telegram_voice": true,
         "phone_call": false
       },
-      "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone."
+      "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone.",
+      "last_executed_at": "2026-11-01T07:35:52.867532",
+      "last_execution_type": "CATCH_UP_35M_LATE"
     },
     {
       "id": "night_wrapup",
@@ -64,13 +66,15 @@
       "persona": "CASUAL_COWBOY",
       "schedule_type": "daily",
       "catchup_grace_minutes": 120,
-      "last_executed_date": null,
+      "last_executed_date": "2026-10-31",
       "channels": {
         "local_speaker": true,
         "telegram_voice": true,
         "phone_call": false
       },
-      "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification."
+      "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification.",
+      "last_executed_at": "2026-10-31T22:00:00.579287",
+      "last_execution_type": "ON_TIME"
     }
   ]
 }

@@ -94,7 +94,7 @@ class CloudRoutineEngine:
                         "schedule_type": "daily",
                         "catchup_grace_minutes": 180,
                         "last_executed_date": None,
-                        "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call."
+                        "description": "Karur live weather radar, real-time temperature, Hank Yarn sun-drying report & Brotherly wake-up call."
                     },
                     {
                         "id": "workout_beast",
