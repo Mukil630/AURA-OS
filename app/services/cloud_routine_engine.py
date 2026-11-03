@@ -169,10 +169,9 @@ class CloudRoutineEngine:
         return {"success": False, "error": f"Routine '{routine_id}' not found"}
 
     def run_morning_wakeup(self, dispatch_audio: bool = True) -> dict:
-        """06:00 AM Karur Weather + Stark Tone Wakeup."""
-        weather = get_live_weather_radar("karur")
-        convo_lines = generate_human_sensory_weather_speech(weather)
-        speech_text = f"Good morning Boss Mukil! {convo_lines}"
+        """06:00 AM Karur Weather + Stark Tone Wakeup with Zero-Hallucination Truth Shield."""
+        from tools.truth_shield_engine import execute_grounded_voice_pipeline
+        from tools.weather_radar_tool import get_live_weather_radar
 
         audio_res = None
         if dispatch_audio:
