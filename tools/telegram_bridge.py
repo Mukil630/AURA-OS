@@ -1607,7 +1607,7 @@ def generate_spoken_voice_script(raw_text: str) -> str:
 
     try:
         completion = groq_client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
+            model="openai/gpt-oss-120b",
             messages=[
                 {
                     "role": "system",
@@ -1623,8 +1623,8 @@ def generate_spoken_voice_script(raw_text: str) -> str:
                 },
                 {"role": "user", "content": clean[:800]}
             ],
-            temperature=0.2,
-            max_tokens=50
+            temperature=0.3,
+            max_tokens=300
         )
         spoken = completion.choices[0].message.content.strip()
         if spoken and len(spoken) > 5:
@@ -1658,7 +1658,7 @@ async def background_voice_agent(
         active_cfg = get_active_voice_config()
         effective_caption = caption if (caption and caption not in ["🎙️ AURA Spoken Voice", "AURA Spoken Voice"]) else active_cfg.get("caption", "🎙️ JARVIS Voice")
 
-        audio_path = await generate_voice_audio(spoken_text)
+        audio_path = await generate_voice_audio(spoken_text, custom_voice="STARK", strict_gemini_only=True)
         if audio_path and os.path.exists(audio_path):
             with open(audio_path, "rb") as voice_out:
                 await bot.send_voice(

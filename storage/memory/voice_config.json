@@ -1,7 +1,7 @@
 {
   "active_voice": "STARK",
   "name": "Tony Stark Brotherly Tanglish",
-  "engine": "gemini-3.8-flash-tts",
-  "prebuilt_voice": null,
-  "last_updated": "2026-10-31"
+  "engine": "gemini-3.8-flash-lite-tts",
+  "prebuilt_voice": "Puck",
+  "last_updated": "2026-11-02"
 }

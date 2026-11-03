@@ -47,6 +47,18 @@ BRIDGE_SECRET = os.getenv("PC_BRIDGE_SECRET", "mukil-aura-pc-bridge-secret-2026"
 WORKER_ID = os.getenv("WORKER_ID", "mukil_primary_pc")
 
 
+async def routine_watchdog_loop():
+    """Continuously evaluates daily routines (06:00 AM, 06:05 AM, etc.) persistently on the PC."""
+    from tools.morning_routine_daemon import evaluate_state_aware_routines
+    logger.info("⏰ Background Daily Routine Watchdog started.")
+    while True:
+        try:
+            await asyncio.to_thread(evaluate_state_aware_routines, dispatch_audio=True)
+        except Exception as e:
+            logger.warning(f"Routine watchdog error: {e}")
+        await asyncio.sleep(20)
+
+
 async def sync_brain_loop(ws):
     """Continuously streams AGY live context to the Cloud Server every 15s."""
     logger.info("🧠 Live Brain Context sync loop started.")
@@ -76,6 +88,9 @@ async def run_pc_worker():
     logger.info(f"📍 Target Server: {CLOUD_SERVER_URL}")
     logger.info(f"💻 Worker ID: {WORKER_ID}")
     logger.info("=" * 60)
+
+    # Start background routine watchdog once (runs for entire lifetime of worker)
+    watchdog_task = asyncio.create_task(routine_watchdog_loop())
 
     while True:
         sync_task = None
