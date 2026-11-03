@@ -26,38 +26,45 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ROUTINE="${{ github.event.inputs.routine_id }}"
+            echo "Manual workflow_dispatch selected: $ROUTINE"
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "routine=$ROUTINE" >> $GITHUB_OUTPUT
           else
             HOUR=$(date -u +%H)
             MIN=$(date -u +%M)
             DAY=$(date -u +%d)
             echo "Current UTC Time: $HOUR:$MIN, Day: $DAY"
 
-            if [ "$HOUR" = "00" ] && [ "$MIN" -ge "25" ] && [ "$MIN" -le "33" ]; then
+            if [ "$HOUR" = "00" ] && [ "$MIN" -ge "25" ] && [ "$MIN" -le "34" ]; then
               ROUTINE="morning_wakeup"
-            elif [ "$HOUR" = "00" ] && [ "$MIN" -ge "34" ] && [ "$MIN" -le "42" ]; then
+            elif [ "$HOUR" = "00" ] && [ "$MIN" -ge "35" ] && [ "$MIN" -le "50" ]; then
               ROUTINE="workout_beast"
             elif [ "$HOUR" = "01" ] && [ "$DAY" = "01" ]; then
               ROUTINE="sgc_monthly_gst"
             elif [ "$HOUR" = "16" ]; then
               ROUTINE="night_wrapup"
             else
-              ROUTINE="morning_wakeup"
+              echo "⏭️ No scheduled routine matching current UTC time ($HOUR:$MIN). Skipping to avoid out-of-schedule triggers."
+              echo "skip=true" >> $GITHUB_OUTPUT
+              exit 0
             fi
+            echo "Selected Routine: $ROUTINE"
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "routine=$ROUTINE" >> $GITHUB_OUTPUT
           fi
-          echo "Selected Routine: $ROUTINE"
-          echo "routine=$ROUTINE" >> $GITHUB_OUTPUT
 
       - name: Dispatch Cloud Routine to Render
+        if: steps.select-routine.outputs.skip != 'true'
         run: |
           ROUTINE="${{ steps.select-routine.outputs.routine }}"
-          URL="https://aura-os-jarvis.onrender.com/api/v1/routines/trigger/${ROUTINE}?secret=mukil-aura-pc-bridge-secret-2026"
-          echo "Dispatched trigger for '$ROUTINE' to $URL"
+          URL="https://aura-os-jarvis.onrender.com/api/v1/routines/trigger/${ROUTINE}?secret=mukil-aura-pc-bridge-secret-2026&force=false"
+          echo "Dispatched trigger for '$ROUTINE' to $URL (force=false)"
           
-          # Retry up to 3 times to ensure container wakes if cold
-          curl --retry 3 --retry-delay 15 --max-time 90 -s -f -X POST "$URL" || {
-            echo "Direct API post returned non-zero. Attempting fallback wake-up..."
-            curl -s --max-time 30 "https://aura-os-jarvis.onrender.com/health"
-            sleep 10
-            curl -f -X POST "$URL"
+          # Single request with wake-up fallback to prevent duplicate retry spam
+          curl --max-time 60 -s -f -X POST "$URL" || {
+            echo "Container may be asleep, waking up /health..."
+            curl -s --max-time 20 "https://aura-os-jarvis.onrender.com/health"
+            sleep 5
+            curl -s -f -X POST "$URL" || echo "Routine already triggered or handled by Cloud engine."
           }
-          echo "✅ Successfully triggered routine: $ROUTINE"
+          echo "Trigger evaluation complete for: $ROUTINE"

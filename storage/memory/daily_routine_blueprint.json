@@ -11,15 +11,15 @@
       "persona": "MORNING_WAKEUP",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-11-01",
+      "last_executed_date": "2026-11-03",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
       "description": "Karur live weather radar, real-time temperature, Hank Yarn sun-drying report & Brotherly wake-up call.",
-      "last_executed_at": "2026-11-01T07:35:52.867532",
-      "last_execution_type": "CATCH_UP_95M_LATE"
+      "last_executed_at": "2026-11-03T06:45:46.840531+05:30",
+      "last_execution_type": "TRIGGERED"
     },
     {
       "id": "workout_beast",
@@ -29,15 +29,15 @@
       "persona": "WORKOUT_BEAST",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-11-01",
+      "last_executed_date": "2026-11-03",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
       "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio.",
-      "last_executed_at": "2026-11-01T07:35:52.867532",
-      "last_execution_type": "CATCH_UP_90M_LATE"
+      "last_executed_at": "2026-11-03T06:45:52.300417+05:30",
+      "last_execution_type": "TRIGGERED"
     },
     {
       "id": "sgc_monthly_gst",
@@ -51,7 +51,7 @@
       "last_executed_date": "2026-11-01",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
       "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone.",
@@ -69,7 +69,7 @@
       "last_executed_date": "2026-10-31",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
       "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification.",

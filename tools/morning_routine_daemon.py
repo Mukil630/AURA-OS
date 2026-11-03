@@ -73,7 +73,7 @@ def run_6am_touchpoint(dispatch_audio: bool = True) -> dict:
     return {"speech": speech_text, "audio": audio_res}
 
 
-def run_605am_touchpoint(dispatch_audio: bool = True) -> dict:
+def run_605am_touchpoint(dispatch_audio: bool = True, dispatch_telegram: bool = False, play_speaker: bool = True) -> dict:
     today_name = datetime.now().strftime("%A")
     split = WEEKLY_WORKOUT_SPLIT_OORU.get(today_name, "ஃபுல் பாடி வொர்க்அவுட் மாப்ள!")
     speech_text = (
@@ -85,9 +85,12 @@ def run_605am_touchpoint(dispatch_audio: bool = True) -> dict:
     if dispatch_audio:
         ok, audio_file = synthesize_persona_voice(speech_text, persona_type="WORKOUT_BEAST")
         if ok:
-            play_through_speakers(audio_file)
-            sent = send_voice_to_telegram(audio_file, caption="⚡ 06:05 AM Workout Alert (Beast Mode)")
-            audio_res = {"file": audio_file, "telegram_sent": sent}
+            if play_speaker:
+                play_through_speakers(audio_file)
+            sent = False
+            if dispatch_telegram:
+                sent = send_voice_to_telegram(audio_file, caption="⚡ 06:05 AM Workout Alert (Beast Mode)")
+            audio_res = {"file": audio_file, "telegram_sent": sent, "speaker_played": play_speaker}
 
     return {"speech": speech_text, "audio": audio_res}
 
@@ -227,12 +230,12 @@ def update_routine_schedule(routine_id: str, new_time: str, enabled: bool = None
     return {"success": False, "error": f"Routine '{routine_id}' not found"}
 
 
-def dispatch_routine(routine_id: str, dispatch_audio: bool = True, force_run: bool = False) -> dict:
+def dispatch_routine(routine_id: str, dispatch_audio: bool = True, force_run: bool = False, dispatch_telegram: bool = False, play_speaker: bool = True) -> dict:
     """Executes a routine by its unique ID."""
     if routine_id == "morning_wakeup":
-        return run_6am_touchpoint(dispatch_audio=dispatch_audio)
+        return run_6am_touchpoint(dispatch_audio=dispatch_audio, dispatch_telegram=dispatch_telegram, play_speaker=play_speaker)
     elif routine_id == "workout_beast":
-        return run_605am_touchpoint(dispatch_audio=dispatch_audio)
+        return run_605am_touchpoint(dispatch_audio=dispatch_audio, dispatch_telegram=dispatch_telegram, play_speaker=play_speaker)
     elif routine_id == "sgc_monthly_gst":
         return run_700am_touchpoint(dispatch_audio=dispatch_audio, force_run=force_run)
     elif routine_id == "night_wrapup":
@@ -287,7 +290,10 @@ def evaluate_state_aware_routines(dispatch_audio: bool = True) -> list:
                 logger.info(f"⚡ [TRIGGER] Firing {rid} ({exec_type}) - Target: {target_str}, Now: {now.strftime('%H:%M')}")
                 print(f"\n[DAEMON] ⏰ Triggering Routine: {routine.get('name')} [{exec_type}]")
 
-                res = dispatch_routine(rid, dispatch_audio=dispatch_audio, force_run=False)
+                channels = routine.get("channels", {})
+                tele_active = dispatch_audio and channels.get("telegram_voice", False)
+                speaker_active = channels.get("local_speaker", True)
+                res = dispatch_routine(rid, dispatch_audio=dispatch_audio, force_run=False, dispatch_telegram=tele_active, play_speaker=speaker_active)
                 routine["last_executed_date"] = today_str
                 routine["last_executed_at"] = now.isoformat()
                 routine["last_execution_type"] = exec_type

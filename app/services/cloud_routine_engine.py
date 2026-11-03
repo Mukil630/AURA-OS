@@ -182,7 +182,7 @@ class CloudRoutineEngine:
                 sent = send_voice_to_telegram(audio_file, caption=caption)
                 audio_res = {"file": audio_file, "telegram_sent": sent}
             else:
-                send_telegram_markdown_alert(f"🌅 *06:00 AM Morning Intel*\n\n{speech_text}")
+                logger.error("[MorningIntel] Voice synthesis failed. Suppressing text alert to prevent duplicate chat spam.")
 
         return {"speech": speech_text, "audio": audio_res}
 
@@ -204,7 +204,7 @@ class CloudRoutineEngine:
                 sent = send_voice_to_telegram(audio_file, caption=caption)
                 audio_res = {"file": audio_file, "telegram_sent": sent}
             else:
-                send_telegram_markdown_alert(f"⚡ *06:05 AM Workout Alert*\n\n{speech_text}")
+                logger.error("[WorkoutAlert] Voice synthesis failed. Suppressing text alert to prevent duplicate chat spam.")
 
         return {"speech": speech_text, "audio": audio_res}
 
@@ -229,7 +229,7 @@ class CloudRoutineEngine:
                 sent = send_voice_to_telegram(audio_file, caption=caption)
                 audio_res = {"file": audio_file, "telegram_sent": sent}
             else:
-                send_telegram_markdown_alert(f"📊 *07:00 AM Month-End GST Audit*\n\n{speech_text}")
+                logger.error("[GSTAlert] Voice synthesis failed. Suppressing text fallback.")
 
         return {"speech": speech_text, "audit": audit, "audio": audio_res}
 
@@ -250,12 +250,38 @@ class CloudRoutineEngine:
                 sent = send_voice_to_telegram(audio_file, caption=caption)
                 audio_res = {"file": audio_file, "telegram_sent": sent}
             else:
-                send_telegram_markdown_alert(f"🌙 *22:00 PM Night Wrap-Up*\n\n{speech_text}")
+                logger.error("[NightWrapup] Voice synthesis failed. Suppressing text fallback.")
 
         return {"speech": speech_text, "audio": audio_res}
 
     def execute_routine(self, routine_id: str, dispatch_audio: bool = True, force_run: bool = False) -> dict:
-        """Executes any routine by its ID."""
+        """Executes any routine by its ID with strict deduplication and cooldown gates."""
+        import time
+        now_ist = datetime.now(IST_TZ)
+        today_str = now_ist.strftime("%Y-%m-%d")
+        bp = self.load_blueprint()
+
+        target_routine = None
+        for r in bp.get("routines", []):
+            if r.get("id") == routine_id:
+                target_routine = r
+                break
+
+        # 1. Deduplication Gate: Check if already triggered today
+        if target_routine and target_routine.get("last_executed_date") == today_str and not force_run:
+            logger.info(f"⏭️ [DEDUP] Routine '{routine_id}' was ALREADY executed today ({today_str}). Ignoring duplicate trigger.")
+            return {"success": True, "status": "ALREADY_EXECUTED_TODAY", "routine_id": routine_id}
+
+        # 2. In-Memory Anti-Bounce / Retry Cooldown Guard (180 seconds)
+        now_epoch = time.time()
+        if not hasattr(self, "_last_trigger_times"):
+            self._last_trigger_times = {}
+        last_trigger = self._last_trigger_times.get(routine_id, 0)
+        if (now_epoch - last_trigger) < 180:
+            logger.warning(f"⚠️ [COOLDOWN] Routine '{routine_id}' was triggered {int(now_epoch - last_trigger)}s ago. Rejecting rapid retry.")
+            return {"success": True, "status": "COOLDOWN_ACTIVE", "routine_id": routine_id}
+        self._last_trigger_times[routine_id] = now_epoch
+
         logger.info(f"⚡ [EXECUTE] Firing Routine '{routine_id}' (force={force_run})")
         if routine_id in ["morning_wakeup", "6am"]:
             res = self.run_morning_wakeup(dispatch_audio=dispatch_audio)

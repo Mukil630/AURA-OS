@@ -46,14 +46,16 @@ def trigger_routine(
     routine_id: str,
     secret: Optional[str] = Query(None),
     x_aura_secret: Optional[str] = Header(None, alias="X-Aura-Secret"),
-    dispatch_audio: bool = Query(True)
+    dispatch_audio: bool = Query(True),
+    force: bool = Query(False)
 ):
     """
     Webhook Trigger Endpoint for external Cloud Cron services (e.g. cron-job.org, GitHub Actions, UptimeRobot).
     Instantly wakes Render from sleep, synthesizes Gemini voice, and delivers to Telegram!
+    Strictly adheres to daily deduplication unless force=True is explicitly passed.
     """
     verify_secret(secret, x_aura_secret)
-    res = cloud_routine_engine.execute_routine(routine_id, dispatch_audio=dispatch_audio, force_run=True)
+    res = cloud_routine_engine.execute_routine(routine_id, dispatch_audio=dispatch_audio, force_run=force)
     if not res.get("success"):
         raise HTTPException(status_code=400, detail=res.get("error", "Failed to trigger routine"))
     return res
