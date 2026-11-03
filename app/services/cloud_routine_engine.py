@@ -266,7 +266,17 @@ class CloudRoutineEngine:
                 target_routine = r
                 break
 
-        # 1. Deduplication Gate: Check if already triggered today
+        # 1. ATOMIC TURSO CLOUD LOCK GATE (Global ACID Multi-Device Persistent Lock)
+        try:
+            from tools.cloud_routine_lock import try_claim_daily_routine_lock
+            claimed = try_claim_daily_routine_lock(routine_id, today_str)
+            if not claimed and not force_run:
+                logger.info(f"⏭️ [TURSO CLOUD LOCK] Routine '{routine_id}' was ALREADY dispatched today ({today_str}). Blocking duplicate.")
+                return {"success": True, "status": "ALREADY_DISPATCHED_TODAY", "routine_id": routine_id}
+        except Exception as ex:
+            logger.warning(f"[CloudLock] Turso lock check notice: {ex}")
+
+        # 2. Local Blueprint Fallback Check
         if target_routine and target_routine.get("last_executed_date") == today_str and not force_run:
             logger.info(f"⏭️ [DEDUP] Routine '{routine_id}' was ALREADY executed today ({today_str}). Ignoring duplicate trigger.")
             return {"success": True, "status": "ALREADY_EXECUTED_TODAY", "routine_id": routine_id}
