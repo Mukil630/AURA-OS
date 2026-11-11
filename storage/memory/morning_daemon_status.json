@@ -1,7 +1,7 @@
 {
   "status": "RUNNING",
   "engine": "STATE_AWARE_CATCHUP",
-  "last_heartbeat": "2026-10-31T18:56:05.920461",
+  "last_heartbeat": "2026-11-10T21:40:42.917326",
   "routines": [
     {
       "id": "morning_wakeup",
@@ -11,14 +11,14 @@
       "persona": "MORNING_WAKEUP",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-10-31",
+      "last_executed_date": "2026-11-10",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
-      "description": "Karur live weather radar, 33C sun intensity, Hank Yarn sun-drying report & Brotherly wake-up call.",
-      "last_executed_at": "2026-10-30T07:15:58.779019+05:30",
+      "description": "Karur live weather radar, real-time temperature, Hank Yarn sun-drying report & Brotherly wake-up call.",
+      "last_executed_at": "2026-11-03T06:35:05.759713",
       "last_execution_type": "SKIPPED_PAST_GRACE_WINDOW"
     },
     {
@@ -29,14 +29,14 @@
       "persona": "WORKOUT_BEAST",
       "schedule_type": "daily",
       "catchup_grace_minutes": 180,
-      "last_executed_date": "2026-10-31",
+      "last_executed_date": "2026-11-10",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
       "description": "Day-specific gym split (Push/Pull/Legs/Shoulders/Arms/Cardio/Rest) with high-energy coaching audio.",
-      "last_executed_at": "2026-10-30T07:17:42.842359+05:30",
+      "last_executed_at": "2026-11-08T09:01:04.725177",
       "last_execution_type": "SKIPPED_PAST_GRACE_WINDOW"
     },
     {
@@ -48,13 +48,15 @@
       "schedule_type": "monthly",
       "monthly_day": 1,
       "catchup_grace_minutes": 720,
-      "last_executed_date": null,
+      "last_executed_date": "2026-11-01",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
-      "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone."
+      "description": "Runs on the 1st of every month. SGC 5% GST IT filing audit, infographic dispatch to Telegram and phone.",
+      "last_executed_at": "2026-11-01T07:35:52.867532",
+      "last_execution_type": "CATCH_UP_35M_LATE"
     },
     {
       "id": "night_wrapup",
@@ -64,13 +66,38 @@
       "persona": "CASUAL_COWBOY",
       "schedule_type": "daily",
       "catchup_grace_minutes": 120,
-      "last_executed_date": null,
+      "last_executed_date": "2026-11-08",
       "channels": {
         "local_speaker": true,
-        "telegram_voice": true,
+        "telegram_voice": false,
         "phone_call": false
       },
-      "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification."
+      "description": "Nightly wrap-up, GitHub commit streak audit, and Drive mesh sync verification.",
+      "last_executed_at": "2026-11-08T22:00:14.795137",
+      "last_execution_type": "ON_TIME"
+    },
+    {
+      "id": "bleaching_morning_form",
+      "name": "08:00 AM Bleaching Kaalai Inward Form",
+      "target_time": "08:00",
+      "enabled": true,
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 180,
+      "last_executed_date": "2026-11-10",
+      "description": "Daily 08:00 AM Bleaching Unit Attendance Poll & Kaalai Inward Work Form dispatch.",
+      "last_execution_type": "SKIPPED_PAST_GRACE_WINDOW"
+    },
+    {
+      "id": "bleaching_night_form",
+      "name": "20:00 PM Bleaching Iravu Closing Form",
+      "target_time": "20:00",
+      "enabled": true,
+      "schedule_type": "daily",
+      "catchup_grace_minutes": 180,
+      "last_executed_date": "2026-11-10",
+      "description": "Daily 08:00 PM (20:00) Bleaching Unit Night Closing & Profit Calculation Form dispatch.",
+      "last_executed_at": "2026-11-10T21:39:42.823787",
+      "last_execution_type": "CATCH_UP_99M_LATE"
     }
   ]
 }
