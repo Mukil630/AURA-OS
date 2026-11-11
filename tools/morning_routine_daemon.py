@@ -57,23 +57,23 @@ WEEKLY_WORKOUT_SPLIT_OORU = {
 }
 
 
-def run_6am_touchpoint(dispatch_audio: bool = True) -> dict:
-    from tools.truth_shield_engine import execute_grounded_voice_pipeline
-    from tools.weather_radar_tool import get_live_weather_radar
+def run_6am_touchpoint(dispatch_audio: bool = True, dispatch_telegram: bool = True, play_speaker: bool = True) -> dict:
+    weather = get_live_weather_radar("karur")
+    convo_lines = generate_human_sensory_weather_speech(weather)
+    speech_text = f"Good morning Boss! {convo_lines}"
 
-    res = execute_grounded_voice_pipeline(
-        tool_fn=get_live_weather_radar,
-        tool_args=("karur",),
-        persona_type="MORNING_WAKEUP",
-        caption_title="06:00 AM Morning Intel (Stark Wakeup)",
-        dispatch_telegram=dispatch_audio,
-        play_speaker=True
-    )
-    return {
-        "speech": res["final_speech"],
-        "audio": res.get("audio"),
-        "truth_shield_passed": res.get("truth_shield_passed")
-    }
+    audio_res = None
+    if dispatch_audio:
+        ok, audio_file = synthesize_persona_voice(speech_text, persona_type="MORNING_WAKEUP")
+        if ok:
+            if play_speaker:
+                play_through_speakers(audio_file)
+            sent = False
+            if dispatch_telegram:
+                sent = send_voice_to_telegram(audio_file, caption="🌅 06:00 AM Morning Intel (Stark Wakeup)")
+            audio_res = {"file": audio_file, "telegram_sent": sent, "speaker_played": play_speaker}
+
+    return {"speech": speech_text, "audio": audio_res}
 
 
 def run_605am_touchpoint(dispatch_audio: bool = True, dispatch_telegram: bool = False, play_speaker: bool = True) -> dict:
@@ -243,6 +243,12 @@ def dispatch_routine(routine_id: str, dispatch_audio: bool = True, force_run: bo
         return run_700am_touchpoint(dispatch_audio=dispatch_audio, force_run=force_run)
     elif routine_id == "night_wrapup":
         return run_night_touchpoint(dispatch_audio=dispatch_audio)
+    elif routine_id == "bleaching_morning_form":
+        from tools.bleaching_touchpoints import run_bleaching_morning_touchpoint
+        return run_bleaching_morning_touchpoint()
+    elif routine_id == "bleaching_night_form":
+        from tools.bleaching_touchpoints import run_bleaching_night_touchpoint
+        return run_bleaching_night_touchpoint()
     else:
         return {"status": "UNKNOWN_ROUTINE", "routine_id": routine_id}
 
