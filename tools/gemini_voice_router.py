@@ -97,8 +97,6 @@ def send_voice_to_telegram(audio_path: str, caption: str) -> bool:
     Dispatches generated voice note to Mukil's Telegram with native OGG Opus voice bubble.
     """
     token = getattr(config, "TELEGRAM_BOT_TOKEN", None) or os.getenv("TELEGRAM_BOT_TOKEN")
-    if not token or "ituk" in token:
-        token = "8738700204:AAGjnD-mlhV8LOhmPTHUcRD_nk1wWBrGNiI"
     raw_user = os.getenv("TELEGRAM_AUTHORIZED_USER_ID") or getattr(config, "AUTHORIZED_TELEGRAM_USERS", [6233907249])
 
     chat_id = 6233907249
