@@ -114,3 +114,5 @@ server_dist/
 storage/voice_samples/active_cache/
 *.wav
 *.ogg
+
+storage/memory/agy_live_context.json
