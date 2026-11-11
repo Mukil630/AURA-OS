@@ -100,7 +100,7 @@ def resolve_enterprise(text: str) -> Dict[str, Any]:
 
     # Explicit keyword overrides
     bleach_kws = ["bleach", "bleaching", "salavai", "washing unit", "my unit", "independent"]
-    sgc_kws = ["dyeing", "yarn dyeing", "father unit", "father business", "sgc dyeing"]
+    sgc_kws = ["dyeing", "yarn dyeing", "father unit", "father business", "sgc dyeing", "sgc", "colours", "ganapathi", "sri ganapathi colours"]
 
     has_bleach_kw = any(k in t_low for k in bleach_kws)
     has_sgc_kw = any(k in t_low for k in sgc_kws)
@@ -125,6 +125,7 @@ def resolve_enterprise(text: str) -> Dict[str, Any]:
     # Query intent tags
     is_tax = any(w in t_low for w in ["tax", "gst", "cgst", "sgst", "gstr", "auditor"])
     is_overdue = any(w in t_low for w in ["overdue", "debtor", "who owes", "pending collection", "recovery"])
+    is_month = any(w in t_low for w in ["month", "months", "maasam", "masam", "endha month", "which month", "how many bills", "how much bills", "yathana", "yathanaa", "created", "dossier", "breakdown"])
 
     target_month = None
     for m in ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december", "sep", "oct"]:
@@ -142,6 +143,7 @@ def resolve_enterprise(text: str) -> Dict[str, Any]:
         "bill_no": bill_no,
         "is_tax_query": is_tax,
         "is_overdue_query": is_overdue,
+        "is_month_query": is_month,
         "target_month": target_month,
     }
 
@@ -472,8 +474,8 @@ def handle_smart_billing_query(query: str, entities: Optional[Dict[str, Any]] = 
         speech = f"Boss, Bleaching unit-la total {ov['total_bills']} bills, {ov['total_invoiced']} rupees invoiced. Outstanding balance {ov['total_outstanding']} rupees."
         return rep_md, speech
 
-    # 6. SGC-Only Query
-    if target == "SGC":
+    # 6. Month-Wise Breakdown Query or SGC-Only Query
+    if plan.get("is_month_query") or target == "SGC":
         rep, speech = sgc_billing_query.format_month_wise_bills_dossier()
         return rep, speech
 
