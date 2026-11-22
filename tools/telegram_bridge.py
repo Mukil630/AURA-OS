@@ -2060,6 +2060,8 @@ def main():
     
     while True:
         try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             app = build_app()
             app.run_polling(drop_pending_updates=False, bootstrap_retries=-1, timeout=20, stop_signals=None)
             time.sleep(3)

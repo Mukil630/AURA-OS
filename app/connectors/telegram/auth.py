@@ -17,6 +17,7 @@ class TelegramAuthorizer:
         self._secret = default_secret or os.getenv("TELEGRAM_WEBHOOK_SECRET", "mukil_jarvis_secret_webhook_2026")
         # Map Telegram IDs/Usernames to internal tenant user_ids
         self._authorized_users: Dict[str, str] = user_mappings or {
+            "6233907249": "mukil",
             "987654321": "mukil",
             "mukil630": "mukil",
             "mukil_admin": "mukil",
