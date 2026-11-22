@@ -38,7 +38,7 @@ def _safe_prune_messages(messages: List[Dict[str, Any]], keep_count: int = 8) ->
 
 
 class AuraAgent:
-    def __init__(self, model: str = "openai/gpt-oss-20b"):
+    def __init__(self, model: str = "openai/gpt-oss-20b", session_id: str = None):
         self.model = model
         self.groq_client = None
         self.gemini_client = None
@@ -58,7 +58,7 @@ class AuraAgent:
             except Exception:
                 self.gemini_client = None
 
-        self.session_id = f"sess_{int(time.time())}"
+        self.session_id = session_id or f"sess_{int(time.time())}"
         self.messages: List[Dict[str, Any]] = [
             {"role": "system", "content": SYSTEM_INSTRUCTION}
         ]

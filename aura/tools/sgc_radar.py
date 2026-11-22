@@ -18,6 +18,7 @@ def get_sgc_db_path() -> Optional[Path]:
         Path(os.environ.get("APPDATA", "C:/Users/mukil/AppData/Roaming")) / "sgc-billing" / "sgc-billing-data.json",
         Path.home() / "AppData" / "Roaming" / "sgc-billing" / "sgc-billing-data.json",
         Path("C:/Users/mukil/AppData/Roaming/sgc-billing/sgc-billing-data.json"),
+        repo_root / "data" / "sgc_bills_mirror.json",
         repo_root / "storage" / "memory" / "sgc-billing-data.json",
         repo_root / "data" / "sgc-billing-data.json",
         repo_root / "data" / "memory" / "sgc-billing-data.json",
