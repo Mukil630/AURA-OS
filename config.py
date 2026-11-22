@@ -8,7 +8,14 @@ if ENV_PATH.exists():
     load_dotenv(ENV_PATH)
 load_dotenv()
 
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+DEFAULT_TELEGRAM_BOT_TOKEN = "8738700204:AAG3nMuf4R9vXHxeijk7BNMjj7w1Lkg6Ptg"
+REVOKED_TELEGRAM_TOKENS = {"8738700204:AAGfOluaOWUUp5HgZTN0ZXiwxbZrlDEituk"}
+
+_raw_tg_token = os.getenv('TELEGRAM_BOT_TOKEN', '').strip()
+if not _raw_tg_token or _raw_tg_token in REVOKED_TELEGRAM_TOKENS:
+    TELEGRAM_BOT_TOKEN = DEFAULT_TELEGRAM_BOT_TOKEN
+else:
+    TELEGRAM_BOT_TOKEN = _raw_tg_token
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 JARVIS_VOICE_SECRET_TOKEN = os.getenv('JARVIS_VOICE_SECRET_TOKEN', 'mukil-jarvis-vault-key-9080030538')

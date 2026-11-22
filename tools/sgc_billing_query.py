@@ -17,6 +17,7 @@ def get_sgc_db_path() -> Optional[Path]:
     candidates = [
         Path(os.environ.get("APPDATA", "")) / "sgc-billing" / "sgc-billing-data.json",
         Path.home() / "AppData" / "Roaming" / "sgc-billing" / "sgc-billing-data.json",
+        Path(__file__).parent.parent / "data" / "sgc_bills_mirror.json",
         Path(__file__).parent.parent / "data" / "sgc-billing-data.json",
         Path(__file__).parent.parent / "storage" / "bills" / "sgc-billing-data.json",
         Path(__file__).parent.parent / "storage" / "memory" / "sgc-billing-data.json",

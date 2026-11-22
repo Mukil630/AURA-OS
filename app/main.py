@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Start 24/7 Telegram Bridge Daemon when deployed to Cloud / Production
     telegram_process = None
     from config import TELEGRAM_BOT_TOKEN
-    token = os.getenv("TELEGRAM_BOT_TOKEN") or TELEGRAM_BOT_TOKEN
+    token = TELEGRAM_BOT_TOKEN
     is_cloud = bool(os.getenv("RENDER") or settings.ENVIRONMENT == "production" or os.getenv("RUN_TELEGRAM_BOT", "false").lower() == "true")
     if is_cloud and token:
         bridge_script = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tools", "telegram_bridge.py")

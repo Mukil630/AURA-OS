@@ -36,8 +36,8 @@ async def health_check() -> HealthResponse:
 @router.get("/cloud-vitals")
 async def cloud_vitals():
     """Diagnostic check to verify which cloud environment variables are configured on Render."""
-    import os
-    tg_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    from config import TELEGRAM_BOT_TOKEN
+    tg_token = TELEGRAM_BOT_TOKEN
     groq_key = os.getenv("GROQ_API_KEY", "")
     gemini_key = os.getenv("GEMINI_API_KEY", "")
 

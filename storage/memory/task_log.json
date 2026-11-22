@@ -750,5 +750,11 @@
     "event": "TELEGRAM_CHAT",
     "description": "User (MK): ella endha month la how much bills we have created... | Antigravity: \ud83c\udfdb\ufe0f **MUKIL'S DUAL-ENTERPRISE FINANCIAL RADAR**\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501...",
     "metadata": {}
+  },
+  {
+    "timestamp": "2026-11-22T18:35:22.448840",
+    "event": "TELEGRAM_START",
+    "description": "User MK started Telegram conversation",
+    "metadata": {}
   }
 ]
