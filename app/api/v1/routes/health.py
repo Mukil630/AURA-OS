@@ -1,4 +1,5 @@
 """Health probe and readiness endpoints."""
+import os
 from datetime import datetime, timezone
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
